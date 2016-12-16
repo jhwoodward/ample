@@ -3,7 +3,7 @@ var jsmidgen = require('jsmidgen');
 var ample = require('./ample');
 var easymidi = require('easymidi');
 var MidiPlayer = require('midi-player-js');
-var output = new easymidi.Output('IAC Driver Bus 1');
+var output;
 var Player = new MidiPlayer.Player(function(event) {
     // This function will get called for each event emitted by the player. 
     console.log(event);
@@ -17,7 +17,9 @@ var Player = new MidiPlayer.Player(function(event) {
     }
 });
 
-function play(song) {
+function play(song, midiOutput) {
+
+  output = new easymidi.Output(midiOutput);
 
   filename = song.name || 'song';
   filename = './' + filename + '.mid';

@@ -17,4 +17,4 @@ var part2 = jingle2[1] + jingle2[2] + jingle2[1] + jingle2[3];
 
 var song = { name:'jingle', parts: [part1, part2] };
 
-play(song);
+play(song, 'IAC Driver Bus 1');

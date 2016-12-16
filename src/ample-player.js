@@ -17,9 +17,9 @@ var Player = new MidiPlayer.Player(function(event) {
     }
 });
 
-function play(song, filename) {
+function play(song) {
 
-  filename = filename || 'song';
+  filename = song.name || 'song';
   filename = './' + filename + '.mid';
 
   var file = new jsmidgen.File();

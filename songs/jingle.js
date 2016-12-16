@@ -1,4 +1,4 @@
-var play = require('./ample-player');
+var play = require('../src/ample-player');
 
 var jingle1 = ['',
 	'12,1:E/E/E/// E/E/E/// E/G/c//DE/// ////',
@@ -15,6 +15,6 @@ var jingle2 = ['',
 var part1 = jingle1[1] + jingle1[2] + jingle1[1] + jingle1[3];
 var part2 = jingle2[1] + jingle2[2] + jingle2[1] + jingle2[3];
 
-var song = { parts: [part1, part2] };
+var song = { name:'jingle', parts: [part1, part2] };
 
 play(song);

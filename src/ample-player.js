@@ -24,7 +24,7 @@ function play(song, midiOutput) {
   filename = song.name || 'song';
   filename = './' + filename + '.mid';
 
-  var file = new jsmidgen.File();
+  var file = new jsmidgen.File({ticks:48});
 
   var tracks = [];
 
@@ -33,7 +33,7 @@ function play(song, midiOutput) {
     if (note.delay) {
       console.log('delay', note.delay);
     }
-    tracks[trackId].addNote(1, note.pitch, note.duration * 128, note.delay * 128, note.velocity);
+    tracks[trackId].addNote(1, note.pitch, note.duration, note.delay, note.velocity);
   
     
   });

@@ -1,6 +1,5 @@
 var parser = require('note-parser');
 
-
 function isNote(char) {
 	var notes = 'abcdefgABCDEFG'; 
 	return notes.indexOf(char) > -1;
@@ -38,6 +37,14 @@ function isComma(char) {
 	return char === ',';
 }
 
+function isStaccato(char) {
+	return char === '\'';
+}
+
+function isAccent(char) {
+	return char === '>';
+}
+
 function isColon(char) {
 	return char === ':';
 }
@@ -62,6 +69,10 @@ function send(trackId, s, startBeat) {
 	var char;
 	var octaveReset = false;
 	var accidental = 0; //sharp or flat / +1 / -1
+  var baseVelocity = 80;
+  var velocity = baseVelocity;
+  var velocityStep = 10;
+  var staccato;
 	
 	for (var i =0;i < s.length;i++) {
 	
@@ -123,14 +134,24 @@ function send(trackId, s, startBeat) {
 				octaveReset = false;
 			} 
 
+      var delay = 0;
+      if (lastRest) {
+        delay += lastRest.duration;
+      }
+      if (lastNote && lastNote.staccato) {
+        delay += lastNote.duration / 2;
+      }
+
   
 			lastNote = {
         char: char, 
-        delay: lastRest ? lastRest.duration : 0,//used to delay the next note for the duration of the rest
+        delay: delay,
         pitch: getPitch(char, octave, accidental),
-        on: beatCount + startBeat, 
+        position: beatCount + startBeat, 
         duration: beatStep, 
-        sent: false
+        sent: false,
+        staccato: staccato,
+        velocity: velocity
       };
       lastRest = undefined;
     }
@@ -139,10 +160,9 @@ function send(trackId, s, startBeat) {
       beatCount += beatStep;
 			plingCount = 0;
 			accidental = 0;
+      staccato = false;
+      velocity = baseVelocity;
     }
-			
-		
-		
 		
 		if (isSustain(char)) {
       if (lastRest) {
@@ -165,6 +185,14 @@ function send(trackId, s, startBeat) {
 			accidental -= 1;		
 		}
 
+    if (isStaccato(char)) {
+      staccato = true;
+    }
+
+    if (isAccent(char)) {
+      velocity += velocityStep;
+    }
+
    
 		if (!isNaN(char) || char === '-') {
 			numbers.push(char);
@@ -172,7 +200,7 @@ function send(trackId, s, startBeat) {
 		
 		if (isComma(char)) {
 			if (numbers.length) {
-				beatStep = parseInt(numbers.join(''),10) / 48;
+				beatStep = parseInt(numbers.join(''),10);
 				numbers = [];
 			}
 		}
@@ -195,24 +223,23 @@ function send(trackId, s, startBeat) {
 	}
 }
 
-function loop(phrase, n) {
-	var out = '';
-	for (var i = 1;i<=n;i++) {
-   	out += phrase;
-   }
-  return out;
-}
 
 function sendNote(trackId, note) {
-  listeners.forEach(function(cb) {
-    cb(trackId,
-    {
+
+  var sendData = {
       pitch: note.pitch,
-      on: note.on,
       duration: note.duration,
       isRest: note.isRest,
-      delay: note.delay
-    });
+      delay: note.delay,
+      velocity: note.velocity
+    };
+  if (note.staccato) {
+    sendData.duration /= 2;
+  }
+  
+  listeners.forEach(function(cb) {
+    cb(trackId,
+    sendData);
   });
   note.sent = true;
 }

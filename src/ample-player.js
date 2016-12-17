@@ -6,7 +6,7 @@ var MidiPlayer = require('midi-player-js');
 var output;
 var Player = new MidiPlayer.Player(function(event) {
     // This function will get called for each event emitted by the player. 
-   // console.log(event);
+    console.log(event);
     if (event.name==='Note off' || event.name==='Note on') {
 
        output.send(event.name.toLowerCase().replace(' ',''), {

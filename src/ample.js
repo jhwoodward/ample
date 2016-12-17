@@ -18,6 +18,7 @@ function isIgnore(char) {
 }
 
 function getPitch(char, octave,accidental) {
+  console.log(char + octave);
   return parser.parse(char + octave).midi + accidental;
 }
 
@@ -162,6 +163,7 @@ function send(trackId, s, startBeat) {
 			accidental = 0;
       staccato = false;
       velocity = baseVelocity;
+      numbers = [];
     }
 		
 		if (isSustain(char)) {

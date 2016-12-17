@@ -6,7 +6,7 @@ var MidiPlayer = require('midi-player-js');
 var output;
 var Player = new MidiPlayer.Player(function(event) {
     // This function will get called for each event emitted by the player. 
-    console.log(event);
+   // console.log(event);
     if (event.name==='Note off' || event.name==='Note on') {
 
        output.send(event.name.toLowerCase().replace(' ',''), {
@@ -29,7 +29,13 @@ function play(song, midiOutput) {
   var tracks = [];
 
   ample.listen(function(trackId, note) {
-    tracks[trackId].addNote(1, note.pitch, note.sustain * 128, 0, note.velocity);
+  
+    if (note.delay) {
+      console.log('delay', note.delay);
+    }
+    tracks[trackId].addNote(1, note.pitch, note.duration * 128, note.delay * 128, note.velocity);
+  
+    
   });
 
   song.parts.forEach(function(part, i) {

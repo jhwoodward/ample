@@ -2,8 +2,12 @@ var parser = require('note-parser');
 
 
 function isNote(char) {
-	var notes = 'abcdefgABCDEFG';
+	var notes = 'abcdefgABCDEFG'; 
 	return notes.indexOf(char) > -1;
+}
+
+function isRest(char) {
+	return char === '^';
 }
 
 function isSustain(char) {
@@ -14,7 +18,7 @@ function isIgnore(char) {
 	return char === ' ';
 }
 
-function pitch(char, octave,accidental) {
+function getPitch(char, octave,accidental) {
   return parser.parse(char + octave).midi + accidental;
 }
 
@@ -38,17 +42,17 @@ function isColon(char) {
 	return char === ':';
 }
 
-function isPlus(char) {
+function isSharp(char) {
 	return char === '+';
 }
 
-function isMinus(char) {
+function isFlat(char) {
 	return char === '-';
 }
 
 function send(trackId, s, startBeat) {
 
-	var lastNote;
+	var lastNote, lastRest;
 	startBeat = startBeat || 1;
 	var beatCount = 0;
 	var beatStep = 1;
@@ -65,40 +69,49 @@ function send(trackId, s, startBeat) {
 
 		char = s[i];
 		
-		if (isNote(char)) {
-		
+		if ((isNote(char) || isRest(char)) && lastNote && !lastNote.sent) {
+      sendNote(trackId, lastNote);
+    }
+
+    if (isRest(char)) {
+      if (lastRest) {
+        lastRest.duration += beatStep;
+      } else {
+        lastRest = {
+          duration: beatStep
+        };
+      }
+    
+    }
+
+    if (isNote(char)) {
 			if (lastNote) {
-				sendNote(trackId, lastNote);
-				lastNote.sent = true;
-				
 				if (!octaveReset) {
 					if (isLowerCase(char)) {
 						//down
 						if (plingCount) {
-							if (pitch(char, octave, accidental) >= lastNote.pitch) {
+							if (getPitch(char, octave, accidental) >= lastNote.pitch) {
 								octave -= plingCount;
 							}
 						} else {
-							if (pitch(char, octave, accidental) > lastNote.pitch || 
+							if (getPitch(char, octave, accidental) > lastNote.pitch || 
 								lastNote.char === char.toUpperCase()) {
 								octave -= 1;
 							}
 						}
 					}
-					
 					if (isUpperCase(char)) {
 						//up
 						if (plingCount) {
-							if (pitch(char, octave, accidental) <= lastNote.pitch) {
+							if (getPitch(char, octave, accidental) <= lastNote.pitch) {
 								octave += plingCount;
 							}
 						} else {
-							if (pitch(char, octave, accidental) < lastNote.pitch ||
+							if (getPitch(char, octave, accidental) < lastNote.pitch ||
 								lastNote.char === char.toLowerCase()) {
 								octave += 1;
 							}
 						}
-
 					}
 				}
 			}
@@ -109,16 +122,34 @@ function send(trackId, s, startBeat) {
 				}
 				octaveReset = false;
 			} 
-			
-			lastNote = {char: char, pitch: pitch(char, octave, accidental), on: beatCount + startBeat, sustain: beatStep, sent: false};
-			
-			beatCount += beatStep;
+
+  
+			lastNote = {
+        char: char, 
+        delay: lastRest ? lastRest.duration : 0,//used to delay the next note for the duration of the rest
+        pitch: getPitch(char, octave, accidental),
+        on: beatCount + startBeat, 
+        duration: beatStep, 
+        sent: false
+      };
+      lastRest = undefined;
+    }
+
+    if (isNote(char) || isRest(char)) {
+      beatCount += beatStep;
 			plingCount = 0;
 			accidental = 0;
-		}
+    }
+			
+		
+		
 		
 		if (isSustain(char)) {
-			lastNote.sustain += beatStep;
+      if (lastRest) {
+        lastRest.duration += beatStep;
+      } else {
+        lastNote.duration += beatStep;
+      }
 			beatCount += beatStep;
 		}
 		
@@ -126,13 +157,15 @@ function send(trackId, s, startBeat) {
 			plingCount +=1;
 		} 
 		
-		if (isPlus(char)) {
+		if (isSharp(char)) {
 			accidental += 1;
 		}
-		if (isMinus(char)) {
+
+		if (isFlat(char)) {
 			accidental -= 1;		
 		}
-		
+
+   
 		if (!isNaN(char) || char === '-') {
 			numbers.push(char);
 		}
@@ -149,6 +182,7 @@ function send(trackId, s, startBeat) {
 				octave = parseInt(numbers.join(''),10) + 4;
 				numbers = [];
 				octaveReset = true;
+        accidental = 0;
 			}
 		}
 		
@@ -175,10 +209,14 @@ function sendNote(trackId, note) {
     {
       pitch: note.pitch,
       on: note.on,
-      sustain: note.sustain
+      duration: note.duration,
+      isRest: note.isRest,
+      delay: note.delay
     });
   });
+  note.sent = true;
 }
+
 
 var listeners = [];
 var api= {

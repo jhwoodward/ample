@@ -17,8 +17,7 @@ var Player = new MidiPlayer.Player(function(event) {
     }
 });
 
-function play(song, midiOutput) {
-
+function playSong(song, midiOutput) {
   output = new easymidi.Output(midiOutput);
 
   filename = song.name || 'song';
@@ -29,13 +28,10 @@ function play(song, midiOutput) {
   var tracks = [];
 
   ample.listen(function(trackId, note) {
-  
     if (note.delay) {
       console.log('delay', note.delay);
     }
     tracks[trackId].addNote(1, note.pitch, note.duration, note.delay, note.velocity);
-  
-    
   });
 
   song.parts.forEach(function(part, i) {
@@ -48,6 +44,46 @@ function play(song, midiOutput) {
   fs.writeFileSync(filename, file.toBytes(), 'binary');
   Player.loadFile(filename);
   Player.play();
+}
+
+
+function playPart(song, midiOutput) {
+  output = new easymidi.Output(midiOutput);
+
+  filename = song.name || 'song';
+  filename = './' + filename + '.mid';
+
+  var file = new jsmidgen.File({ticks:48});
+
+  var tracks = [];
+
+  ample.listen(function(trackId, note) {
+    if (note.delay) {
+      console.log('delay', note.delay);
+    }
+    tracks[trackId].addNote(1, note.pitch, note.duration, note.delay, note.velocity);
+  });
+
+  
+  var track = new jsmidgen.Track();
+  tracks.push(track);
+  file.addTrack(track);
+  ample.send(0, song);
+  
+
+  fs.writeFileSync(filename, file.toBytes(), 'binary');
+  Player.loadFile(filename);
+  Player.play();
+}
+
+
+function play(song, midiOutput) {
+
+  if (song.parts) {
+    playSong(song, midiOutput);
+  } else {
+    playPart(song, midiOutput);
+  }
 }
 
 module.exports = play;

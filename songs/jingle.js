@@ -1,4 +1,4 @@
-var play = require('../src/ample-player');
+var make = require('../src/ample').make;
 var utils = require('../src/utils');
 var loop = utils.loop;
 
@@ -26,4 +26,4 @@ var part2 = loop(jingle2[1] + jingle2[2] + jingle2[1] + jingle2[3] + utils.barRe
 var song = { name:'jingle', parts: [part1,part2] };
 
 
-play(song, 'IAC Driver Bus 1');
+make(song).play();

@@ -230,7 +230,6 @@ function send(trackId, s, startBeat) {
 }
 
 function sendNote(trackId, note) {
-  console.log('send note', note);
   var sendData = {
     pitch: note.pitch,
     duration: note.duration,

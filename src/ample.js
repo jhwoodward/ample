@@ -22,13 +22,14 @@ function makePart(part, tracks, file) {
 
 
 function make(song) {
+
   var filename = song.name || 'song';
   filename = './' + filename + '.mid';
   var file = new jsmidgen.File({ticks:48});
   var tracks = [];
 
   interpreter.listen(function(trackId, note) {
-    tracks[trackId].addNote(trackId+1, note.pitch, note.duration, note.delay, note.velocity);
+    tracks[trackId].addNote(trackId, note.pitch, note.duration, note.delay, note.velocity);
   });
 
   if (song.parts) {

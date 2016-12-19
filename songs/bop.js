@@ -23,7 +23,7 @@ var jingle2 = ['',
 var part1 = loop(jingle1[1] ,4);
 var part2 = loop(jingle2[1] + jingle2[2] + jingle2[1] + jingle2[3] + utils.barRest(2),4);
 
-var song = { name:'jingle', parts: [part1] };
+var song = { name:'jingle', parts: [part1,part2] };
 
 
 make(song).play();

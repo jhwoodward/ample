@@ -9,10 +9,7 @@
   "author": "JHWoodward",
   "license": "ISC",
   "dependencies": {
-    "easymidi": "0.0.2",
     "jsmidgen": "^0.1.5",
-    "midi": "^0.9.5",
-    "midi-player-js": "^1.0.1",
     "note-parser": "^2.0.0"
   }
 }

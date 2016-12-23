@@ -3,15 +3,15 @@ var jsmidgen = require('jsmidgen');
 var interpreter = require('./ample-interpreter');
 var play = require('./play');
 
-var file = new jsmidgen.File({ticks:48});
+var file = new jsmidgen.File({ ticks: 48 });
 var tracks = [];
 
-interpreter.listen(function(trackId, note) {
+interpreter.listen(function (trackId, note) {
   tracks[trackId].addNote(trackId, note.pitch, note.duration, note.delay, note.velocity);
 });
 
 function makeSong(song, rules, iterations) {
-  song.parts.forEach(function(part, i) {
+  song.parts.forEach(function (part, i) {
     makePart(part, rules, iterations, i);
   });
 }
@@ -23,18 +23,26 @@ function makePart(part, rules, iterations, trackId) {
   tracks.push(track);
   file.addTrack(track);
 
-  //string substitution
-  for (var i = 0; i < iterations; i++) {
-    for (var key in rules) {
-      var re = new RegExp(key, 'g');
-      part = part.replace(re,rules[key]);
-    }
-  }
+  part = substitute(part, rules, iterations, 0);
 
   console.log(part);
-  
+
 
   interpreter.send(trackId, part);
+}
+
+function substitute(part, rules, iterations, i) {
+
+  if (i < iterations) {
+    for (var key in rules) {
+      var re = new RegExp(key, 'g');
+      part = part.replace(re, rules[key]);
+    }
+    i += 1;
+    return substitute(part, rules, iterations, i)
+  } else {
+    return part;
+  }
 }
 
 
@@ -51,7 +59,7 @@ function make(song, rules, iterations) {
   fs.writeFileSync(filename, file.toBytes(), 'binary');
 
   return {
-    play: function() {
+    play: function () {
       play(filename);
     }
   }

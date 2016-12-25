@@ -17,9 +17,57 @@ function isIgnore(char) {
   return char === ' ';
 }
 
-function getPitch(char, octave, accidental) {
-  //console.log(char + octave);
-  return parser.parse(char + octave).midi + accidental;
+function getPitch(char, octave, accidental, natural, sharps, flats, scale) {
+
+  var pitch = parser.parse(char + octave).midi;
+  var isFlat = accidental === -1 || flats.indexOf(char.toUpperCase()) > -1;
+  var isSharp = accidental === 1 || sharps.indexOf(char.toUpperCase()) > -1
+  if (isFlat) {
+    pitch -= 1;
+  }
+  if (isSharp) {
+    pitch += 1;
+  }
+
+  if (scale.length) {
+    var scalePitches = []
+    console.log('scale',scale);
+    scale.forEach(function (note) {
+      var acc = 0;
+      var isSharp = note[0] === '+';
+      var isFlat = note[0] === '-';
+      if (isSharp) {
+        acc = 1;
+      }
+      if (isFlat) {
+        acc = -1;
+      }
+      noteWithoutAccidental = note.length > 1 ? note[1] : note[0];
+      for (var oct = 0; oct <= 10; oct++) {
+        scalePitches.push(parser.parse(noteWithoutAccidental + oct).midi + acc);
+      }
+    });
+    scalePitches.sort(function (a, b) {
+      return a < b ? -1 : 1;
+    });
+    var coerced;
+    scalePitches.forEach(function (p, i) {
+      if (p > pitch && !coerced) {
+        coerced = scalePitches[i - 1];
+      }
+    });
+
+    console.log('pitch', pitch);
+    console.log('coerced', coerced);
+    return coerced;
+    //move note to nearest available note in scalev
+  }
+
+  if (natural) {
+    return parser.parse(char + octave).midi;
+  }
+
+  return pitch;
 }
 
 function isUpperCase(char) {
@@ -58,6 +106,31 @@ function isFlat(char) {
   return char === '-';
 }
 
+function isNatural(char) {
+  return char === '=';
+}
+
+
+function isCoerce(char) {
+  return char === 'x';
+}
+
+function isStartKeySignature(chars) {
+  return chars === 'K(';
+}
+
+function isEndKeySignature(chars) {
+  return chars === ')K';
+}
+
+function isStartScaleSignature(chars) {
+  return chars === 'S(';
+}
+
+function isEndScaleSignature(chars) {
+  return chars === ')S';
+}
+
 function send(trackId, s, startBeat) {
 
   var lastNote, lastRest;
@@ -70,25 +143,81 @@ function send(trackId, s, startBeat) {
   var char;
   var octaveReset = false;
   var accidental = 0; //sharp or flat / +1 / -1
+  var natural = false;
   var baseVelocity = 80;
   var velocity = baseVelocity;
   var velocityStep = 10;
   var staccato;
+  var settingKeySignature = false;
+  var settingScaleSignature = false;
+  var flats = [], sharps = [], scale = []; // for key sig
 
   for (var i = 0; i < s.length; i++) {
 
-    if (isIgnore(s[i])) { 
+    if (isIgnore(s[i])) {
       ensureLastNoteSent();
-      continue; 
+      continue;
     }
 
     char = s[i];
 
-    if ((isNote(char) || isRest(char)) && lastNote && !lastNote.sent) {
+    if (i < s.length - 1) {
+      char2 = s[i + 1];
+    } else {
+      char2 = '';
+    }
+    if (isStartKeySignature(char + char2)) {
+      settingKeySignature = true;
+      flats = []; sharps = []; omit = [];
+      i += 1; continue;
+    }
+    if (isEndKeySignature(char + char2)) {
+      settingKeySignature = false;
+      i += 1; continue;
+    }
+
+    if (isStartScaleSignature(char + char2)) {
+      settingScaleSignature = true;
+      scale = [];
+      i += 1; continue;
+    }
+    if (isEndScaleSignature(char + char2)) {
+      settingScaleSignature = false;
+      i += 1; continue;
+    }
+
+    if (settingKeySignature) {
+      //expect 2 characters per accidental, eg -B -A = f major
+      if (isFlat(char)) {
+        flats.push(char2.toUpperCase());
+        i += 1; continue;
+      }
+      if (isSharp(char)) {
+        sharps.push(char2.toUpperCase());
+        i += 1; continue;
+      }
+    }
+
+    if (settingScaleSignature) {
+      if (isFlat(char) || isSharp(char)) {
+        scale.push(char + char2.toUpperCase());
+        i += 1;
+      } else {
+         scale.push(char.toUpperCase());
+      }
+       continue;
+    }
+
+    var rest = isRest(char);// || omit.indexOf(char.toUpperCase()) > -1;
+    console.log(rest);
+
+    var note = isNote(char) && !rest;
+
+    if ((note || rest) && lastNote && !lastNote.sent) {
       sendNote(trackId, lastNote);
     }
 
-    if (isRest(char)) {
+    if (rest) {
       if (lastRest) {
         lastRest.duration += beatStep;
       } else {
@@ -104,11 +233,11 @@ function send(trackId, s, startBeat) {
           if (isLowerCase(char)) {
             //down
             if (plingCount) {
-              if (getPitch(char, octave, accidental) >= lastNote.pitch) {
+              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) >= lastNote.pitch) {
                 octave -= plingCount;
               }
             } else {
-              if (getPitch(char, octave, accidental) > lastNote.pitch ||
+              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) > lastNote.pitch ||
                 lastNote.char === char.toUpperCase() && accidental >= 0) {
                 octave -= 1;
               }
@@ -117,11 +246,11 @@ function send(trackId, s, startBeat) {
           if (isUpperCase(char)) {
             //up
             if (plingCount) {
-              if (getPitch(char, octave, accidental) <= lastNote.pitch) {
+              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) <= lastNote.pitch) {
                 octave += plingCount;
               }
             } else {
-              if (getPitch(char, octave, accidental) < lastNote.pitch ||
+              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) < lastNote.pitch ||
                 lastNote.char === char.toLowerCase() && accidental <= 0) {
                 octave += 1;
               }
@@ -129,14 +258,12 @@ function send(trackId, s, startBeat) {
           }
         }
       }
-
       if (octaveReset) {
         if (isLowerCase(char)) {
           octave -= 1;
         }
         octaveReset = false;
       }
-
       var delay = 0;
       if (lastRest) {
         delay += lastRest.duration;
@@ -144,11 +271,13 @@ function send(trackId, s, startBeat) {
       if (lastNote && lastNote.staccato) {
         delay += lastNote.duration / 2;
       }
+    }
 
+    if (note) {
       lastNote = {
         char: char,
         delay: delay,
-        pitch: getPitch(char, octave, accidental),
+        pitch: getPitch(char, octave, accidental, natural, sharps, flats, scale),
         position: beatCount + startBeat,
         duration: beatStep,
         sent: false,
@@ -158,13 +287,14 @@ function send(trackId, s, startBeat) {
       lastRest = undefined;
     }
 
-    if (isNote(char) || isRest(char)) {
+    if (note || rest) {
       beatCount += beatStep;
       plingCount = 0;
       accidental = 0;
       staccato = false;
       velocity = baseVelocity;
       numbers = [];
+      natural = false;
     }
 
     if (isSustain(char)) {
@@ -186,6 +316,10 @@ function send(trackId, s, startBeat) {
 
     if (isFlat(char)) {
       accidental -= 1;
+    }
+
+    if (isNatural(char)) {
+      natural = true;
     }
 
     if (isStaccato(char)) {
@@ -215,6 +349,9 @@ function send(trackId, s, startBeat) {
         accidental = 0;
       }
     }
+
+
+
 
     ensureLastNoteSent();
 

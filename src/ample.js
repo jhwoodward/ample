@@ -48,6 +48,9 @@ function substitute(part, rules, iterations, i) {
 
 function make(song, rules, iterations) {
 
+  rules = rules || {};
+  iterations = iterations || Object.keys(rules).length ? 1: 0;
+
   if (song.parts) {
     makeSong(song, rules, iterations);
   } else {

@@ -17,17 +17,7 @@ function isIgnore(char) {
   return char === ' ';
 }
 
-function getPitch(char, octave, accidental, natural, sharps, flats, scale) {
-
-  var pitch = parser.parse(char + octave).midi;
-  var isFlat = accidental === -1 || flats.indexOf(char.toUpperCase()) > -1;
-  var isSharp = accidental === 1 || sharps.indexOf(char.toUpperCase()) > -1
-  if (isFlat) {
-    pitch -= 1;
-  }
-  if (isSharp) {
-    pitch += 1;
-  }
+function fitToScale(pitch, scale) {
 
   if (scale.length) {
     var scalePitches = []
@@ -50,23 +40,31 @@ function getPitch(char, octave, accidental, natural, sharps, flats, scale) {
     scalePitches.sort(function (a, b) {
       return a < b ? -1 : 1;
     });
-    var coerced;
+
+    var fittedNote;
     scalePitches.forEach(function (p, i) {
-      if (p > pitch && !coerced) {
-        coerced = scalePitches[i - 1];
+      if (p > pitch && !fittedNote) {
+        fittedNote = scalePitches[i - 1];
       }
     });
 
-    console.log('pitch', pitch);
-    console.log('coerced', coerced);
-    return coerced;
-    //move note to nearest available note in scalev
-  }
+    return fittedNote;
 
-  if (natural) {
-    return parser.parse(char + octave).midi;
+  } else {
+    return pitch;
   }
+}
 
+function getPitch(char, octave, accidental, natural, sharps, flats) {
+  var pitch = parser.parse(char + octave).midi;
+  var isFlat = accidental === -1 || flats.indexOf(char.toUpperCase()) > -1;
+  var isSharp = accidental === 1 || sharps.indexOf(char.toUpperCase()) > -1
+  if (isFlat) {
+    pitch -= 1;
+  }
+  if (isSharp) {
+    pitch += 1;
+  }
   return pitch;
 }
 
@@ -111,8 +109,8 @@ function isNatural(char) {
 }
 
 
-function isCoerce(char) {
-  return char === 'x';
+function isRepeatPitch(char) {
+  return char === '_';
 }
 
 function isStartKeySignature(chars) {
@@ -213,31 +211,22 @@ function send(trackId, s, startBeat) {
 
     var note = isNote(char) && !rest;
 
-    if ((note || rest) && lastNote && !lastNote.sent) {
+    if ((note || rest || isRepeatPitch(char)) && lastNote && !lastNote.sent) {
       sendNote(trackId, lastNote);
-    }
-
-    if (rest) {
-      if (lastRest) {
-        lastRest.duration += beatStep;
-      } else {
-        lastRest = {
-          duration: beatStep
-        };
-      }
     }
 
     if (isNote(char)) {
       if (lastNote) {
+        var pitchBeforeOctaveAdjustment = fitToScale(getPitch(char, octave, accidental, natural, sharps, flats), scale);
         if (!octaveReset) {
           if (isLowerCase(char)) {
             //down
             if (plingCount) {
-              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) >= lastNote.pitch) {
+              if (pitchBeforeOctaveAdjustment >= lastNote.pitch) {
                 octave -= plingCount;
               }
             } else {
-              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) > lastNote.pitch ||
+              if (pitchBeforeOctaveAdjustment > lastNote.pitch ||
                 lastNote.char === char.toUpperCase() && accidental >= 0) {
                 octave -= 1;
               }
@@ -246,11 +235,11 @@ function send(trackId, s, startBeat) {
           if (isUpperCase(char)) {
             //up
             if (plingCount) {
-              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) <= lastNote.pitch) {
+              if (pitchBeforeOctaveAdjustment <= lastNote.pitch) {
                 octave += plingCount;
               }
             } else {
-              if (getPitch(char, octave, accidental, natural, sharps, flats, scale) < lastNote.pitch ||
+              if (pitchBeforeOctaveAdjustment < lastNote.pitch ||
                 lastNote.char === char.toLowerCase() && accidental <= 0) {
                 octave += 1;
               }
@@ -264,6 +253,22 @@ function send(trackId, s, startBeat) {
         }
         octaveReset = false;
       }
+
+    }
+
+    var pitch, pitchToScale, fittedToScale;
+    if (note) {
+      pitch = getPitch(char, octave, accidental, natural, sharps, flats);
+    }
+    if (isRepeatPitch(char)) {
+      pitch = lastNote.pitch + accidental;
+    }
+    if (note || isRepeatPitch(char)) {
+      pitchToScale = fitToScale(pitch, scale);
+      fittedToScale = pitchToScale !== pitch;
+      rest = fittedToScale && pitchToScale === lastNote.pitch;
+      note = !rest;
+
       var delay = 0;
       if (lastRest) {
         delay += lastRest.duration;
@@ -272,12 +277,23 @@ function send(trackId, s, startBeat) {
         delay += lastNote.duration / 2;
       }
     }
+   
+    if (rest) {
+      if (lastRest) {
+        lastRest.duration += beatStep;
+      } else {
+        lastRest = {
+          duration: beatStep
+        };
+      }
+    }
 
     if (note) {
       lastNote = {
         char: char,
         delay: delay,
-        pitch: getPitch(char, octave, accidental, natural, sharps, flats, scale),
+        pitch: pitchToScale,
+        fittedToScale: fittedToScale,
         position: beatCount + startBeat,
         duration: beatStep,
         sent: false,

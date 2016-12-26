@@ -3,6 +3,7 @@ var utils = require('../src/utils');
 var loop = utils.loop;
 
 var scaleC = '0:24,cDEFGABCbagfedc/';
+var repeat = '0:24,cDE+_+_+_++_++++++_--_-_-_';
 var scaleF = '0:12,fGABCDEFedcbagf/';
 var scaleE = '0:12,eFGABCDEdcbagfe/';
 var tune = '0:8,c/EG/eF/ed/bC/Ed/bg/////'
@@ -31,8 +32,9 @@ var keyCircle = {
   'gmaj': 'K(+f)K', // e minor
   'cmaj': 'K()K', //a minor
   */
-  'cpentcoerce': 'K(-E)K S( CD-EEGA )S', //treat f and b as rests
-  //'cpentgap': 'K(xf ^b)K' //treat f and b as rests
+  'cmaj': 'K()K ',
+  'cminpent': 'K(-E)K S( CD-EEGA )S'
+
 
 }
 

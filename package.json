@@ -9,7 +9,6 @@
   "author": "JHWoodward",
   "license": "ISC",
   "dependencies": {
-    "jsmidgen": "^0.1.5",
-    "note-parser": "^2.0.0"
+    "jsmidgen": "^0.1.5"
   }
 }

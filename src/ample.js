@@ -6,8 +6,14 @@ var play = require('./play');
 var file = new jsmidgen.File({ ticks: 48 });
 var tracks = [];
 
-interpreter.listen(function (trackId, note) {
-  tracks[trackId].addNote(trackId, note.pitch, note.duration, note.delay, note.velocity);
+interpreter.listen(function (data) {
+  if (data.note) {
+     tracks[data.trackId].addNote(data.trackId, data.note.pitch, data.note.duration, data.note.delay, data.note.velocity);
+  }
+  if (data.tempo) {
+    tracks[data.trackId].setTempo(data.tempo);
+  }
+ 
 });
 
 function makeSong(song, rules, iterations) {

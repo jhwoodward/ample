@@ -4,10 +4,17 @@ var loop = utils.loop;
 
 var scaleC = '0:24,cDEFGABCbagfedc/';
 var repeat = '0:24,cDE+_+_+_++_++++++_--_-_-_';
+var repeat2 = '0:12,CD24,+_+_+____EG+++_fde+_+_+_++_+++++++_--_-_-_';
 var scaleF = '0:12,fGABCDEFedcbagf/';
 var scaleE = '0:12,eFGABCDEdcbagfe/';
 var tune = '0:8,c/EG/eF/ed/bC/Ed/bg/////'
 
+var c ='0:48,c';
+var f='0:f';
+var yank = '0:12,_++_24,++_+++_/_';
+var yankc = '0:12,cDE/G/G//Ag/e/c//DE/E/d/c/D/////'
+yankc += 'cDE/G/G//Ag/e/c//DE/E/d/d/c/////';
+var yankrel = '12,_++_++_/+++_/_//++_--_/---_/----_//++_++_/_/--_/--_/++_/////';
 
 var keys = {
   'c-minor': 'K(  -e -a  )K',
@@ -32,8 +39,9 @@ var keyCircle = {
   'gmaj': 'K(+f)K', // e minor
   'cmaj': 'K()K', //a minor
   */
-  'cmaj': 'K()K ',
-  'cminpent': 'K(-E)K S( CD-EEGA )S'
+ // 'cmaj': 'K()K ',
+  'yankc' : yankc,
+  'cpent': ' S( CDEFGA )S'
 
 
 }
@@ -42,7 +50,10 @@ var keyCircle = {
 
 var part = '';
 for (var key in keyCircle) {
-  part += key + ' '  + scaleC;
+  //part += key + ' '  + repeat;
+   part += key + ' yankc ';
+  //  part += key + ' '  + f + yank;
+
 }
 console.log(part);
 

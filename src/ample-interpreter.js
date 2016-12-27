@@ -1,4 +1,4 @@
-var parser = require('note-parser');
+var utils = require('jsmidgen').Util;
 
 function isNote(char) {
   var notes = 'abcdefgABCDEFG';
@@ -20,8 +20,7 @@ function isIgnore(char) {
 function fitToScale(pitch, scale) {
 
   if (scale.length) {
-    var scalePitches = []
-    console.log('scale',scale);
+    var scalePitches = [];
     scale.forEach(function (note) {
       var acc = 0;
       var isSharp = note[0] === '+';
@@ -34,7 +33,7 @@ function fitToScale(pitch, scale) {
       }
       noteWithoutAccidental = note.length > 1 ? note[1] : note[0];
       for (var oct = 0; oct <= 10; oct++) {
-        scalePitches.push(parser.parse(noteWithoutAccidental + oct).midi + acc);
+        scalePitches.push(utils.midiPitchFromNote(noteWithoutAccidental + oct) + acc);
       }
     });
     scalePitches.sort(function (a, b) {
@@ -44,7 +43,25 @@ function fitToScale(pitch, scale) {
     var fittedNote;
     scalePitches.forEach(function (p, i) {
       if (p > pitch && !fittedNote) {
-        fittedNote = scalePitches[i - 1];
+        var upper = p;
+        var lower = scalePitches[i - 1];
+        var distToUpper = upper - pitch;
+        var distToLower = pitch - lower;
+        console.log('to upper', distToUpper);
+        console.log('to lower', distToLower);
+        if (distToUpper < distToLower) {
+          fittedNote = upper;
+        }
+        if (distToUpper > distToLower) {
+          fittedNote = lower;
+        }
+        //equidistant so random choice
+        if (Math.floor(Math.random() * 2) ==1) {
+          return upper;
+        } else {
+          return lower;
+        }
+        
       }
     });
 
@@ -55,8 +72,8 @@ function fitToScale(pitch, scale) {
   }
 }
 
-function getPitch(char, octave, accidental, natural, sharps, flats) {
-  var pitch = parser.parse(char + octave).midi;
+function getPitch(char, octave, accidental, natural, sharps, flats, transpose) {
+  var pitch = utils.midiPitchFromNote(char + octave);
   var isFlat = accidental === -1 || flats.indexOf(char.toUpperCase()) > -1;
   var isSharp = accidental === 1 || sharps.indexOf(char.toUpperCase()) > -1
   if (isFlat) {
@@ -65,7 +82,7 @@ function getPitch(char, octave, accidental, natural, sharps, flats) {
   if (isSharp) {
     pitch += 1;
   }
-  return pitch;
+  return pitch + transpose;
 }
 
 function isUpperCase(char) {
@@ -104,17 +121,24 @@ function isFlat(char) {
   return char === '-';
 }
 
+function isTranspose(char) {
+  return char === '@';
+}
+
 function isNatural(char) {
   return char === '=';
 }
 
-
-function isRepeatPitch(char) {
+function isRelativePitch(char) {
   return char === '_';
 }
 
 function isStartKeySignature(chars) {
   return chars === 'K(';
+}
+
+function isSetTempo(chars) {
+  return chars === '=T';
 }
 
 function isEndKeySignature(chars) {
@@ -136,6 +160,7 @@ function send(trackId, s, startBeat) {
   var beatCount = 0;
   var beatStep = 1;
   var octave = 1;
+  var transpose = 0;
   var plingCount = 0;
   var numbers = [];
   var char;
@@ -148,6 +173,7 @@ function send(trackId, s, startBeat) {
   var staccato;
   var settingKeySignature = false;
   var settingScaleSignature = false;
+  var tempo = 120;
   var flats = [], sharps = [], scale = []; // for key sig
 
   for (var i = 0; i < s.length; i++) {
@@ -184,6 +210,13 @@ function send(trackId, s, startBeat) {
       i += 1; continue;
     }
 
+    if (isSetTempo(char+char2)) {
+      tempo = parseInt(numbers.join(''), 10);
+      sendTempo(trackId, tempo);
+      numbers = [];
+      i += 1; continue;
+    }
+
     if (settingKeySignature) {
       //expect 2 characters per accidental, eg -B -A = f major
       if (isFlat(char)) {
@@ -207,17 +240,15 @@ function send(trackId, s, startBeat) {
     }
 
     var rest = isRest(char);// || omit.indexOf(char.toUpperCase()) > -1;
-    console.log(rest);
-
     var note = isNote(char) && !rest;
 
-    if ((note || rest || isRepeatPitch(char)) && lastNote && !lastNote.sent) {
+    if ((note || rest || isRelativePitch(char)) && lastNote && !lastNote.sent) {
       sendNote(trackId, lastNote);
     }
 
     if (isNote(char)) {
       if (lastNote) {
-        var pitchBeforeOctaveAdjustment = fitToScale(getPitch(char, octave, accidental, natural, sharps, flats), scale);
+        var pitchBeforeOctaveAdjustment = fitToScale(getPitch(char, octave, accidental, natural, sharps, flats, transpose), scale);
         if (!octaveReset) {
           if (isLowerCase(char)) {
             //down
@@ -258,16 +289,20 @@ function send(trackId, s, startBeat) {
 
     var pitch, pitchToScale, fittedToScale;
     if (note) {
-      pitch = getPitch(char, octave, accidental, natural, sharps, flats);
+      pitch = getPitch(char, octave, accidental, natural, sharps, flats, transpose);
     }
-    if (isRepeatPitch(char)) {
+    if (isRelativePitch(char)) {
       pitch = lastNote.pitch + accidental;
     }
-    if (note || isRepeatPitch(char)) {
+    if (note || isRelativePitch(char)) {
       pitchToScale = fitToScale(pitch, scale);
       fittedToScale = pitchToScale !== pitch;
-      rest = fittedToScale && pitchToScale === lastNote.pitch;
+      if (fittedToScale) {
+        console.log(utils.noteFromMidiPitch(pitch) + '->' + utils.noteFromMidiPitch(pitchToScale))
+      }
+      rest = fittedToScale && lastNote && pitchToScale === lastNote.pitch;
       note = !rest;
+      note = true;
 
       var delay = 0;
       if (lastRest) {
@@ -366,6 +401,13 @@ function send(trackId, s, startBeat) {
       }
     }
 
+    if (isTranspose(char)) {
+      if (numbers.length) {
+        transpose = parseInt(numbers.join(''), 10);
+        numbers = [];
+      }
+    }
+
 
 
 
@@ -382,21 +424,33 @@ function send(trackId, s, startBeat) {
   }
 }
 
+function sendTempo(trackId,tempo) {
+    listeners.forEach(function (cb) {
+      cb({
+        trackId: trackId,
+        tempo:tempo
+        });
+    });
+
+}
+
 function sendNote(trackId, note) {
   var sendData = {
-    pitch: note.pitch,
-    duration: note.duration,
-    isRest: note.isRest,
-    delay: note.delay,
-    velocity: note.velocity
+    trackId: trackId,
+    note: {
+      pitch: note.pitch,
+      duration: note.duration,
+      isRest: note.isRest,
+      delay: note.delay,
+      velocity: note.velocity
+    }
   };
   if (note.staccato) {
-    sendData.duration /= 2;
+    sendData.note.duration /= 2;
   }
 
   listeners.forEach(function (cb) {
-    cb(trackId,
-      sendData);
+    cb(sendData);
   });
   note.sent = true;
 }

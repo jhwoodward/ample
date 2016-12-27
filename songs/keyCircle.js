@@ -9,11 +9,10 @@ var scaleF = '0:12,fGABCDEFedcbagf/';
 var scaleE = '0:12,eFGABCDEdcbagfe/';
 var tune = '0:8,c/EG/eF/ed/bC/Ed/bg/////'
 
-var c ='0:48,c';
-var f='0:f';
-var yank = '0:12,_++_24,++_+++_/_';
-var yankc = '0:12,cDE/G/G//Ag/e/c//DE/E/d/c/D/////'
-yankc += 'cDE/G/G//Ag/e/c//DE/E/d/d/c/////';
+
+
+var yankc = `120=T 2:12,cD>'E/'G/G//Ag/'e/'c//D>'E/'E/'d/'c/D//^//
+          cD'>E/'G/G//A'>g/e/c//D'>E/'E/'d/'d/c//^//`;
 var yankrel = '12,_++_++_/+++_/_//++_--_/---_/----_//++_++_/_/--_/--_/++_/////';
 
 var keys = {
@@ -24,7 +23,6 @@ var keys = {
 };
 
 var keyCircle = {
-  /*
   'cmaj': 'K()K', //aminor
   'fmaj': 'K(-b)K', //dminor
   'bflat': 'K(-b-e)K', //gminor
@@ -37,13 +35,7 @@ var keyCircle = {
   'amaj': 'K(+f+c+g)K', // fsharp minor
   'dmaj': 'K(+f+c)K', // b minor
   'gmaj': 'K(+f)K', // e minor
-  'cmaj': 'K()K', //a minor
-  */
- // 'cmaj': 'K()K ',
-  'yankc' : yankc,
-  'cpent': ' S( CDEFGA )S'
-
-
+  'cmaj': 'K()K' //a minor
 }
 
 
@@ -51,7 +43,7 @@ var keyCircle = {
 var part = '';
 for (var key in keyCircle) {
   //part += key + ' '  + repeat;
-   part += key + ' yankc ';
+   part += key + yankc;
   //  part += key + ' '  + f + yank;
 
 }

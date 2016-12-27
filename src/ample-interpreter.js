@@ -41,30 +41,39 @@ function fitToScale(pitch, scale) {
     });
 
     var fittedNote;
-    scalePitches.forEach(function (p, i) {
-      if (p > pitch && !fittedNote) {
-        var upper = p;
-        var lower = scalePitches[i - 1];
-        var distToUpper = upper - pitch;
-        var distToLower = pitch - lower;
-        console.log('to upper', distToUpper);
-        console.log('to lower', distToLower);
-        if (distToUpper < distToLower) {
-          fittedNote = upper;
-        }
-        if (distToUpper > distToLower) {
-          fittedNote = lower;
-        }
-        //equidistant so random choice
-        if (Math.floor(Math.random() * 2) ==1) {
-          return upper;
-        } else {
-          return lower;
-        }
-        
-      }
-    });
+    if (scalePitches.indexOf(pitch) > -1) {
+      fittedNote = pitch;
+    } else {
 
+
+      console.log(scalePitches);
+      console.log(pitch);
+      scalePitches.forEach(function (p, i) {
+
+        if (p > pitch && !fittedNote) {
+          var upper = p;
+          var lower = scalePitches[i - 1];
+          var distToUpper = upper - pitch;
+          var distToLower = pitch - lower;
+          console.log('to upper', distToUpper);
+          console.log('to lower', distToLower);
+          if (distToUpper < distToLower) {
+            fittedNote = upper;
+          }
+          if (distToUpper > distToLower) {
+            fittedNote = lower;
+          }
+          //equidistant so random choice
+          if (Math.floor(Math.random() * 2) == 1) {
+            fittedNote = upper;
+          } else {
+            fittedNote = lower;
+          }
+
+        }
+      });
+      console.log(fittedNote)
+    }
     return fittedNote;
 
   } else {
@@ -210,7 +219,7 @@ function send(trackId, s, startBeat) {
       i += 1; continue;
     }
 
-    if (isSetTempo(char+char2)) {
+    if (isSetTempo(char + char2)) {
       tempo = parseInt(numbers.join(''), 10);
       sendTempo(trackId, tempo);
       numbers = [];
@@ -234,9 +243,9 @@ function send(trackId, s, startBeat) {
         scale.push(char + char2.toUpperCase());
         i += 1;
       } else {
-         scale.push(char.toUpperCase());
+        scale.push(char.toUpperCase());
       }
-       continue;
+      continue;
     }
 
     var rest = isRest(char);// || omit.indexOf(char.toUpperCase()) > -1;
@@ -248,16 +257,17 @@ function send(trackId, s, startBeat) {
 
     if (isNote(char)) {
       if (lastNote) {
-        var pitchBeforeOctaveAdjustment = fitToScale(getPitch(char, octave, accidental, natural, sharps, flats, transpose), scale);
+        //var pitchBeforeOctaveAdjustment = fitToScale(getPitch(char, octave, accidental, natural, sharps, flats, transpose), scale);
+        var pitchBeforeOctaveAdjustment = getPitch(char, octave, accidental, natural, sharps, flats, transpose);
         if (!octaveReset) {
           if (isLowerCase(char)) {
             //down
             if (plingCount) {
-              if (pitchBeforeOctaveAdjustment >= lastNote.pitch) {
+              if (pitchBeforeOctaveAdjustment >= lastNote.pitchBeforeFit) {
                 octave -= plingCount;
               }
             } else {
-              if (pitchBeforeOctaveAdjustment > lastNote.pitch ||
+              if (pitchBeforeOctaveAdjustment > lastNote.pitchBeforeFit ||
                 lastNote.char === char.toUpperCase() && accidental >= 0) {
                 octave -= 1;
               }
@@ -266,11 +276,11 @@ function send(trackId, s, startBeat) {
           if (isUpperCase(char)) {
             //up
             if (plingCount) {
-              if (pitchBeforeOctaveAdjustment <= lastNote.pitch) {
+              if (pitchBeforeOctaveAdjustment <= lastNote.pitchBeforeFit) {
                 octave += plingCount;
               }
             } else {
-              if (pitchBeforeOctaveAdjustment < lastNote.pitch ||
+              if (pitchBeforeOctaveAdjustment < lastNote.pitchBeforeFit ||
                 lastNote.char === char.toLowerCase() && accidental <= 0) {
                 octave += 1;
               }
@@ -312,7 +322,7 @@ function send(trackId, s, startBeat) {
         delay += lastNote.duration / 2;
       }
     }
-   
+
     if (rest) {
       if (lastRest) {
         lastRest.duration += beatStep;
@@ -327,6 +337,7 @@ function send(trackId, s, startBeat) {
       lastNote = {
         char: char,
         delay: delay,
+        pitchBeforeFit: pitch,
         pitch: pitchToScale,
         fittedToScale: fittedToScale,
         position: beatCount + startBeat,
@@ -424,13 +435,13 @@ function send(trackId, s, startBeat) {
   }
 }
 
-function sendTempo(trackId,tempo) {
-    listeners.forEach(function (cb) {
-      cb({
-        trackId: trackId,
-        tempo:tempo
-        });
+function sendTempo(trackId, tempo) {
+  listeners.forEach(function (cb) {
+    cb({
+      trackId: trackId,
+      tempo: tempo
     });
+  });
 
 }
 

@@ -45,7 +45,6 @@ function substitute(part, rules, iterations, i) {
       var re = new RegExp(key, 'g');
       part = part.replace(re, rules[key]);
     }
-    //console.log('sub' + i + ' of ' + iterations,part);
     i += 1;
     return substitute(part, rules, iterations, i)
   } else {

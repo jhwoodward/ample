@@ -3,11 +3,11 @@ var utils = require('../src/utils');
 var loop = utils.loop;
 
 
-var tune1=`0: 24, c//D //E/ //// ////`;// x 1
+var tune1=`0: 24, c//D //E/ //// ////`;// x 1 ... 24 x 16 (loop 1x) = 384
 
-var tune2=`1:  8, ^//g f//e //g/ `;//x 4
+var tune2=`1:  8, ^//g f//e //g/ `;//x 4 ... 8 x 12 (loop 4x) = 384
 
-var tune3=`-1:6, ^/// ///e //// /BC//`; // x4
+var tune3=`-1:6, ^/// ///e //// /BC//`; // x 4 ... 6 x 16 (loop 4x) = 384
 
 var part1 = `120=T 
 0: c7 0@

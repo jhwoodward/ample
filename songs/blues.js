@@ -2,14 +2,6 @@ var make = require('../src/ample').make;
 var utils = require('../src/utils');
 var loop = utils.loop;
 
-var scaleC = '0:24,cDEFGABCbagfedc/';
-var repeat = '0:24,cDE+_+_+_++_++++++_--_-_-_';
-var repeat2 = '0:12,CD24,+_+_+____EG+++_fde+_+_+_++_+++++++_--_-_-_';
-var scaleF = '0:12,fGABCDEFedcbagf/';
-var scaleE = '0:12,eFGABCDEdcbagfe/';
-var tune = '0:8,c/EG/eF/ed/bC/Ed/bg/////'
-
-
 
 var part = `120=T 2:12,
 0: c7 0@

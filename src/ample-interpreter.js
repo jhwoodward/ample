@@ -45,9 +45,6 @@ function fitToScale(pitch, scale) {
       fittedNote = pitch;
     } else {
 
-
-      console.log(scalePitches);
-      console.log(pitch);
       scalePitches.forEach(function (p, i) {
 
         if (p > pitch && !fittedNote) {
@@ -55,8 +52,6 @@ function fitToScale(pitch, scale) {
           var lower = scalePitches[i - 1];
           var distToUpper = upper - pitch;
           var distToLower = pitch - lower;
-          console.log('to upper', distToUpper);
-          console.log('to lower', distToLower);
           if (distToUpper < distToLower) {
             fittedNote = upper;
           }
@@ -72,7 +67,7 @@ function fitToScale(pitch, scale) {
 
         }
       });
-      console.log(fittedNote)
+
     }
     return fittedNote;
 
@@ -167,8 +162,8 @@ function send(trackId, s, startBeat) {
   var lastNote, lastRest;
   startBeat = startBeat || 1;
   var beatCount = 0;
-  var beatStep = 1;
-  var octave = 1;
+  var beatStep = 48;
+  var octave = 4;
   var transpose = 0;
   var plingCount = 0;
   var numbers = [];

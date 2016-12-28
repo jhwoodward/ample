@@ -3,8 +3,8 @@ var jsmidgen = require('jsmidgen');
 var interpreter = require('./ample-interpreter');
 var play = require('./play');
 
-var file = new jsmidgen.File({ ticks: 48 });
-var tracks = [];
+var file;
+var tracks;
 
 interpreter.listen(function (data) {
   if (data.note) {
@@ -17,9 +17,11 @@ interpreter.listen(function (data) {
 });
 
 function makeSong(song, rules, iterations) {
+  var parts = [];
   song.parts.forEach(function (part, i) {
-    makePart(part, rules, iterations, i);
+    parts.push(makePart(part, rules, iterations, i));
   });
+  return parts;
 }
 
 
@@ -31,10 +33,9 @@ function makePart(part, rules, iterations, trackId) {
 
   part = substitute(part, rules, iterations, 0);
 
-  console.log(part);
-
-
   interpreter.send(trackId, part);
+
+  return part;
 }
 
 function substitute(part, rules, iterations, i) {
@@ -44,6 +45,7 @@ function substitute(part, rules, iterations, i) {
       var re = new RegExp(key, 'g');
       part = part.replace(re, rules[key]);
     }
+    //console.log('sub' + i + ' of ' + iterations,part);
     i += 1;
     return substitute(part, rules, iterations, i)
   } else {
@@ -53,14 +55,17 @@ function substitute(part, rules, iterations, i) {
 
 
 function make(song, rules, iterations) {
+  file = new jsmidgen.File({ ticks: 48 });
+  tracks = [];
+  var parts = [];
 
   rules = rules || {};
-  iterations = iterations || Object.keys(rules).length ? 1: 0;
+  iterations = iterations || (Object.keys(rules).length ? 10: 0);
 
   if (song.parts) {
-    makeSong(song, rules, iterations);
+    parts = makeSong(song, rules, iterations);
   } else {
-    makePart(song, rules, iterations);
+    parts.push(makePart(song, rules, iterations));
   }
 
   var filename = song.name || 'song';
@@ -70,6 +75,7 @@ function make(song, rules, iterations) {
   return {
     play: function () {
       play(filename);
+      return parts;
     }
   }
 }

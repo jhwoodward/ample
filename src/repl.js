@@ -1,7 +1,7 @@
 const repl = require('repl');
 var make = require('./ample').make;
 var fs = require('fs');
-var spawnSync = require('child_process').spawnSync;
+var cp = require('child_process');
 
 var rules = {
   part1: 'cDEF',
@@ -33,13 +33,12 @@ function set(cmd, callback) {
 
 function generate(cmd, callback) {
 
-    var result = spawnSync('node', ['./src/prompt.js'], { stdio: 'inherit' });
- /*
-  process.stdout.on('data', function(data) {
-        console.log(data.toString()); 
+    var prompt = cp.spawnSync('node',['./src/prompt.js'], { stdio: 'inherit' });
+
+    fs.readFile('./tmp/config.js', function (err, data) {
+      var config = JSON.parse(data);
+      callback(config.name);
     });
-    */
-    callback(result.output);
 
 }
 

@@ -1,1 +1,1 @@
-{"name":"john","parts":"3","sections":"2","section1":{"beats":"1"},"section2":{"beats":"5"}}
+{"sections":[{"gcd":48,"lcm":12,"parts":[{"phraseTimeSignature":"48,4","phrase":"","phraseBeatLength":48,"phraseBeatCount":4,"phraseLength":192,"phraseLengthDivided":4,"loop":3},{"phraseTimeSignature":"48,3","phrase":"","phraseBeatLength":48,"phraseBeatCount":3,"phraseLength":144,"phraseLengthDivided":3,"loop":4},{"phraseTimeSignature":"24,4","phrase":"","phraseBeatLength":24,"phraseBeatCount":4,"phraseLength":96,"phraseLengthDivided":2,"loop":6}]}]}

@@ -29,16 +29,23 @@ function set(cmd, callback) {
   callback(null, rules);
 }
 
-  
+
+
+
+
 
 function generate(cmd, callback) {
+  console.log('generate');
+  var prompt = cp.spawnSync('node', ['./src/prompt.js'], { stdio: 'inherit' });
 
-    var prompt = cp.spawnSync('node',['./src/prompt.js'], { stdio: 'inherit' });
+  console.log('prompt end');
+  fs.readFile('./tmp/config.js', readConfig);
 
-    fs.readFile('./tmp/config.js', function (err, data) {
-      var config = JSON.parse(data);
-      callback(config.name);
-    });
+  function readConfig(err, data) {
+    console.log('read config');
+    var config = JSON.parse(data);
+    callback(JSON.stringify(config,null,2));
+  }
 
 }
 
@@ -77,19 +84,19 @@ function myEval(cmd, context, filename, callback) {
   } else if (cmd.indexOf('gen') === 0) {
     generate(cmd, callback);
   } else {
-    cmd = cmd.replace(/\/n/g,'').trim();
+    cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
       callback(null, make(cmd, rules).play());
     } else {
       callback();
     }
-    
+
   }
 }
 
-const r = repl.start({ 
-  prompt: '> ', 
+const r = repl.start({
+  prompt: '> ',
   input: process.stdin,
-  output: process.stdout, 
-  eval: myEval 
+  output: process.stdout,
+  eval: myEval
 });

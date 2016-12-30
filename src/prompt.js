@@ -47,7 +47,14 @@ function getSectionProps(config) {
   var sections = { properties: {} };
 
   for (var i = 0; i < config.sections; i++) {
-    var section = { properties: {} };
+    var section = { 
+      properties: {
+        minLength: {
+          type: 'integer',
+          default: 1536
+        }
+      } 
+    };
     for (var j = 0; j < config.parts; j++) {
       var part = {
         properties: {
@@ -67,9 +74,9 @@ function getSectionProps(config) {
           }
         }
       };
-      section.properties[`part${j + 1}`] = part;
+      section.properties[`part${j+1}`] = part;
     }
-    sections.properties[`section${i + 1}`] = section;
+    sections.properties[`section${i+1}`] = section;
   }
   return sections;
 }
@@ -77,13 +84,13 @@ function getSectionProps(config) {
 function confirmLoop(config) {
   var out = { properties: {} };
   config.sections.forEach(function (section, i) {
-
-    console.log(`section ${i + 1}`.yellow);
+    var partLength;
+    console.log(`Section ${i+1}`.yellow);
     section.parts.forEach(function (part, j) {
-      var totalTicks = part.phraseBeatLength * part.phraseBeatCount * part.loop;
-      console.log(`  part ${j + 1} `.yellow);
+      partLength = part.phraseBeatLength * part.phraseBeatCount * part.loop;
+      console.log(`  Part ${j+1} `.yellow);
       console.log(`    ${part.phraseTimeSignature} = ${part.phraseLength} ticks`.cyan);
-      console.log(`      x ${part.loop} = ${totalTicks} ticks`.green);
+      console.log(`     x ${part.loop} = ${partLength} ticks`.green);
     });
 
     var phraseLengthsDividedByGcd = section.parts.map(function (part) {
@@ -94,10 +101,11 @@ function confirmLoop(config) {
       return part.phraseLength;
     });
 
-    console.log(`
-   gcd(${JSON.stringify(phraseLengths)}) = ${section.gcd}  
-   lcm(${JSON.stringify(phraseLengthsDividedByGcd)}) = ${section.lcm}
-   `.magenta);
+    console.log(`\n  gcd(${JSON.stringify(phraseLengths)}) = ${section.gcd} `.gray);
+    console.log(`  lcm(${JSON.stringify(phraseLengthsDividedByGcd)}) = ${section.lcm}`.gray);
+
+    console.log(`\n Section ${i+1} will last for ${partLength / 48} beats`.yellow);
+    console.log(`\n `);
 
   });
 
@@ -143,9 +151,19 @@ function build(config) {
       phraseLengthsDivided.push(part.phraseLengthDivided);
     });
     var lcm = utils.getLcm(phraseLengthsDivided);
+    var length;
     parts.forEach(function (part) {
       part.loop = lcm / part.phraseLengthDivided;
+      length = part.phraseBeatLength * part.phraseBeatCount * part.loop; //all part lengths should be the same
     });
+
+    if (length < section.minLength) {
+      var multiplier = Math.round(section.minLength / length);
+      parts.forEach(function (part) {
+        part.loop = part.loop * multiplier;
+      });
+    }
+
     out.sections.push({ gcd: gcd, lcm: lcm, parts: parts });
   }
   return out;

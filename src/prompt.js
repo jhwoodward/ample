@@ -11,17 +11,20 @@ prompt.message = '';
 var props = {
   properties: {
     name: {
+      description: 'Name',
       pattern: /^[a-zA-Z\s\-]+$/,
       message: 'Name must be only letters, spaces, or dashes',
       default: 'test',
       required: true
     },
     parts: {
+      description: 'Number of parts',
       default: 3,
       type: 'integer',
       required: true
     },
     sections: {
+      description: 'Number of sections',
       default: 1,
       type: 'integer',
       required: true
@@ -49,16 +52,32 @@ function getSectionProps(config) {
   for (var i = 0; i < config.sections; i++) {
     var section = { 
       properties: {
+         name: {
+          description: `Section ${i+1} \n  Name`.yellow,
+          pattern: /^[a-zA-Z]+[a-zA-Z0-9]*$/,
+          message: 'Name must be only letters or numbers',
+          default: `s${i+1}`,
+          required: true
+        },
         minLength: {
+          description: `  Minimum length (beats)`.yellow,
           type: 'integer',
-          default: 1536
+          default: 32
         }
       } 
     };
     for (var j = 0; j < config.parts; j++) {
       var part = {
         properties: {
+          name: {
+            description: `  Part ${j+1} \n    Name`.green,
+            pattern: /^[a-zA-Z]+[a-zA-Z0-9]*$/,
+            message: 'Name must be only letters or numbers',
+            default: `s${i+1}p${j+1}`,
+            required: true
+          },
           phraseTimeSignature: {
+            description: `    Time signature`.green,
             default: defaults[j] || '48,4',
             enum: [
               '48,7', '48,6', '48,5', '48,4', '48,3',
@@ -67,6 +86,7 @@ function getSectionProps(config) {
             ]
           },
           phrase: {
+            description: '    Phrase'.cyan,
             conform: function (value) {
               //TODO: validate phrase against # beats in time sig
               return true;
@@ -107,6 +127,7 @@ function confirmLoop(config) {
     console.log(`\n Section ${i+1} will last for ${partLength / 48} beats`.yellow);
     console.log(`\n `);
 
+    section.length = partLength;
   });
 
 
@@ -129,7 +150,10 @@ prompt.get(props, function (err, config) {
 });
 
 function build(config) {
-  var out = { sections: [] };
+  var out = { 
+    name: config.name, 
+    sections: [] 
+  };
   //work out min length of each section to fully loop all parts
   for (var i = 1; i <= config.sections; i++) {
     var section = config['section' + i];
@@ -142,6 +166,9 @@ function build(config) {
       part.phraseBeatCount = parseInt(timeSig.split(',')[1], 10);
       part.phraseLength = part.phraseBeatLength * part.phraseBeatCount;
       phraseLengths.push(part.phraseLength);
+      if (!part.phrase) {
+        part.phrase = `${part.phraseBeatLength}, ^${Array(part.phraseBeatCount).join('/')}`;
+      }
       parts.push(part);
     }
     var gcd = utils.getGcd(phraseLengths);
@@ -158,7 +185,7 @@ function build(config) {
     });
 
     if (length < section.minLength) {
-      var multiplier = Math.round(section.minLength / length);
+      var multiplier = Math.round((section.minLength * 48) / length);
       parts.forEach(function (part) {
         part.loop = part.loop * multiplier;
       });

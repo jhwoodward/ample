@@ -14,11 +14,7 @@ function gcd2(x, y) {
 
 var api = {
   loop: function (phrase, n) {
-    var out = '';
-    for (var i = 1; i <= n; i++) {
-      out += phrase;
-    }
-    return out;
+    return Array(n+1).join(phrase + ' ');
   },
   barRest: function (n) {
     n = n || 1;

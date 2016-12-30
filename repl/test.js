@@ -3,9 +3,12 @@ var utils = require('../src/utils');
 var loop = utils.loop;
 
 var rules = {
-  'part1': 'cDEF',
-  'part2': 'part1 part1 part1',
-  'part3': '6,part2'
+  's1p1': '48, ^///',
+  'part1': 's1p1 s1p1 s1p1 ',
+  's1p2': '48, ^//',
+  'part2': 's1p2 s1p2 s1p2 s1p2 ',
+  's1p3': '24, ^///',
+  'part3': 's1p3 s1p3 s1p3 s1p3 s1p3 s1p3 '
 };
 
 var parts = [
@@ -13,6 +16,5 @@ var parts = [
   'part2',
   'part3'
 ];
-
 
 make({ name: 'test', parts: parts }, rules).play();

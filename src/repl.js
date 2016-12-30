@@ -1,8 +1,11 @@
 const repl = require('repl');
+var utils = require('./utils');
+var loop = utils.loop;
 var make = require('./ample').make;
 var fs = require('fs');
 var cp = require('child_process');
 
+var config = {};
 var rules = {
   part1: 'cDEF',
   part2: 'part1 part1 part1',
@@ -29,11 +32,6 @@ function set(cmd, callback) {
   callback(null, rules);
 }
 
-
-
-
-
-
 function generate(cmd, callback) {
   console.log('generate');
   var prompt = cp.spawnSync('node', ['./src/prompt.js'], { stdio: 'inherit' });
@@ -43,7 +41,17 @@ function generate(cmd, callback) {
 
   function readConfig(err, data) {
     console.log('read config');
-    var config = JSON.parse(data);
+    config = JSON.parse(data);
+    //build rules from config
+    rules = {};
+    config.sections.forEach(function(section){
+      section.parts.forEach(function(part,i) {
+        rules[part.name] = part.phrase;
+        rules[`part${i+1}`] = rules[`part${i+1}`] || '';
+        rules[`part${i+1}`] += `${loop(part.name, part.loop)}`;
+      });
+    });
+  
     callback(JSON.stringify(config,null,2));
   }
 
@@ -56,7 +64,7 @@ function run(callback) {
 
 function save(cmd, callback) {
 
-  var filename = cmd.replace('save', '').trim();
+  var filename = cmd.replace('save', '').trim() || config.name;
   if (!filename) {
     console.error('No filename')
   } else {

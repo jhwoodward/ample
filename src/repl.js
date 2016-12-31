@@ -12,14 +12,17 @@ var rules = {
   part3: '6,part2'
 };
 
-function getParts() {
-  var parts = [];
+function getPlayers() {
+  var players = [];
+  var channel = 1;
   for (var key in rules) {
-    if (key.indexOf('part') === 0) {
-      parts.push(key);
+    if (key.indexOf('player') === 0) {
+      var player = {part:key,channel:channel};
+      players.push(player);
+      channel +=1;
     }
   }
-  return parts;
+  return players;
 }
 
 function set(cmd, callback) {
@@ -33,48 +36,54 @@ function set(cmd, callback) {
 }
 
 function generate(cmd, callback) {
-  console.log('generate');
+
   var prompt = cp.spawnSync('node', ['./src/prompt.js'], { stdio: 'inherit' });
 
-  console.log('prompt end');
-  fs.readFile('./tmp/config.js', readConfig);
+  fs.readFile('./tmp/config.json', readConfig);
 
   function readConfig(err, data) {
-    console.log('read config');
+
     config = JSON.parse(data);
     //build rules from config
     rules = {};
-    config.sections.forEach(function(section){
+    config.phrases.forEach(function(phrase) {
+      rules[phrase.name] = phrase.content;
+    });
+    config.sections.forEach(function(section) {
       section.parts.forEach(function(part,i) {
-        rules[part.name] = part.phrase;
-        rules[`part${i+1}`] = rules[`part${i+1}`] || '';
-        rules[`part${i+1}`] += `${loop(part.name, part.loop)}`;
+        rules[part.name] = part.content;
+        rules[`player${i+1}`] = rules[`player${i+1}`] || '';
+        rules[`player${i+1}`] += `${loop(part.name, part.loop)}`;
       });
     });
   
-    callback(JSON.stringify(config,null,2));
+    callback();
   }
 
 }
 
 function run(callback) {
-  var parts = getParts();
-  callback(null, make({ name: 'repl', parts: parts }, rules).play());
+  var players = getPlayers();
+  callback(null, make({ name: 'repl', players: players }, rules).play());
 }
 
 function save(cmd, callback) {
-
   var filename = cmd.replace('save', '').trim() || config.name;
   if (!filename) {
-    console.error('No filename')
+    console.error('No filename');
   } else {
+    if (fs.existsSync('./repl/' + filename + '.js')) {
+      filename += '_' + new Date().getTime();
+    } 
     var req = `var make = require('../src/ample').make;\nvar utils = require('../src/utils');\nvar loop = utils.loop;\n\n`;
     var data = `var rules = ${JSON.stringify(rules, null, 2).replace(/\"/g, '\'')};\n\n`;
-    var parts = `var parts = ${JSON.stringify(getParts(), null, 2).replace(/\"/g, '\'')};\n\n`;
-    var make = `make({ name: '${filename}', parts: parts }, rules).play();\n`;
-    fs.writeFile('./repl/' + filename + '.js', req + data + parts + make, function () {
+    var players = `var players = ${JSON.stringify(getPlayers(), null, 2).replace(/\"/g, '\'')};\n\n`;
+    var make = `make({ name: '${filename}', players: players }, rules).play();\n`;
+    fs.writeFile('./repl/' + filename + '.config.json',JSON.stringify(config,null,2));
+    fs.writeFile('./repl/' + filename + '.js', req + data + players + make, function () {
       callback('Saved');
     });
+
   }
 }
 
@@ -82,8 +91,7 @@ function myEval(cmd, context, filename, callback) {
   console.log(cmd);
   if (cmd.indexOf('rules') === 0) {
     callback(null, rules);
-  }
-  else if (cmd.indexOf('set') === 0) {
+  } else if (cmd.indexOf('set') === 0) {
     set(cmd, callback);
   } else if (cmd.indexOf('run') === 0) {
     run(callback);

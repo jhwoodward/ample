@@ -8,32 +8,48 @@ var tracks;
 
 interpreter.listen(function (data) {
   if (data.note) {
-     tracks[data.trackId].addNote(data.trackId, data.note.pitch, data.note.duration, data.note.delay, data.note.velocity);
+    tracks[data.playerId].addNote(
+      players[data.playerId].channel-1,
+      data.note.pitch,
+      data.note.duration,
+      data.note.delay,
+      data.note.velocity);
   }
   if (data.tempo) {
-    tracks[data.trackId].setTempo(data.tempo);
+    tracks[data.playerId].setTempo(data.tempo);
   }
- 
+
 });
 
+var players;
 function makeSong(song, rules, iterations) {
   var parts = [];
-  song.parts.forEach(function (part, i) {
-    parts.push(makePart(part, rules, iterations, i));
+  players = song.players;
+  players.forEach(function (player, i) {
+
+    if (!player.part) { //legacy
+      player = {
+        part: player,
+        channel: i+1
+      };
+      players[i] = player;
+    }
+
+    parts.push(makePart(player.part, rules, iterations, i));
   });
   return parts;
 }
 
 
-function makePart(part, rules, iterations, trackId) {
-  trackId = trackId || 0;
+function makePart(part, rules, iterations, playerId) {
+  playerId = playerId || 0;
   var track = new jsmidgen.Track();
   tracks.push(track);
   file.addTrack(track);
 
   part = substitute(part, rules, iterations, 0);
 
-  interpreter.send(trackId, part);
+  interpreter.send(playerId, part);
 
   return part;
 }
@@ -59,16 +75,25 @@ function make(song, rules, iterations) {
   var parts = [];
 
   rules = rules || {};
-  iterations = iterations || (Object.keys(rules).length ? 10: 0);
+  iterations = iterations || (Object.keys(rules).length ? 10 : 0);
 
-  if (song.parts) {
+  if (song.parts) { //legacy
+    song.players = song.parts;
+  }
+
+  if (song.players) {
+    players = song.players;
     parts = makeSong(song, rules, iterations);
   } else {
+    players = [{ channel: 1 }];
     parts.push(makePart(song, rules, iterations));
   }
 
   var filename = song.name || 'song';
-  filename = './' + filename + '.mid';
+  if (fs.existsSync('./midi/' + filename + '.mid')) {
+    filename += '_' + new Date().getTime();
+  }
+  filename = './midi/' + filename + '.mid';
   fs.writeFileSync(filename, file.toBytes(), 'binary');
 
   return {

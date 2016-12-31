@@ -1,0 +1,60 @@
+{
+  "name": "jim",
+  "phrases": [
+    {
+      "name": "phrase1",
+      "timeSignature": "48,4",
+      "content": "48,0:cDEF",
+      "ticksPerBeat": 48,
+      "beatCount": 4,
+      "tickCount": 192
+    },
+    {
+      "name": "phrase2",
+      "timeSignature": "48,3",
+      "content": "24,1:EcEcGA",
+      "ticksPerBeat": 48,
+      "beatCount": 3,
+      "tickCount": 144
+    },
+    {
+      "name": "phrase3",
+      "timeSignature": "24,4",
+      "content": "24,-1:cGcG",
+      "ticksPerBeat": 24,
+      "beatCount": 4,
+      "tickCount": 96
+    }
+  ],
+  "sections": [
+    {
+      "name": "section1",
+      "gcd": 48,
+      "lcm": 210,
+      "beatCount": 210,
+      "parts": [
+        {
+          "name": "part1",
+          "content": "phrase1 phrase2",
+          "tickCount": 336,
+          "tickCountFactored": 7,
+          "loop": 30
+        },
+        {
+          "name": "part2",
+          "content": "phrase2 phrase3",
+          "tickCount": 240,
+          "tickCountFactored": 5,
+          "loop": 42
+        },
+        {
+          "name": "part3",
+          "content": "phrase3 phrase1",
+          "tickCount": 288,
+          "tickCountFactored": 6,
+          "loop": 35
+        }
+      ]
+    }
+  ]
+}

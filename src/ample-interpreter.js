@@ -157,7 +157,7 @@ function isEndScaleSignature(chars) {
   return chars === ')S';
 }
 
-function send(trackId, s, startBeat) {
+function send(playerId, s, startBeat) {
 
   var lastNote, lastRest;
   startBeat = startBeat || 1;
@@ -216,7 +216,7 @@ function send(trackId, s, startBeat) {
 
     if (isSetTempo(char + char2)) {
       tempo = parseInt(numbers.join(''), 10);
-      sendTempo(trackId, tempo);
+      sendTempo(playerId, tempo);
       numbers = [];
       i += 1; continue;
     }
@@ -247,7 +247,7 @@ function send(trackId, s, startBeat) {
     var note = isNote(char) && !rest;
 
     if ((note || rest || isRelativePitch(char)) && lastNote && !lastNote.sent) {
-      sendNote(trackId, lastNote);
+      sendNote(playerId, lastNote);
     }
 
     if (isNote(char)) {
@@ -414,15 +414,12 @@ function send(trackId, s, startBeat) {
       }
     }
 
-
-
-
     ensureLastNoteSent();
 
     function ensureLastNoteSent() {
       if (i === s.length - 1) {
-        if (!lastNote.sent) {
-          sendNote(trackId, lastNote);
+        if (lastNote && !lastNote.sent) {
+          sendNote(playerId, lastNote);
         }
         return beatCount + startBeat;
       }
@@ -430,19 +427,19 @@ function send(trackId, s, startBeat) {
   }
 }
 
-function sendTempo(trackId, tempo) {
+function sendTempo(playerId, tempo) {
   listeners.forEach(function (cb) {
     cb({
-      trackId: trackId,
+      playerId: playerId,
       tempo: tempo
     });
   });
 
 }
 
-function sendNote(trackId, note) {
+function sendNote(playerId, note) {
   var sendData = {
-    trackId: trackId,
+    playerId: playerId,
     note: {
       pitch: note.pitch,
       duration: note.duration,

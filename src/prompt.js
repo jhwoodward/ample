@@ -17,15 +17,21 @@ var props = {
       default: 'test',
       required: true
     },
-    parts: {
-      description: 'Number of parts',
+    phraseCount: {
+      description: 'Number of phrases',
       default: 3,
       type: 'integer',
       required: true
     },
-    sections: {
+    sectionCount: {
       description: 'Number of sections',
       default: 1,
+      type: 'integer',
+      required: true
+    },
+    partCount: {
+      description: 'Number of parts',
+      default: 3,
       type: 'integer',
       required: true
     }
@@ -46,152 +52,220 @@ defaults = {
   2: '24,4'
 }
 
-function getSectionProps(config) {
-  var sections = { properties: {} };
-
-  for (var i = 0; i < config.sections; i++) {
-    var section = { 
+function getPhraseProps(config) {
+  var out = { properties: {} };
+  for (var i = 0; i < config.phraseCount; i++) {
+    var phraseProps = {
       properties: {
-         name: {
-          description: `Section ${i+1} \n  Name`.yellow,
+        name: {
+          description: ` Phrase ${i + 1} name`.green,
           pattern: /^[a-zA-Z]+[a-zA-Z0-9]*$/,
           message: 'Name must be only letters or numbers',
-          default: `s${i+1}`,
+          default: `phrase${i + 1}`,
           required: true
         },
-        minLength: {
-          description: `  Minimum length (beats)`.yellow,
+        timeSignature: {
+          description: `    Time signature`.green,
+          default: defaults[i] || '48,4',
+          enum: [
+            '48,7', '48,6', '48,5', '48,4', '48,3',
+            '36,7', '36,6', '36,5', '36,4', '36,3',
+            '24,7', '24,6', '24,5', '24,4', '24,3'
+          ]
+        },
+        content: {
+          description: '    Content'.cyan,
+          conform: function (value) {
+            //TODO: validate phrase against # beats in time sig
+            return true;
+          }
+        }
+      }
+    };
+    out.properties[`phrase${i + 1}`] = phraseProps;
+  }
+  return out;
+}
+
+function getSectionProps(config) {
+  var out = { properties: {} };
+  for (var i = 0; i < config.sectionCount; i++) {
+    var sectionProps = {
+      properties: {
+        name: {
+          description: `Section ${i + 1} \n  Name`.yellow,
+          pattern: /^[a-zA-Z]+[a-zA-Z0-9]*$/,
+          message: 'Name must be only letters or numbers',
+          default: `section${i + 1}`,
+          required: true
+        },
+        minBeats: {
+          description: `  Approx length (beats)`.yellow,
           type: 'integer',
           default: 32
         }
-      } 
+      }
     };
-    for (var j = 0; j < config.parts; j++) {
-      var part = {
+
+    for (var j = 0; j < config.partCount; j++) {
+      var partProps = {
         properties: {
           name: {
-            description: `  Part ${j+1} \n    Name`.green,
+            description: `Part ${j + 1} \n  Name`.green,
             pattern: /^[a-zA-Z]+[a-zA-Z0-9]*$/,
             message: 'Name must be only letters or numbers',
-            default: `s${i+1}p${j+1}`,
+            default: `part${j + 1}`,
             required: true
           },
-          phraseTimeSignature: {
-            description: `    Time signature`.green,
-            default: defaults[j] || '48,4',
-            enum: [
-              '48,7', '48,6', '48,5', '48,4', '48,3',
-              '36,7', '36,6', '36,5', '36,4', '36,3',
-              '24,7', '24,6', '24,5', '24,4', '24,3'
-            ]
-          },
-          phrase: {
-            description: '    Phrase'.cyan,
-            conform: function (value) {
-              //TODO: validate phrase against # beats in time sig
-              return true;
-            }
+          content: {
+            description: `  Content`.green, // space - separated list of phrases previously defined
+            default: config[`phrase${j + 1}`].name
           }
         }
       };
-      section.properties[`part${j+1}`] = part;
+      sectionProps.properties[`part${j + 1}`] = partProps;
     }
-    sections.properties[`section${i+1}`] = section;
+
+
+    out.properties[`section${i + 1}`] = sectionProps;
   }
-  return sections;
-}
-
-function confirmLoop(config) {
-  var out = { properties: {} };
-  config.sections.forEach(function (section, i) {
-    var partLength;
-    console.log(`Section ${i+1}`.yellow);
-    section.parts.forEach(function (part, j) {
-      partLength = part.phraseBeatLength * part.phraseBeatCount * part.loop;
-      console.log(`  Part ${j+1} `.yellow);
-      console.log(`    ${part.phraseTimeSignature} = ${part.phraseLength} ticks`.cyan);
-      console.log(`     x ${part.loop} = ${partLength} ticks`.green);
-    });
-
-    var phraseLengthsDividedByGcd = section.parts.map(function (part) {
-      return part.phraseLengthDivided;
-    });
-
-    var phraseLengths = section.parts.map(function (part) {
-      return part.phraseLength;
-    });
-
-    console.log(`\n  gcd(${JSON.stringify(phraseLengths)}) = ${section.gcd} `.gray);
-    console.log(`  lcm(${JSON.stringify(phraseLengthsDividedByGcd)}) = ${section.lcm}`.gray);
-
-    console.log(`\n Section ${i+1} will last for ${partLength / 48} beats`.yellow);
-    console.log(`\n `);
-
-    section.length = partLength;
-  });
-
-
   return out;
-
 }
+
+
+
+
 
 prompt.start();
-prompt.get(props, function (err, config) {
-  prompt.get(getSectionProps(config), function (err, result) {
+prompt.get(props, gotProps);
+
+function gotProps(err, config) {
+  prompt.get(getPhraseProps(config), gotPhraseProps);
+
+  function gotPhraseProps(err, result) {
     Object.assign(config, result);
+
+    config.phrases = [];
+    for (var j = 1; j <= config.phraseCount; j++) {
+      var phrase = config['phrase' + j];
+      phrase.ticksPerBeat = parseInt(phrase.timeSignature.split(',')[0], 10);
+      phrase.beatCount = parseInt(phrase.timeSignature.split(',')[1], 10);
+      phrase.tickCount = phrase.ticksPerBeat * phrase.beatCount;
+      if (!phrase.content) {
+        phrase.content = `${phrase.ticksPerBeat}, ^${Array(phrase.beatCount).join('/')}`;
+      }
+      config.phrases.push(phrase);
+    }
+
+    prompt.get(getSectionProps(config), gotSectionProps);
+  }
+
+  function gotSectionProps(err, result) {
+    Object.assign(config, result);
+
     config = build(config);
-    prompt.get(confirmLoop(config), function (err, result) {
-
-      fs.writeFile('./tmp/config.js', JSON.stringify(config));
-
+    prompt.get(confirm(config), function (err, result) {
+      fs.writeFile('./tmp/config.json', JSON.stringify(config, null, 2));
     });
+  }
 
+
+
+}
+
+function getPhraseByName(phrases, phraseName) {
+  var out;
+  phrases.forEach(function (phrase) {
+    if (phrase.name === phraseName) {
+      out = phrase;
+    }
   });
-});
+  return out;
+}
 
 function build(config) {
-  var out = { 
-    name: config.name, 
-    sections: [] 
+  console.log(config);
+  var out = {
+    name: config.name,
+    phrases: config.phrases,
+    sections: []
   };
-  //work out min length of each section to fully loop all parts
-  for (var i = 1; i <= config.sections; i++) {
+
+  for (var i = 1; i <= config.sectionCount; i++) {
     var section = config['section' + i];
-    var phraseLengths = [];
+    var tickCounts = [];
     var parts = [];
-    for (var j = 1; j <= config.parts; j++) {
+    for (var j = 1; j <= config.partCount; j++) {
       var part = section['part' + j];
-      var timeSig = part.phraseTimeSignature;
-      part.phraseBeatLength = parseInt(timeSig.split(',')[0], 10);
-      part.phraseBeatCount = parseInt(timeSig.split(',')[1], 10);
-      part.phraseLength = part.phraseBeatLength * part.phraseBeatCount;
-      phraseLengths.push(part.phraseLength);
-      if (!part.phrase) {
-        part.phrase = `${part.phraseBeatLength}, ^${Array(part.phraseBeatCount).join('/')}`;
-      }
+      var phrases = part.content.split(' ');
+
+      var tickCount = 0;
+      phrases.forEach(function (phraseName) {
+        var phrase = getPhraseByName(config.phrases, phraseName);
+        if (!phrase) {
+          console.error(`Phrase '${phraseName}' not found`);
+        } else {
+          tickCount += phrase.tickCount;
+        }
+      });
+      part.tickCount = tickCount;
+      tickCounts.push(part.tickCount);
+
       parts.push(part);
     }
-    var gcd = utils.getGcd(phraseLengths);
-    var phraseLengthsDivided = [];
+    var gcd = utils.getGcd(tickCounts);
+    var allTicksFactored = [];
     parts.forEach(function (part) {
-      part.phraseLengthDivided = part.phraseLength / gcd;
-      phraseLengthsDivided.push(part.phraseLengthDivided);
+      part.tickCountFactored = part.tickCount / gcd;
+      allTicksFactored.push(part.tickCountFactored);
     });
-    var lcm = utils.getLcm(phraseLengthsDivided);
-    var length;
-    parts.forEach(function (part) {
-      part.loop = lcm / part.phraseLengthDivided;
-      length = part.phraseBeatLength * part.phraseBeatCount * part.loop; //all part lengths should be the same
-    });
+    var lcm = utils.getLcm(allTicksFactored);
+    var tickCountLooped;
 
-    if (length < section.minLength) {
-      var multiplier = Math.round((section.minLength * 48) / length);
+    parts.forEach(function (part) {
+      part.loop = lcm / part.tickCountFactored;
+      tickCountLooped = part.tickCount * part.loop; // all part lengths should be the same
+    });
+    console.log('tickCountLooped', tickCountLooped);
+    console.log('min', section.minBeats * 48);
+    if (tickCountLooped < (section.minBeats * 48)) {
+      var multiplier = Math.round((section.minBeats * 48) / tickCountLooped); // use Math.ceil to force minBeats
       parts.forEach(function (part) {
         part.loop = part.loop * multiplier;
+        tickCountLooped = part.tickCount * part.loop;
       });
     }
 
-    out.sections.push({ gcd: gcd, lcm: lcm, parts: parts });
+    out.sections.push({ name: section.name, gcd: gcd, lcm: lcm, beatCount: tickCountLooped / 48, parts: parts });
   }
   return out;
+}
+
+function confirm(config) {
+  var out = { properties: {} };
+  config.sections.forEach(function (section, i) {
+    console.log(`Section ${i + 1}`.yellow);
+    section.parts.forEach(function (part, j) {
+      console.log(`  Part ${j + 1} `.yellow);
+      console.log(`    ${part.content} = ${part.tickCount} ticks`.cyan);
+      console.log(`     x ${part.loop} = ${part.tickCount * part.loop} ticks`.green);
+    });
+
+    var tickCountsFactored = section.parts.map(function (part) {
+      return part.tickCountFactored;
+    });
+
+    var tickCounts = section.parts.map(function (part) {
+      return part.tickCount;
+    });
+
+    console.log(`\n  gcd(${JSON.stringify(tickCounts)}) = ${section.gcd} `.gray);
+    console.log(`  lcm(${JSON.stringify(tickCountsFactored)}) = ${section.lcm}`.gray);
+
+    console.log(`\n Section ${i + 1} will last for ${section.beatCount} beats`.yellow);
+    console.log(`\n `);
+
+  });
+  return out;
+
 }

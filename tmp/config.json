@@ -1,10 +1,10 @@
 {
-  "name": "jim",
+  "name": "test",
   "phrases": [
     {
       "name": "phrase1",
       "timeSignature": "48,4",
-      "content": "48,0:cDEF",
+      "content": "48, ^///",
       "ticksPerBeat": 48,
       "beatCount": 4,
       "tickCount": 192
@@ -12,7 +12,7 @@
     {
       "name": "phrase2",
       "timeSignature": "48,3",
-      "content": "24,1:EcEcGA",
+      "content": "48, ^//",
       "ticksPerBeat": 48,
       "beatCount": 3,
       "tickCount": 144
@@ -20,7 +20,7 @@
     {
       "name": "phrase3",
       "timeSignature": "24,4",
-      "content": "24,-1:cGcG",
+      "content": "24, ^///",
       "ticksPerBeat": 24,
       "beatCount": 4,
       "tickCount": 96
@@ -30,29 +30,29 @@
     {
       "name": "section1",
       "gcd": 48,
-      "lcm": 210,
-      "beatCount": 210,
+      "lcm": 12,
+      "beatCount": 36,
       "parts": [
         {
           "name": "part1",
-          "content": "phrase1 phrase2",
-          "tickCount": 336,
-          "tickCountFactored": 7,
-          "loop": 30
+          "content": "phrase1",
+          "tickCount": 192,
+          "tickCountFactored": 4,
+          "loop": 9
         },
         {
           "name": "part2",
-          "content": "phrase2 phrase3",
-          "tickCount": 240,
-          "tickCountFactored": 5,
-          "loop": 42
+          "content": "phrase2",
+          "tickCount": 144,
+          "tickCountFactored": 3,
+          "loop": 12
         },
         {
           "name": "part3",
-          "content": "phrase3 phrase1",
-          "tickCount": 288,
-          "tickCountFactored": 6,
-          "loop": 35
+          "content": "phrase3",
+          "tickCount": 96,
+          "tickCountFactored": 2,
+          "loop": 18
         }
       ]
     }

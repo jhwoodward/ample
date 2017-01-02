@@ -157,11 +157,16 @@ function isEndScaleSignature(chars) {
   return chars === ')S';
 }
 
-function send(playerId, s, startBeat) {
+String.prototype.splice = function(idx, rem, str) {
+    return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
+};
 
+function send(playerId, s, conduct, startBeat) {
+
+  var conductor = Object.assign({},conduct);
   var lastNote, lastRest;
   startBeat = startBeat || 1;
-  var beatCount = 0;
+  var tickCount = 0;
   var beatStep = 48;
   var octave = 4;
   var transpose = 0;
@@ -180,12 +185,34 @@ function send(playerId, s, startBeat) {
   var tempo = 120;
   var flats = [], sharps = [], scale = []; // for key sig
 
-  for (var i = 0; i < s.length; i++) {
+  var i = 0;
+  while (i < s.length) {
+
+console.log(i);
+console.log(s.length);
+
+    var beat = Math.round(tickCount / 48);
+     
+    if (conductor[beat]) {
+      
+      console.log('instruction at ' + beat,conductor[beat])
+      //insert global instruction
+      console.log('before',s);
+      s = s.substring(0,i) + ' ' + conductor[beat] + ' ' + s.substring(i,s.length);
+      console.log('after',s);
+
+      delete conductor[beat];
+    }
+
 
     if (isIgnore(s[i])) {
       ensureLastNoteSent();
+      i++;
       continue;
     }
+
+
+  
 
     char = s[i];
 
@@ -197,48 +224,49 @@ function send(playerId, s, startBeat) {
     if (isStartKeySignature(char + char2)) {
       settingKeySignature = true;
       flats = []; sharps = []; omit = [];
-      i += 1; continue;
+      i +=2; continue;
     }
     if (isEndKeySignature(char + char2)) {
       settingKeySignature = false;
-      i += 1; continue;
+      i +=2; continue;
     }
 
     if (isStartScaleSignature(char + char2)) {
       settingScaleSignature = true;
       scale = [];
-      i += 1; continue;
+      i +=2; continue;
     }
     if (isEndScaleSignature(char + char2)) {
       settingScaleSignature = false;
-      i += 1; continue;
+      i +=2; continue;
     }
 
     if (isSetTempo(char + char2)) {
       tempo = parseInt(numbers.join(''), 10);
       sendTempo(playerId, tempo);
       numbers = [];
-      i += 1; continue;
+      i +=2; continue;
     }
 
     if (settingKeySignature) {
       //expect 2 characters per accidental, eg -B -A = f major
       if (isFlat(char)) {
         flats.push(char2.toUpperCase());
-        i += 1; continue;
+        i += 2; continue;
       }
       if (isSharp(char)) {
         sharps.push(char2.toUpperCase());
-        i += 1; continue;
+        i += 2; continue;
       }
     }
 
     if (settingScaleSignature) {
       if (isFlat(char) || isSharp(char)) {
         scale.push(char + char2.toUpperCase());
-        i += 1;
+        i += 2;
       } else {
         scale.push(char.toUpperCase());
+          i ++;
       }
       continue;
     }
@@ -316,6 +344,11 @@ function send(playerId, s, startBeat) {
       if (lastNote && lastNote.staccato) {
         delay += lastNote.duration / 2;
       }
+
+      //if legato set overlap
+      var overlap = 0;
+      //overlap notes if legato
+      delay -= overlap;
     }
 
     if (rest) {
@@ -335,8 +368,8 @@ function send(playerId, s, startBeat) {
         pitchBeforeFit: pitch,
         pitch: pitchToScale,
         fittedToScale: fittedToScale,
-        position: beatCount + startBeat,
-        duration: beatStep,
+        position: tickCount + startBeat,
+        duration: beatStep + overlap,
         sent: false,
         staccato: staccato,
         velocity: velocity
@@ -345,7 +378,7 @@ function send(playerId, s, startBeat) {
     }
 
     if (note || rest) {
-      beatCount += beatStep;
+      tickCount += beatStep;
       plingCount = 0;
       accidental = 0;
       staccato = false;
@@ -360,7 +393,7 @@ function send(playerId, s, startBeat) {
       } else {
         lastNote.duration += beatStep;
       }
-      beatCount += beatStep;
+      tickCount += beatStep;
     }
 
     if (isPling(char)) {
@@ -421,9 +454,12 @@ function send(playerId, s, startBeat) {
         if (lastNote && !lastNote.sent) {
           sendNote(playerId, lastNote);
         }
-        return beatCount + startBeat;
+        return tickCount + startBeat;
       }
     }
+
+    i+=1;
+
   }
 }
 

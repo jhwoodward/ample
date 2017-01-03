@@ -1,4 +1,4 @@
-var make = require('../src/ample').make;
+var make = require('../src/realtime').make;
 var utils = require('../src/utils');
 var loop = utils.loop;
 

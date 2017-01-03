@@ -157,9 +157,7 @@ function isEndScaleSignature(chars) {
   return chars === ')S';
 }
 
-String.prototype.splice = function(idx, rem, str) {
-    return this.slice(0, idx) + str + this.slice(idx + Math.abs(rem));
-};
+var messages = [];
 
 function send(playerId, s, conduct, startBeat) {
 
@@ -188,18 +186,15 @@ function send(playerId, s, conduct, startBeat) {
   var i = 0;
   while (i < s.length) {
 
-console.log(i);
-console.log(s.length);
-
     var beat = Math.round(tickCount / 48);
      
     if (conductor[beat]) {
       
-      console.log('instruction at ' + beat,conductor[beat])
+   //   console.log('instruction at ' + beat,conductor[beat])
       //insert global instruction
-      console.log('before',s);
+   //   console.log('before',s);
       s = s.substring(0,i) + ' ' + conductor[beat] + ' ' + s.substring(i,s.length);
-      console.log('after',s);
+  //    console.log('after',s);
 
       delete conductor[beat];
     }
@@ -275,7 +270,7 @@ console.log(s.length);
     var note = isNote(char) && !rest;
 
     if ((note || rest || isRelativePitch(char)) && lastNote && !lastNote.sent) {
-      sendNote(playerId, lastNote);
+      sendNote(playerId, lastNote, tickCount);
     }
 
     if (isNote(char)) {
@@ -331,7 +326,7 @@ console.log(s.length);
       pitchToScale = fitToScale(pitch, scale);
       fittedToScale = pitchToScale !== pitch;
       if (fittedToScale) {
-        console.log(utils.noteFromMidiPitch(pitch) + '->' + utils.noteFromMidiPitch(pitchToScale))
+       // console.log(utils.noteFromMidiPitch(pitch) + '->' + utils.noteFromMidiPitch(pitchToScale))
       }
       rest = fittedToScale && lastNote && pitchToScale === lastNote.pitch;
       note = !rest;
@@ -461,6 +456,8 @@ console.log(s.length);
     i+=1;
 
   }
+
+  return messages;
 }
 
 function sendTempo(playerId, tempo) {
@@ -479,7 +476,6 @@ function sendNote(playerId, note) {
     note: {
       pitch: note.pitch,
       duration: note.duration,
-      isRest: note.isRest,
       delay: note.delay,
       velocity: note.velocity
     }
@@ -491,6 +487,20 @@ function sendNote(playerId, note) {
   listeners.forEach(function (cb) {
     cb(sendData);
   });
+
+  messages.push({
+    type: 'noteon',
+    pitch: note.pitch,
+    velocity: note.velocity,
+    tick: note.position
+  });
+
+  messages.push({
+    type: 'noteoff',
+    pitch: note.pitch,
+    tick: note.position + (note.staccato ? note.duration/2 : note.duration + 1)
+  });
+
   note.sent = true;
 }
 

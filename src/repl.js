@@ -1,7 +1,7 @@
 const repl = require('repl');
 var utils = require('./utils');
 var loop = utils.loop;
-var make = require('./ample').make;
+var make = require('./realtime').make;
 var fs = require('fs');
 var cp = require('child_process');
 

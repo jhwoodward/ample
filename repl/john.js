@@ -1,4 +1,4 @@
-var make = require('../src/ample').make;
+var make = require('../src/realtime').make;
 var utils = require('../src/utils');
 var loop = utils.loop;
 
@@ -45,4 +45,5 @@ var conductor = {
    102:'S(CEG)S'
 }
 
-make({ name: 'john', players: players }, rules, conductor).play();
+var parts = make({ name: 'john', players: players }, rules, conductor).play();
+

@@ -1,50 +1,6 @@
-var fs = require('fs');
-var jsmidgen = require('jsmidgen');
+
 var interpreter = require('./ample-interpreter');
-var play = require('./play');
-
-var file;
-var tracks;
-
-interpreter.listen(function (data) {
-
-/*
-  tracks[data.playerId].addEvent(
-    
-    new jsmidgen.Event({
-        type: jsmidgen.Event.CONTROLLER,
-        channel: players[data.playerId].channel-1,
-        param1: 64,
-        param2:127,
-        time: 0
-      }
-  ));
-*/
-
-  if (data.note) {
-
-
-    tracks[data.playerId].addNote(
-      players[data.playerId].channel-1,
-      data.note.pitch,
-      data.note.duration,
-      data.note.delay,
-      data.note.velocity);
-
-/*
-    tracks[data.playerId].addNoteOff(
-      players[data.playerId].channel-1,
-      data.note.pitch,
-      data.note.duration,// + 10,
-      data.note.delay,
-      data.note.velocity);
-      */
-  }
-  if (data.tempo) {
-    tracks[data.playerId].setTempo(data.tempo);
-  }
-
-});
+var seq = require('./seq');
 
 var players;
 function makeSong(song, rules, conductor, iterations) {
@@ -55,7 +11,7 @@ function makeSong(song, rules, conductor, iterations) {
     if (!player.part) { //legacy
       player = {
         part: player,
-        channel: i+1
+        channel: i + 1
       };
       players[i] = player;
     }
@@ -68,15 +24,12 @@ function makeSong(song, rules, conductor, iterations) {
 
 function makePart(part, rules, conductor, iterations, playerId) {
   playerId = playerId || 0;
-  var track = new jsmidgen.Track();
-  tracks.push(track);
-  file.addTrack(track);
 
   part = substitute(part, rules, iterations, 0);
 
-  interpreter.send(playerId, part, conductor);
+  var messages = interpreter.send(playerId, part, conductor);
 
-  return part;
+  return { part: part, messages: messages };
 }
 
 function substitute(part, rules, iterations, i) {
@@ -95,8 +48,7 @@ function substitute(part, rules, iterations, i) {
 
 
 function make(song, rules, conductor, iterations) {
-  file = new jsmidgen.File({ ticks: 48 });
-  tracks = [];
+
   var parts = [];
 
   rules = rules || {};
@@ -114,24 +66,20 @@ function make(song, rules, conductor, iterations) {
     parts.push(makePart(song, rules, conductor, iterations));
   }
 
-  var filename = song.name || 'song';
- // if (fs.existsSync('./midi/' + filename + '.mid')) {
- //   filename += '_' + new Date().getTime();
- // }
-  filename = './midi/' + filename + '.mid';
-  fs.writeFileSync(filename, file.toBytes(), 'binary');
-
   return {
     play: function () {
-      play(filename);
+      var messages = [];
+      parts.forEach(function (part) {
+        messages = messages.concat(part.messages);
+      });
+      seq.send(messages);
       return parts;
     }
   }
 }
 
 module.exports = {
-  make: make,
-  play: play
+  make: make
 };
 
 

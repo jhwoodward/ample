@@ -1,15 +1,25 @@
 const repl = require('repl');
 var utils = require('./utils');
 var loop = utils.loop;
-var make = require('./realtime').make;
+var make = require('./ample').make;
 var fs = require('fs');
 var cp = require('child_process');
+var rulePresets = require('./rules');
+var colors = require("colors");
 
 var config = {};
 var rules = {
-  part1: 'cDEF',
-  part2: 'part1 part1 part1',
-  part3: '6,part2'
+   vib: '[-3:C]',
+      nonv: '[-3:+C]',
+      spic: '[-3:D]',
+      stak: '[-3:+D]',//careful - clashes with staccato annotation
+      pizz: '[-3:E]',
+  'part1': 'stak {staccato} 1:12,eFGA -BCD 127=L {legato} vib E//^F~e//',
+  'part2': '127=L {legato} vib  1:12,cD~EF~GA-BC//^b~C//',
+  'part3': '6,part2',
+  'part': '1:cDEFG',
+  'player1': 'part1',
+  'player2': 'part2'
 };
 
 function getPlayers() {
@@ -29,8 +39,7 @@ function set(cmd, callback) {
   var s = cmd.replace('set ', '');
   var key = s.split('=')[0].trim();
   var val = s.split('=')[1].trim();
-  this.lineParser.reset();
-  this.bufferedCommand = '';
+
   rules[key] = val;
   callback(null, rules);
 }
@@ -67,6 +76,18 @@ function run(callback) {
   callback(null, make({ name: 'repl', players: players }, rules).play());
 }
 
+
+function use(cmd, callback) {
+   var rule = cmd.replace('use', '').trim();
+  if (rulePresets[rule]) {
+    Object.assign(rules, rulePresets[rule]);
+    //callback();
+    callback(JSON.stringify(rulePresets[rule],null,2).green);
+  } else {
+    callback(`No rule found called ${rule}`.red);
+  }
+}
+
 function save(cmd, callback) {
   var filename = cmd.replace('save', '').trim() || config.name;
   if (!filename) {
@@ -88,7 +109,7 @@ function save(cmd, callback) {
 }
 
 function myEval(cmd, context, filename, callback) {
-  console.log(cmd);
+
   if (cmd.indexOf('rules') === 0) {
     callback(null, rules);
   } else if (cmd.indexOf('set') === 0) {
@@ -99,10 +120,14 @@ function myEval(cmd, context, filename, callback) {
     save(cmd, callback);
   } else if (cmd.indexOf('gen') === 0) {
     generate(cmd, callback);
+  } else if (cmd.indexOf('use') === 0) {
+    use(cmd, callback);
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
-      callback(null, make(cmd, rules).play());
+      var results = make(cmd, rules).play();
+      var parts = results.map(function(result) { return result.part;});
+      callback(parts);
     } else {
       callback();
     }

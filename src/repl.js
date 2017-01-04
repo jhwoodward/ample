@@ -14,12 +14,13 @@ var rules = {
       spic: '[-3:D]',
       stak: '[-3:+D]',//careful - clashes with staccato annotation
       pizz: '[-3:E]',
-  'part1': 'stak {staccato} 1:12,eFGA -BCD 127=L {legato} vib E//^F~e//',
-  'part2': '127=L {legato} vib  1:12,cD~EF~GA-BC//^b~C//',
-  'part3': '6,part2',
+  'part1': 'stak {staccato} 1:12,eFGA -BCD 127=L {legato} vib E//^F~b//^',
+  'part2': '127=L {legato} nonv  1:12,cD~EF~GA-BC//^b~C//^',
+  'part3': '127=L {legato} vib  0:12,cbagfedc//^G~c//^',
   'part': '1:cDEFG',
   'player1': 'part1',
-  'player2': 'part2'
+  'player2': 'part2',
+  'player3': 'part3'
 };
 
 function getPlayers() {

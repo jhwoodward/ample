@@ -506,10 +506,11 @@ function send(playerId, s, conduct, config) {
         position: tickCount,
         duration: beatStep,
         sent: false,
-        staccato: staccato,
+        staccato: staccato || annotations.staccato,
         legato: annotations.legato,
         lastNoteLegato: lastNote && lastNote.legato,
-        slur: slur,
+        slur: slur || annotations.glissando,
+        lastNoteSlur: lastNote && lastNote.slur,
         velocity: velocity
       };
       lastRest = undefined;
@@ -598,6 +599,14 @@ function send(playerId, s, conduct, config) {
       if (lastNote && !lastNote.sent) {
         sendNote(lastNote);
       }
+      if (lastRest) {
+        messages.push({
+          type: 'noteoff',
+          pitch: lastNote.pitch,
+          tick: tickCount,
+          channel: playerId
+        });
+      }
       return tickCount;
     }
   }
@@ -606,13 +615,23 @@ function send(playerId, s, conduct, config) {
   function sendNote(note) {
 
 
-    if (annotations.glissando || note.slur) {
-      sendPitch(0, note.position - 1);
+    if (note.slur) {
+      if (!note.lastNoteSlur) {
+         if (note.lastNoteLegato) {
+            sendPitch(0, note.position - 11); //bring position forward slightly to compensate for legato transition
+          } else {
+            sendPitch(0, note.position - 1);
+          }
+         
+      }
+     
     } else {
 
-
-      sendPitch(8191, note.position - 1);
-
+       if (note.lastNoteLegato) {
+            sendPitch(8191, note.position - 11); //bring position forward slightly to compensate for legato transition
+          } else {
+            sendPitch(8191, note.position - 1);
+          }
 
     }
 
@@ -621,14 +640,12 @@ function send(playerId, s, conduct, config) {
     var duration = note.duration - 5; //default slightly detached
 
     if (note.legato) {
-      
       duration = note.duration + 1; //allow overlap to trigger legato transitions
       if (note.lastNoteLegato) {
         on -= 10; //bring position forward slightly to compensate for legato transition
       }
-      
     }
-    if (annotations.staccato || note.staccato) {
+    if (note.staccato) {
       duration = note.duration / 2;
     }
 

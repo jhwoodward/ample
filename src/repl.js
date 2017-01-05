@@ -5,34 +5,53 @@ var make = require('./ample').make;
 var fs = require('fs');
 var cp = require('child_process');
 var rulePresets = require('./rules');
+var annotations = require('./annotations');
 var colors = require("colors");
 
 var config = {};
+
 var rules = {
-   vib: '[-3:C]',
-      nonv: '[-3:+C]',
-      spic: '[-3:D]',
-      stak: '[-3:+D]',//careful - clashes with staccato annotation
-      pizz: '[-3:E]',
-  'part1': 'stak {staccato} 1:12,eFGA -BCD 127=L {legato} vib E//^F~b//^',
-  'part2': '127=L {legato} nonv  1:12,cD~EF~GA-BC//^b~C//^',
-  'part3': '127=L {legato} vib  0:12,cbagfedc//^G~c//^',
-  'part': '1:cDEFG',
-  'player1': 'part1',
-  'player2': 'part2',
-  'player3': 'part3'
+  'part1': '{staccato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e//^',
+ 'part2': '127=L {legato} 1:12,cD~EF~GA-B {legato} C//^b~C//^',
+  'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
+ // 'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
+ // 'part1': `90=L {default} 12,1:c_D E_F {staccato} Gfed {default} c/////^`,
+ // 'part2': `{pizzicato} 2:24,CCCCC`,
+ // 'part3':''
+// part1: '60=VB {spiccato} 24:1:c >c {legato} cDE {spiccato}  >c >c c c >c',
+ //part2:'',
+// part3:''
 };
 
+var players = [
+  {
+    part: 'part1',
+    channel: 0,
+    annotations: annotations.triobroz
+  },
+  {
+    part: 'part2',
+    channel: 1,
+    annotations: annotations.triobroz
+  },
+  {
+    part: 'part3',
+    channel: 2,
+    annotations: annotations.triobroz
+  },
+];
+
 function getPlayers() {
+  /*
   var players = [];
-  var channel = 1;
+  var channel = 0;
   for (var key in rules) {
     if (key.indexOf('player') === 0) {
-      var player = {part:key,channel:channel};
+      var player = {part:key, channel:channel,  annotations: annotations.triobroz };
       players.push(player);
       channel +=1;
     }
-  }
+  }*/
   return players;
 }
 
@@ -72,9 +91,26 @@ function generate(cmd, callback) {
 
 }
 
+function play(cmd, callback) {
+  var player;
+   var args = cmd.replace('play ', '').split(' ');
+   var playerId = parseInt(args[0], 10) - 1;
+
+   if (args.length > 1) {
+     var part = args[1];
+     player = Object.assign({},players[playerId]);
+     player.part = part;
+   } else {
+     player = players[playerId];
+   }
+   make({ name: 'repl', players: [player] }, rules).play();
+   callback('\n');
+}
+
 function run(callback) {
   var players = getPlayers();
-  callback(null, make({ name: 'repl', players: players }, rules).play());
+  make({ name: 'repl', players: players }, rules).play();
+  callback('\n');
 }
 
 
@@ -123,6 +159,8 @@ function myEval(cmd, context, filename, callback) {
     generate(cmd, callback);
   } else if (cmd.indexOf('use') === 0) {
     use(cmd, callback);
+  } else if (cmd.indexOf('play') === 0) {
+    play(cmd, callback);
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {

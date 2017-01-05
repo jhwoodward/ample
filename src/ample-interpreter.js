@@ -142,7 +142,7 @@ function isNatural(char) {
 }
 
 function isRelativePitch(char) {
-  return char === '_';
+  return char === 'x';
 }
 
 function isSlur(char) {
@@ -170,7 +170,9 @@ function isEndAnnotation(char) {
   return char === '}';
 }
 
-
+function isLegato(char) {
+  return char === '_';
+}
 
 function isEndKeySwitch(char) {
   return char === ']';
@@ -196,17 +198,26 @@ function isSetPitch(chars) {
   return chars === '=P';
 }
 
-function getKeyswitch(s, start) {
+function isSetVelocity(chars) {
+  return chars === '=V';
+}
 
-  var i = start;
+function isSetBaseVelocity(chars) {
+  return chars === '=VB';
+}
+
+function getKeyswitch(score, start) {
+
+  var cursor = start;
   var accidental = 0;
   var octave = 4;
   var numbers = [];
   var note;
   var char;
+  var temp;
 
-  while (i < s.length && !isEndKeySwitch(char)) {
-    char = s[i];
+  while (cursor < score.length && !isEndKeySwitch(char)) {
+    char = score[cursor];
 
     if (isSharp(char)) {
       accidental += 1;
@@ -224,6 +235,10 @@ function getKeyswitch(s, start) {
       }
     }
 
+    if (isComma(char)) {
+      temp = true;
+    }
+
     if (!isNaN(char) || char === '-') {
       numbers.push(char);
     }
@@ -231,62 +246,70 @@ function getKeyswitch(s, start) {
       note = char;
     }
 
-    i++;
+    cursor++;
   }
 
   return {
     pitch: getPitch(note, octave, accidental),
-    length: i - start
+    length: cursor - start,
+    temp:temp
   };
 
 }
 
 function getAnnotation(s, start) {
 
-  var i = start;
+  var cursor = start;
   var char;
   var annotation = '';
 
-  while (i < s.length && !isEndAnnotation(char)) {
-    char = s[i];
+  while (cursor < s.length && !isEndAnnotation(char)) {
+    char = s[cursor];
     if (!isStartAnnotation(char) && !isEndAnnotation(char)) {
       annotation += char;
     }
-    i++;
+    cursor++;
   }
 
   return {
     value: annotation.trim(),
-    length: i - start
+    length: cursor - start
   };
 
 }
 
+function splice(score, cursor, s) {
+   return `${score.substring(0, cursor)}  ${s} ${score.substring(cursor, score.length)}`;
+}
 
-function send(playerId, s, conduct, config) {
+function send(player, conductor) {
   var messages = [];
-  var conductor = Object.assign({}, conduct);
-  var lastNote, lastRest;
+  conductor = Object.assign({},conductor); //copy object to avoid mutations splling out
+  var lastNote, lastRest, previousNote;
   var tickCount = 10;
   var beatStep = 48;
   var octave = 4;
   var transpose = 0;
   var plingCount = 0;
   var numbers = [];
-  var char;
+  var char, char2,char3;
   var octaveReset = false;
   var octaveBeforeKeySwitch;
   var accidental = 0; //sharp or flat / +1 / -1
   var natural = false;
+  var accent = false;
+  var pizzicato = false;
   var slur = false;
   var baseVelocity = 80;
   var velocity = baseVelocity;
   var velocityStep = 10;
-  var staccato;
+  var staccato = false;
+  var legato = false;
   var settingKeySignature = false;
   var settingScaleSignature = false;
   var tempo = 120;
   var flats = [], sharps = [], scale = []; // for key sig
+  var tempKeySwitch, lastPermKeySwitch;
 
   var annotations = {
     legato: false,
@@ -294,127 +317,164 @@ function send(playerId, s, conduct, config) {
     glissando: false
   };
 
-  var i = 0;
-  while (i < s.length) {
+  var cursor = 0;
+  while (cursor < player.score.length) {
 
     var beat = Math.round(tickCount / 48);
 
     if (conductor[beat]) {
-
-      //   console.log('instruction at ' + beat,conductor[beat])
-      //insert global instruction
-      //   console.log('before',s);
-      s = s.substring(0, i) + ' ' + conductor[beat] + ' ' + s.substring(i, s.length);
-      //    console.log('after',s);
-
+      player.score = splice(player.score, cursor, conductor[beat]);
       delete conductor[beat];
     }
 
-
-    if (isIgnore(s[i])) {
+    if (isIgnore(player.score[cursor])) {
       ensureLastNoteSent();
-      i++;
+      cursor++;
       continue;
     }
 
-    char = s[i];
+    char = player.score[cursor];
 
-
-    if (i < s.length - 1) {
-      char2 = s[i + 1];
+    if (cursor < player.score.length - 1) {
+      char2 = player.score[cursor + 1];
     } else {
       char2 = '';
+    }
+    if (cursor < player.score.length - 2) {
+      char3 = player.score[cursor + 2];
+    } else {
+      char3 = '';
     }
     if (isStartKeySignature(char + char2)) {
       settingKeySignature = true;
       flats = []; sharps = []; omit = [];
-      i += 2; continue;
+      cursor += 2; continue;
     }
     if (isEndKeySignature(char + char2)) {
       settingKeySignature = false;
-      i += 2; continue;
+      cursor += 2; continue;
     }
 
     if (isStartKeySwitch(char)) {
-      var keyswitch = getKeyswitch(s, i);
+      var keyswitch = getKeyswitch(player.score, cursor);
       sendKeyswitch(keyswitch.pitch, tickCount);
-      i += keyswitch.length; continue;
+      cursor += keyswitch.length; 
+      if (keyswitch.temp) {
+        var revert;
+        if (lastPermKeySwitch) {
+          revert = lastPermKeySwitch.pitch;
+        } else if (annotations.default) {
+          var defaultKeyswitch = getKeyswitch(annotations.default,0);
+          revert = defaultKeyswitch.pitch || 24;
+        } else {
+          revert = 24;
+        }
+        keyswitch.revert = revert;
+        tempKeySwitch = keyswitch;
+      } else {
+        tempKeySwitch = undefined;
+        lastPermKeySwitch = keyswitch;
+      }
+      continue;
     }
 
     if (isStartAnnotation(char)) {
-      var annotation = getAnnotation(s, i);
+      var annotation = getAnnotation(player.score, cursor);
 
-      console.log(annotation);
-      switch (annotation.value) {
-        case 'legato':
+      switch (true) {
+        case annotation.value.indexOf('legato') === 0:
           annotations.legato = true;
           annotations.staccato = false;
           break;
-        case 'staccato':
+        case annotation.value.indexOf('staccato') === 0:
           annotations.staccato = true;
           annotations.legato = false;
           annotations.glissando = false;
-        case 'glissando':
+        case annotation.value.indexOf('pizzicato') === 0:
+          annotations.legato = false;
+          annotations.glissando = false;
+        case annotation.value.indexOf('spiccato') === 0:
+          annotations.legato = false;
+          annotations.glissando = false;
+        case annotation.value.indexOf('glissando') === 0:
           annotations.glissando = true;
           annotations.staccato = false;
-        case 'default':
+        case annotation.value.indexOf('default') === 0:
           annotations.legato = false;
           annotations.staccato = false;
           annotations.glissando = false;
           break;
       }
-      i += annotation.length; continue;
+      cursor += annotation.length; 
+
+      if (player.annotations[annotation.value]) {
+        player.score = splice(player.score, cursor, player.annotations[annotation.value]);
+      }
+
+      continue;
     }
 
     if (isStartScaleSignature(char + char2)) {
       settingScaleSignature = true;
       scale = [];
-      i += 2; continue;
+      cursor += 2; continue;
     }
     if (isEndScaleSignature(char + char2)) {
       settingScaleSignature = false;
-      i += 2; continue;
+      cursor += 2; continue;
     }
 
     if (isSetTempo(char + char2)) {
       tempo = parseInt(numbers.join(''), 10);
-      sendTempo(playerId, tempo);
+      sendTempo(tempo);
       numbers = [];
-      i += 2; continue;
+      cursor += 2; continue;
     }
 
+  if (isSetBaseVelocity(char + char2 + char3)) {
+      baseVelocity = parseInt(numbers.join(''), 10);
+      numbers = [];
+      cursor += 3; continue;
+    }
+    if (isSetVelocity(char + char2)) {
+      velocity = parseInt(numbers.join(''), 10);
+      numbers = [];
+      cursor += 2; continue;
+    }
+
+ 
 
     if (isSetPitch(char + char2)) { //pitchbend not transpose
       sendPitch(parseInt(numbers.join(''), 10));
       numbers = [];
-      i += 2; continue;
+      cursor += 2; continue;
     }
 
-    if (isSetDynamics(char + char2)) { 
-      sendCC(1,parseInt(numbers.join(''), 10));//cc1 = modulation
+    if (isSetDynamics(char + char2)) {
+      sendCC(1, parseInt(numbers.join(''), 10));//cc1 = modulation
       numbers = [];
-      i += 2; continue;
+      cursor += 2; continue;
     }
 
     if (settingKeySignature) {
       //expect 2 characters per accidental, eg -B -A = f major
       if (isFlat(char)) {
         flats.push(char2.toUpperCase());
-        i += 2; continue;
+        cursor += 2; continue;
       }
       if (isSharp(char)) {
         sharps.push(char2.toUpperCase());
-        i += 2; continue;
+        cursor += 2; continue;
       }
     }
 
     if (settingScaleSignature) {
       if (isFlat(char) || isSharp(char)) {
         scale.push(char + char2.toUpperCase());
-        i += 2;
+        cursor += 2;
       } else {
         scale.push(char.toUpperCase());
-        i++;
+        cursor++;
       }
       continue;
     }
@@ -422,7 +482,23 @@ function send(playerId, s, conduct, config) {
     var rest = isRest(char);// || omit.indexOf(char.toUpperCase()) > -1;
     var note = isNote(char) && !rest;
 
+
+
+
     if ((note || rest || isRelativePitch(char)) && lastNote && !lastNote.sent) {
+      if (legato && !staccato && !accent && !pizzicato) {
+
+/*
+        if (player.annotations['_']) {
+          var keyswitch = getKeyswitch(player.annotations['_'], 0);
+          sendKeyswitch(keyswitch.pitch, tickCount-1);
+        } 
+        */
+        lastNote.legato = true;
+      }
+      if (staccato) {
+        lastNote.staccato = true;
+      }
       sendNote(lastNote);
     }
 
@@ -482,9 +558,8 @@ function send(playerId, s, conduct, config) {
         console.log(utils.noteFromMidiPitch(pitch) + '->' + utils.noteFromMidiPitch(pitchToScale))
       }
       rest = fittedToScale && lastNote && pitchToScale === lastNote.pitch;
-      note = !rest;
+      //note = !rest;
       note = true;
-
     }
 
     if (rest) {
@@ -497,7 +572,13 @@ function send(playerId, s, conduct, config) {
       }
     }
 
+
+    if (previousNote && previousNote.legato && !annotations.legato && !lastNote.legato && !previousNote.noteOffSent) {
+      sendNoteOff(previousNote,tickCount-previousNote.duration-10);
+    }
+
     if (note) {
+      previousNote = lastNote;
       lastNote = {
         char: char,
         pitchBeforeFit: pitch,
@@ -506,8 +587,8 @@ function send(playerId, s, conduct, config) {
         position: tickCount,
         duration: beatStep,
         sent: false,
-        staccato: staccato || annotations.staccato,
-        legato: annotations.legato,
+        staccato: annotations.staccato, // single note staccato needs to be applied after the note, before send
+        legato: (!staccato && !accent && !pizzicato) && annotations.legato, // single note legato needs to be applied after the note, before send
         lastNoteLegato: lastNote && lastNote.legato,
         slur: slur || annotations.glissando,
         lastNoteSlur: lastNote && lastNote.slur,
@@ -520,11 +601,14 @@ function send(playerId, s, conduct, config) {
       tickCount += beatStep;
       plingCount = 0;
       accidental = 0;
+      accent = false;
+      pizzicato = false;
       staccato = false;
       velocity = baseVelocity;
       numbers = [];
       natural = false;
       slur = false;
+      legato = false;
     }
 
     if (isSustain(char)) {
@@ -556,12 +640,23 @@ function send(playerId, s, conduct, config) {
       natural = true;
     }
 
+
+    if (isLegato(char)) {
+      legato = true;
+   
+    }
+
     if (isStaccato(char)) {
       staccato = true;
     }
 
     if (isAccent(char)) {
-      velocity += velocityStep;
+      accent = true;
+      if (player.annotations[char]) {
+         player.score = splice(player.score, cursor+1, player.annotations[char]);
+      } else { //default accent
+        velocity += velocityStep;
+      }
     }
 
     if (!isNaN(char) || char === '-') {
@@ -591,11 +686,11 @@ function send(playerId, s, conduct, config) {
       }
     }
     ensureLastNoteSent();
-    i += 1;
+    cursor ++;
   }
 
   function ensureLastNoteSent() {
-    if (i === s.length - 1) {
+    if (cursor === player.score.length - 1) {
       if (lastNote && !lastNote.sent) {
         sendNote(lastNote);
       }
@@ -604,7 +699,7 @@ function send(playerId, s, conduct, config) {
           type: 'noteoff',
           pitch: lastNote.pitch,
           tick: tickCount,
-          channel: playerId
+          channel: player.channel
         });
       }
       return tickCount;
@@ -614,39 +709,37 @@ function send(playerId, s, conduct, config) {
 
   function sendNote(note) {
 
-
     if (note.slur) {
       if (!note.lastNoteSlur) {
-         if (note.lastNoteLegato) {
-            sendPitch(0, note.position - 11); //bring position forward slightly to compensate for legato transition
-          } else {
-            sendPitch(0, note.position - 1);
-          }
-         
+        if (note.lastNoteLegato) {
+          sendPitch(0, note.position - 11); //bring position forward slightly to compensate for legato transition
+        } else {
+          sendPitch(0, note.position - 1);
+        }
       }
-     
     } else {
-
-       if (note.lastNoteLegato) {
-            sendPitch(8191, note.position - 11); //bring position forward slightly to compensate for legato transition
-          } else {
-            sendPitch(8191, note.position - 1);
-          }
-
+      if (note.lastNoteLegato) {
+        sendPitch(8191, note.position - 11); //bring position forward slightly to compensate for legato transition
+      } else {
+        sendPitch(8191, note.position - 1);
+      }
     }
-
 
     var on = note.position;
     var duration = note.duration - 5; //default slightly detached
 
+  
     if (note.legato) {
       duration = note.duration + 1; //allow overlap to trigger legato transitions
-      if (note.lastNoteLegato) {
-        on -= 10; //bring position forward slightly to compensate for legato transition
-      }
-    }
+    }//TODO: SHOULD ONLY BE DONE IF NEXT NOTE IS ALSO LEGATO?
+    
     if (note.staccato) {
       duration = note.duration / 2;
+    }
+
+    if (note.lastNoteLegato &&note.legato) {
+      on -= 10; //bring position forward slightly to compensate for legato transition
+      duration+=10
     }
 
     var off = on + duration;
@@ -656,17 +749,34 @@ function send(playerId, s, conduct, config) {
       pitch: note.pitch,
       velocity: note.velocity,
       tick: on,
-      channel: playerId
+      channel: player.channel
     });
 
     messages.push({
       type: 'noteoff',
       pitch: note.pitch,
       tick: off,
-      channel: playerId
+      channel: player.channel
     });
+    
 
     note.sent = true;
+
+
+    if (tempKeySwitch) {
+      sendKeyswitch(tempKeySwitch.revert,tickCount+1);
+      tempKeySwitch = undefined;
+    }
+  }
+
+  function sendNoteOff(note,position) {
+    messages.push({
+      type: 'noteoff',
+      pitch: note.pitch,
+      tick: position,
+      channel: player.channel
+    });
+    note.noteOffSent=true;
   }
 
   function sendCC(number, value, position) {
@@ -675,7 +785,7 @@ function send(playerId, s, conduct, config) {
       controller: number,
       value: value,
       tick: position || tickCount,
-      channel: playerId
+      channel: player.channel
     });
   }
 
@@ -684,7 +794,7 @@ function send(playerId, s, conduct, config) {
       type: 'pitch',
       value: value,
       tick: position || tickCount,
-      channel: playerId
+      channel: player.channel
     });
   }
 
@@ -695,13 +805,13 @@ function send(playerId, s, conduct, config) {
       pitch: pitch,
       velocity: 64,
       tick: position,
-      channel: playerId
+      channel: player.channel
     });
     messages.push({
       type: 'noteoff',
       pitch: pitch,
       tick: position + 1,
-      channel: playerId
+      channel: player.channel
     });
 
 

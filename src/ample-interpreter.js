@@ -817,7 +817,7 @@ function send(player, conductor) {
     if (event.noteon) {
 
       var on = event.time.tick;
-      var legato = event.expression.note.legato || (prev && prev.expression.phrase.legato && event.expression.phrase.legato );
+      var legato = event.expression.note.legato || (prev && prev.noteon && prev.expression.phrase.legato && event.expression.phrase.legato );
       var staccato = event.expression.note.staccato || event.expression.phrase.staccato;
       var prevDynamics = prev && prev.noteon ? prev.expression.dynamics: undefined;
       var prevGlissando = prev && prev.noteon ? prev.expression.note.glissando: undefined;
@@ -829,28 +829,24 @@ function send(player, conductor) {
 
       if (event.expression.keyswitch.current && 
         lastKeySwitch !== event.expression.keyswitch.current.pitch ) {
-        var kson = event.time.tick-1;
-        if (legato) {
-          kson -=legatoTransition;
-        }
          sendKeyswitch(
             event.expression.keyswitch.current.pitch,
             event.expression.keyswitch.current.char,
-            kson);
+            on-1);
          lastKeySwitch = event.expression.keyswitch.current.pitch;
       }
 
       if (lastKeySwitch && lastKeySwitch.temp) {
-        sendKeyswitch(lastKeySwitch.revert,  event.time.tick-1);
+        sendKeyswitch(lastKeySwitch.revert,  on-1);
         lastKeySwitch = undefined;
       }
 
       if (event.expression.dynamics && event.expression.dynamics !== prevDynamics) {
-        sendCC(1, event.expression.dynamics, event.time.tick - 1, 'dynamics'); //INSTRUMENT SPECIFIC
+        sendCC(1, event.expression.dynamics, on - 1, 'dynamics'); //INSTRUMENT SPECIFIC
       }
 
       if (event.expression.pitchbend && event.expression.pitchbend !== prevPitchbend) {
-        sendPitchbend(event.expression.pitchbend, event.time.tick - 1); //INSTRUMENT SPECIFIC
+        sendPitchbend(event.expression.pitchbend, on - 1); 
       }
 
 

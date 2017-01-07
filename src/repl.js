@@ -12,14 +12,16 @@ var config = {};
 
 var rules = {
  // 'part1': '{staccato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e//^',
- //'part2': '127=L {legato} 1:12,cD~EF~GA-B {legato} C//^b~C//^',
+ //'part2': '127=L {legato} 1:12,cDEFGA-B {legato} C//^b~C//^',
 //  'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
  // 'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
- // 'part1': `90=L {default} 12,1:c_D E_F {staccato} Gfed {default} c/////^`,
+//  'part1': `90=L {default} 12,1:c_D E_F {staccato} >Gfed {default} c/////^`,
  // 'part2': `{pizzicato} 2:24,CCCCC`,
  // 'part3':''
- part1: '60=VB {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
- part2:'',
+ part2: '',
+ //part1: '50=VB 127=L {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
+ part1: '50=VB 127=L {spiccato} 48,1:c >c {legato} 24, cD EF ed {spiccato} 48,  >c >c c c >c',
+ //part2:'',
  part3:''
  //part2:'',
 // part3:''

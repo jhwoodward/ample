@@ -127,8 +127,11 @@ function getKeyswitch(score, start) {
     cursor++;
   }
 
+  var noteSuffix = accidental < 0 ? 'b': accidental > 0 ? '#' : '';
+
   return {
     pitch: getPitch(note, octave, accidental),
+    char: note + noteSuffix,
     length: cursor - start,
     temp: temp
   };
@@ -708,7 +711,7 @@ function send(player, conductor) {
         legato: false,
         staccato: false,
         glissando: false,
-        pizzicatio: false
+        pizzicato: false
       }
     },
     pitch: {
@@ -769,19 +772,12 @@ function send(player, conductor) {
       setPitch(state.parser, state.pitch, state.key);
       fitToScale(state.parser, state.pitch, state.key);
 
-    //  log.push('char: ' + state.parser.char);
-    //  log.push(' -> pitch: ' + state.pitch.value);
-   //   log.push('\n');
-
-   
       var event = {
         noteon: true,
         time: _.merge({}, state.time),
         pitch: _.merge({}, state.pitch),
         expression: _.merge({}, state.expression)
       }
-      console.log('ks',event.expression.keyswitch.current);
-
 
       parsed.push(event);
     }
@@ -809,176 +805,189 @@ function send(player, conductor) {
 
   console.log(log.join(''));
 
-    var lastKeySwitch;
+  var lastKeySwitch;
+  var legatoTransition = 7;
 
   parsed.forEach(function (event, i) {
 
     var next = i < parsed.length ? parsed[i + 1] : undefined;
     var prev = i > 0 ? parsed[i - 1] : undefined;
 
-console.log('ksp',event.expression.keyswitch.current);
 
     if (event.noteon) {
-      // console.log(JSON.stringify(event.pitch, null, 2));
 
-      if (event.expression.keyswitch.current && lastKeySwitch !== event.expression.keyswitch.current.pitch ) {
-        console.log('keyswitch',event.expression.keyswitch.current);
-         sendKeyswitch(event.expression.keyswitch.current.pitch, event.time.tick-1);
+      var on = event.time.tick;
+      var legato = event.expression.note.legato || (prev && prev.expression.phrase.legato && event.expression.phrase.legato );
+      var staccato = event.expression.note.staccato || event.expression.phrase.staccato;
+      var prevDynamics = prev && prev.noteon ? prev.expression.dynamics: undefined;
+      var prevGlissando = prev && prev.noteon ? prev.expression.note.glissando: undefined;
+      var prevPitchbend = prev && prev.noteon ? prev.expression.pitchbend: undefined;
+
+      if (legato) {
+        on -= legatoTransition; // move note on back to compensate for legato transition
+      }
+
+      if (event.expression.keyswitch.current && 
+        lastKeySwitch !== event.expression.keyswitch.current.pitch ) {
+        var kson = event.time.tick-1;
+        if (legato) {
+          kson -=legatoTransition;
+        }
+         sendKeyswitch(
+            event.expression.keyswitch.current.pitch,
+            event.expression.keyswitch.current.char,
+            kson);
          lastKeySwitch = event.expression.keyswitch.current.pitch;
       }
-      
+
+      if (lastKeySwitch && lastKeySwitch.temp) {
+        sendKeyswitch(lastKeySwitch.revert,  event.time.tick-1);
+        lastKeySwitch = undefined;
+      }
+
+      if (event.expression.dynamics && event.expression.dynamics !== prevDynamics) {
+        sendCC(1, event.expression.dynamics, event.time.tick - 1, 'dynamics'); //INSTRUMENT SPECIFIC
+      }
+
+      if (event.expression.pitchbend && event.expression.pitchbend !== prevPitchbend) {
+        sendPitchbend(event.expression.pitchbend, event.time.tick - 1); //INSTRUMENT SPECIFIC
+      }
+
+
+      if (event.expression.note.glissando && !prevGlissando) {
+        sendPitchbend(0, on - 1, 'glissando'); //INSTRUMENT SPECIFIC
+      } else if (prevGlissando) {
+        sendPitchbend(8192, on - 1,' glissando off'); 
+      }
+
+      var info = [];
+
+      if (legato) {
+        info.push('legato');
+      }
+      if (staccato) {
+        info.push('staccato');
+      }
+      if (event.expression.note.pizzicato) {
+        info.push('pizzicato');
+      }
+      if (event.expression.note.spiccato) {
+        info.push('spiccato');
+      }
+      if (event.expression.note.accent) {
+        info.push('accent');
+      }
+      if (event.expression.note.glissando) {
+        info.push('glissando');
+      }
+      info = info.length > 1 ? info.join(', '): info;
+
+     
       if (prev && prev.noteon) {
+
+        var off;
+
+        if (legato) {
+          off = event.time.tick + 5; // legato slight overlap
+        } else {
+          off = event.time.tick - 5; // default slightly detached
+          /*
+          var prevLegato = prev.expression.note.legato || prev.expression.phrase.legato;
+          if (prevLegato) {
+             off = event.time.tick - 5;// - legatoTransition; //default slightly detached
+          } else {
+             off = event.time.tick - 5; //default slightly detached
+          }     
+          */
+        }
+
         sendNoteOff(
-          event.time.tick - 5,
-          prev.pitch.value)
+          off,
+          prev.pitch.value,
+          prev.pitch.char)
       }
 
       sendNoteOn(
-        event.time.tick,
+        on,
         event.pitch.value,
-        event.expression.velocity.value);
+        event.expression.velocity.value, 
+        event.pitch.char,
+        info);
     }
 
     if (event.noteoff) {
       sendNoteOff(
         event.time.tick,
-        prev.pitch.value);
+        prev.pitch.value,
+        prev.pitch.char);
     }
-
 
   });
 
-  function sendNote(note) {
-
-    if (note && !note.sent) {
-
-      if (note.slur) {
-        if (!note.lastNoteSlur) {
-          if (note.previous && note.previous.legato) {
-            sendPitch(0, note.position - 11); //bring position forward slightly to compensate for legato transition
-          } else {
-            sendPitch(0, note.position - 1);
-          }
-        }
-      } else {
-        if (note.previous && note.previous.legato) {
-          sendPitch(8191, note.position - 11); //bring position forward slightly to compensate for legato transition
-        } else {
-          sendPitch(8191, note.position - 1);
-        }
-      }
-
-      var on = note.position;
-      var duration = note.duration - 5; //default slightly detached
-
-
-      if (note.legato) {
-        duration = note.duration + 1; //allow overlap to trigger legato transitions
-      }//TODO: SHOULD ONLY BE DONE IF NEXT NOTE IS ALSO LEGATO?
-
-      if (note.staccato) {
-        duration = note.duration / 2;
-      }
-
-      if (note.legato &&
-        (note.previous && //is the previous note one that can be transitioned to?
-          !note.previous.accent
-          && !note.previous.staccato
-          && !note.previous.pizzicato)
-      ) {
-        on -= 10; //bring position forward slightly to compensate for legato transition
-
-
-        duration += 10
-      }
-      /*
-          if (note.previous && note.previosu.legato){
-            on -= 10; //bring position forward slightly to compensate for legato transition
-            
-            
-            duration+=10
-          }
-      */
-      var off = on + duration;
-
-      messages.push({
-        type: 'noteon',
-        pitch: note.pitch,
-        velocity: note.velocity,
-        tick: on,
-        channel: player.channel
-      });
-
-      messages.push({
-        type: 'noteoff',
-        pitch: note.pitch,
-        tick: off,
-        channel: player.channel
-      });
-
-
-      note.sent = true;
-
-
-      if (tempKeySwitch) {
-        sendKeyswitch(tempKeySwitch.revert, tickCount + 1);
-        tempKeySwitch = undefined;
-      }
-    }
-  }
-
-  function sendNoteOn(tick, pitch, velocity) {
+  function sendNoteOn(tick, pitch, velocity, char, info) {
     messages.push({
       type: 'noteon',
       pitch: pitch,
       velocity: velocity,
       tick: tick,
-      channel: player.channel
+      channel: player.channel,
+      char: char,
+      info: info
     });
   }
 
-  function sendNoteOff(tick, pitch) {
+  function sendNoteOff(tick, pitch, char, info) {
     messages.push({
       type: 'noteoff',
       pitch: pitch,
       tick: tick,
-      channel: player.channel
+      channel: player.channel,
+      char: char,
+      info: info
     });
   }
 
-  function sendCC(number, value, position) {
+  function sendCC(number, value, position, info) {
     messages.push({
       type: 'cc',
       controller: number,
       value: value,
       tick: position || tickCount,
-      channel: player.channel
+      channel: player.channel,
+      info: info
     });
   }
 
-  function sendPitch(value, position) {
+  function sendPitchbend(value, position, info) {
     messages.push({
       type: 'pitch',
       value: value,
       tick: position || tickCount,
-      channel: player.channel
+      channel: player.channel,
+      info: info
     });
   }
 
-  function sendKeyswitch(pitch, position) {
+  function sendKeyswitch(pitch, char, position, info) {
 
     messages.push({
       type: 'noteon',
       pitch: pitch,
       velocity: 64,
       tick: position,
-      channel: player.channel
+      channel: player.channel,
+      info: info,
+      char,
+      keyswitch: true
     });
     messages.push({
       type: 'noteoff',
       pitch: pitch,
       tick: position + 1,
-      channel: player.channel
+      channel: player.channel,
+      info: info,
+      char,
+      keyswitch: true
     });
 
 

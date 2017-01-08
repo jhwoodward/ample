@@ -9,8 +9,13 @@ var annotations = {
     spic: '[-3:D]',
     pizzicato: '[-3:E]',
     pizz: '[-3:E]',
-    accent: '[-3:D] 120=V',
+    accent: '120=V',
     glissando: '0=P'
+  },
+  cinebrass: { //MIDI CC MAP setting
+    default:'20=C3 40=VB',
+    legato: '20=C3',
+    staccato: '50=C3',
   }
 };
 

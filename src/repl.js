@@ -10,38 +10,63 @@ var colors = require("colors");
 
 var config = {};
 
-var rules = {
-  'part1': '{staccato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e//^',
- 'part2': '127=L {legato} 1:12,cDEFGA-B {legato} C//^b~C//^',
-  'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^'
- // 'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
-//  'part1': `90=L {default} 12,1:c_D E_F {staccato} >Gfed {default} c/////^`,
- // 'part2': `{pizzicato} 2:24,CCCCC`,
- // 'part3':''
-// part2: '',
- //part1: '50=VB 127=L {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
-//// part1: '50=VB 127=L {spiccato} 48,1:c >c {legato} 24, cD EF ed {spiccato} 48,  >c >c c c >c',
- //part2:'',
-// part3:''
- //part2:'',
-// part3:''
+var triobroz = {
+  //  'part1': '{staccato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e/c/g/^',
+  'part2': '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
+  'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
+  // 'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
+  'part1': `12,1:c_D E_F {pizzicato} >Gf>ed {default} c/////^`,
+  // 'part2': `{pizzicato} 2:24,CCCCC`,
+  // 'part3':''
+  // part3: '',
+  //part1: '50=VB 127=L {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
+  //// part1: '50=VB 127=L {spiccato} 48,1:c >c {legato} 24, cD EF ed {spiccato} 48,  >c >c c c >c',
+  //part2:'',
+  // part3:''
+  //part2:'',
+  // part3:''
+  annotations: annotations.triobroz,
+  config: {
+    legatoTransition: 7,
+    defaults: {
+      dynamics: 90
+    }
+  }
 };
+
+var cinebrass = { 
+  'part1': `48,1: cDEF {staccato} Gfed {legato} c////^`,
+  annotations: annotations.cinebrass,
+  config: {
+    defaults: {
+      legatoTransition: 0,
+      velocityBase:40,
+      dynamics: 5,
+      detach: -5
+    }
+  }
+};
+
+var rules = cinebrass;
 
 var players = [
   {
     part: 'part1',
     channel: 0,
-    annotations: annotations.triobroz
+    annotations: rules.annotations,
+    config: rules.config
   },
   {
     part: 'part2',
     channel: 1,
-    annotations: annotations.triobroz
+    annotations: rules.annotations,
+    config: rules.config
   },
   {
     part: 'part3',
     channel: 2,
-    annotations: annotations.triobroz
+    annotations: rules.annotations,
+    config: rules.config
   },
 ];
 
@@ -79,17 +104,17 @@ function generate(cmd, callback) {
     config = JSON.parse(data);
     //build rules from config
     rules = {};
-    config.phrases.forEach(function(phrase) {
+    config.phrases.forEach(function (phrase) {
       rules[phrase.name] = phrase.content;
     });
-    config.sections.forEach(function(section) {
-      section.parts.forEach(function(part,i) {
+    config.sections.forEach(function (section) {
+      section.parts.forEach(function (part, i) {
         rules[part.name] = part.content;
-        rules[`player${i+1}`] = rules[`player${i+1}`] || '';
-        rules[`player${i+1}`] += `${loop(part.name, part.loop)}`;
+        rules[`player${i + 1}`] = rules[`player${i + 1}`] || '';
+        rules[`player${i + 1}`] += `${loop(part.name, part.loop)}`;
       });
     });
-  
+
     callback();
   }
 
@@ -97,18 +122,18 @@ function generate(cmd, callback) {
 
 function play(cmd, callback) {
   var player;
-   var args = cmd.replace('play ', '').split(' ');
-   var playerId = parseInt(args[0], 10) - 1;
+  var args = cmd.replace('play ', '').split(' ');
+  var playerId = parseInt(args[0], 10) - 1;
 
-   if (args.length > 1) {
-     var part = args[1];
-     player = Object.assign({},players[playerId]);
-     player.part = part;
-   } else {
-     player = players[playerId];
-   }
-   make({ name: 'repl', players: [player] }, rules).play();
-   callback('\n');
+  if (args.length > 1) {
+    var part = args[1];
+    player = Object.assign({}, players[playerId]);
+    player.part = part;
+  } else {
+    player = players[playerId];
+  }
+  make({ name: 'repl', players: [player] }, rules).play();
+  callback('\n');
 }
 
 function run(callback) {
@@ -119,11 +144,11 @@ function run(callback) {
 
 
 function use(cmd, callback) {
-   var rule = cmd.replace('use', '').trim();
+  var rule = cmd.replace('use', '').trim();
   if (rulePresets[rule]) {
     Object.assign(rules, rulePresets[rule]);
     //callback();
-    callback(JSON.stringify(rulePresets[rule],null,2).green);
+    callback(JSON.stringify(rulePresets[rule], null, 2).green);
   } else {
     callback(`No rule found called ${rule}`.red);
   }
@@ -136,12 +161,12 @@ function save(cmd, callback) {
   } else {
     if (fs.existsSync('./repl/' + filename + '.js')) {
       filename += '_' + new Date().getTime();
-    } 
+    }
     var req = `var make = require('../src/ample').make;\nvar utils = require('../src/utils');\nvar loop = utils.loop;\n\n`;
     var data = `var rules = ${JSON.stringify(rules, null, 2).replace(/\"/g, '\'')};\n\n`;
     var players = `var players = ${JSON.stringify(getPlayers(), null, 2).replace(/\"/g, '\'')};\n\n`;
     var make = `make({ name: '${filename}', players: players }, rules).play();\n`;
-    fs.writeFile('./repl/' + filename + '.config.json',JSON.stringify(config,null,2));
+    fs.writeFile('./repl/' + filename + '.config.json', JSON.stringify(config, null, 2));
     fs.writeFile('./repl/' + filename + '.js', req + data + players + make, function () {
       callback('Saved');
     });
@@ -169,7 +194,7 @@ function myEval(cmd, context, filename, callback) {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
       var results = make(cmd, rules).play();
-      var parts = results.map(function(result) { return result.part;});
+      var parts = results.map(function (result) { return result.part; });
       callback(parts);
     } else {
       callback();

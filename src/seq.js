@@ -81,6 +81,7 @@ var api = {
         }
 
         log += colors.green(pad(5,message.tick.toString())) + '  ';
+        log += colors.green(pad((message.channel+1).toString(),3));
         log += color(pad(name,10)) + '  ';
         log += color(pad(data.join('  '),14));
         if (message.info) log += color(message.info) + '  ';

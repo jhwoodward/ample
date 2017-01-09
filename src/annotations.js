@@ -1,9 +1,8 @@
 
 var annotations = {
   triobroz: {
-    default: '[-3:C] 8192=P',
     staccato: '[-3:+D]',
-    legato: '[-3:C] 8192=P',
+    legato: '[-3:C] 8192=P -7=ON',
     'legato-nonvib': '[-3:+C]',
     spiccato: '[-3:D]',
     spic: '[-3:D]',
@@ -12,10 +11,13 @@ var annotations = {
     accent: '120=V',
     glissando: '0=P'
   },
-  cinebrass: { //MIDI CC MAP setting
-    default:'20=C3 40=VB',
-    legato: '20=C3',
-    staccato: '50=C3',
+  cinebrass: { //VELOCITY MAP setting
+    legato: '20=C3 127=C64 -7=ON 5=OFF',
+    detached4: '20=C3 127=C64 -10=OFF',
+    staccato: '50=VB  0=C64',// /2=OFF ? harcoded for now
+    staccato8: '50=VB  0=C64',
+    staccato4: '100=VB  0=C64',
+    staccato2: '120=VB  0=C64',
   }
 };
 

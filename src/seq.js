@@ -8,7 +8,8 @@ var api = {
 
   send: function (messages) {
     var tick = -1;
-    setTimeout(onTick, 10);
+    var interval = 10;
+    setTimeout(onTick, interval);
 
     var space = '                                                   ';
 
@@ -101,7 +102,7 @@ var api = {
       });
 
       if (tick < maxTick) {
-        setTimeout(onTick, 10);
+        setTimeout(onTick, interval);
       } else {
          console.log(space.bgGreen);
       }

@@ -155,9 +155,15 @@ function parseChars(score, parser) {
   } else {
     parser.char3 = '';
   }
+  if (parser.cursor < score.length - 3) {
+    parser.char4 = score[parser.cursor + 3];
+  } else {
+    parser.char4 = '';
+  }
 
-  parser.char2 = parser.char + parser.char2;
-  parser.char3 = parser.char2 + parser.char3;
+  parser.char2 = (parser.char + parser.char2).trim();
+  parser.char3 = (parser.char2 + parser.char3).trim();
+  parser.char4 = (parser.char3 + parser.char4).trim();
 
   return parser;
 }
@@ -271,65 +277,17 @@ function isKeyswitch(score, parser, time, expression) {
 
 }
 
-function isAnnotation(score, parser, phrase) {
+function isAnnotation(score, parser, phrase, annotations) {
   if (matchStart(parser.char)) {
-    var annotation = getAnnotation(score, parser.cursor);
 
-    switch (true) {
-      case annotation.value.indexOf('legato') === 0:
-        phrase.legato = true;
-        phrase.staccato = false;
-        phrase.default = false;
-        phrase.pizzicato = false;
-        phrase.spiccato = false;
-        break;
-      case annotation.value.indexOf('staccato') === 0:
-        phrase.staccato = true;
-        phrase.legato = false;
-        phrase.glissando = false;
-        phrase.pizzicato = false;
-        phrase.default = false;
-        phrase.spiccato = false;
-        break;
-      case annotation.value.indexOf('pizzicato') === 0:
-        phrase.legato = false;
-        phrase.pizzicato = true;
-        phrase.glissando = false;
-        phrase.default = false;
-        phrase.spiccato = false;
-        break;
-      case annotation.value.indexOf('spiccato') === 0:
-        phrase.legato = false;
-        phrase.glissando = false;
-        phrase.default = false;
-        phrase.pizzicato = false;
-        phrase.spiccato = true;
-        break;
-      case annotation.value.indexOf('glissando') === 0:
-        phrase.glissando = true;
-        phrase.staccato = false;
-        phrase.default = false;
-        phrase.pizzicato = false;
-        phrase.spiccato = false;
-        break;
-      case annotation.value.indexOf('default') === 0:
-        phrase.default = true;
-        break;
-    }
+    var annotation = getAnnotation(score, parser.cursor);
+    phrase.name = annotation.name;
+    console.log(phrase.name);
+    phrase.expression = annotations[phrase.name].expression;
+    phrase.legato = phrase.name.indexOf('legato') === 0;
+    phrase.staccato = phrase.name.indexOf('staccato') === 0;
     parser.cursor += annotation.length;
 
-    phrase.annotations = [];
-    for (var key in phrase) {
-      if (key !== 'annotations' && phrase[key]) {
-        phrase.annotations.push(key);
-      }
-    }
-
-    /*
-        if (player.annotations[annotation.value]) {
-          player.score = splice(player.score, parser.cursor, player.annotations[annotation.value]);
-        }
-    */
     return true;
   }
 
@@ -347,7 +305,7 @@ function isAnnotation(score, parser, phrase) {
       cursor++;
     }
     return {
-      value: annotation.trim(),
+      name: annotation.trim(),
       length: cursor - start
     };
   }
@@ -376,7 +334,7 @@ function isTempo(parser, time) {
 
 function isVelocity(parser, expression) {
   if (matchBase(parser.char3)) {
-    expression.velocityBase = parseInt(parser.numbers.join(''), 10);
+    expression.phrase.velocity = parseInt(parser.numbers.join(''), 10);
     parser.numbers = [];
     parser.cursor += 3;
     return true;
@@ -418,12 +376,17 @@ function isPitchbend(parser, expression) {
 function isController(parser, expression) {
   if (!match(parser.char2)) return false;
 
-  var number = parseInt(parser.char3[2], 10);//will need to extend to allow for >9
+  var cc = parseInt(parser.char3[2], 10);//will need to extend to allow for >9
+  parser.cursor += 3;
+  if (parser.char4.length === 4) {
+    cc = parseInt(parser.char4[2] + parser.char4[3], 10);
+    parser.cursor += 1;
+  }
   var value = parseInt(parser.numbers.join(''), 10);
 
-  expression.controller[number] = value;
+  expression.controller[cc] = value;
   parser.numbers = [];
-  parser.cursor += 3;
+
   return true;
 
   function match(chars) {
@@ -561,7 +524,7 @@ function setPitch(parser, pitch, key) {
   }
 }
 
-function isAccidental(parser, pitch) {
+function isAccidentalOrNumeric(parser, pitch) {
   if (isSharp(parser.char)) {
     pitch.accidental++;
     parser.cursor++;
@@ -569,6 +532,7 @@ function isAccidental(parser, pitch) {
   }
 
   if (isFlat(parser.char)) {
+    parser.numbers.push(parser.char);//also represents negative number
     pitch.accidental--;
     parser.cursor++;
     return true;
@@ -580,17 +544,16 @@ function isAccidental(parser, pitch) {
     return true;
   }
 
-
-}
-
-function isNumeric(parser) {
-  if (!isNaN(parser.char) || parser.char === '-') {
+  if (!isNaN(parser.char)) {
     parser.numbers.push(parser.char);
     parser.cursor++;
     return true;
   }
 
+
 }
+
+
 
 
 function isTranspose(parser, pitch) {
@@ -618,58 +581,34 @@ function isBeatstep(parser, time) {
   }
 }
 
-function isArticulation(parser, expression) {
+function isArticulation(parser, note, annotations) {
 
-  var found = false;
+  var articulation;
   if (isGlissando(parser.char)) {
-    expression.note.glissando = true;
-    found = true;
+    articulation = { name: 'glissando', expression: annotations.glissando.expression };
   }
 
   if (isLegato(parser.char)) {
-    expression.note.legato = true;
-    found = true;
-    /*
-    if (player.annotations.legato) {
-      player.score = splice(player.score, parser.cursor + 1, player.annotations.legato);
-    }
-    */
+    articulation = { name: 'legato', after: true, expression: annotations.legato.expression };
+    note.legato = true;
   }
 
   if (isStaccato(parser.char)) {
-    expression.note.staccato = true;
-    found = true;
+    articulation = { name: 'staccato', after: true, expression: annotations.staccato.expression };
+    note.staccato = true;
   }
 
   if (isAccent(parser.char)) {
-    expression.note.accent = true;
-    found = true;
-    /*
-    if (player.annotations.accent) {
-      player.score = splice(player.score, parser.cursor + 1, player.annotations.accent);
-    }
-   
-     else { //default accent
-      expression.velocity.value += expression.velocity.step;
-    }
-     */
-
+    articulation = { name: 'accent', expression: annotations.accent.expression };
   }
 
-  expression.note.articulations = [];
-  for (var key in expression.note) {
-    if (key !== 'articulations' && expression.note[key]) {
-      expression.note.articulations.push(key);
-    }
-  }
-
-  if (found) {
+  if (articulation) {
+    note.articulations.push(articulation);
     parser.cursor++;
     return true;
   } else {
     return false;
   }
-
 
 }
 
@@ -693,7 +632,29 @@ function isOctave(parser, pitch) {
   }
 }
 
-function parse(score, conductor, defaults) {
+function isOnOffset(parser, expression) {
+
+  if (parser.char3 === '=ON') {
+    if (parser.numbers.length) {
+      expression.on = parseInt(parser.numbers.join(''), 10);
+      console.log('xon', expression.on);
+      parser.numbers = [];
+    }
+    parser.cursor += 3;
+    return true;
+  }
+
+  if (parser.char4 === '=OFF') {
+    if (parser.numbers.length) {
+      expression.off = parseInt(parser.numbers.join(''), 10);
+      parser.numbers = [];
+    }
+    parser.cursor += 4;
+    return true;
+  }
+}
+
+function parse(score, conductor, annotations, defaultExpression) {
   conductor = conductor || {};
   var messages = [];
   var parsed = [];
@@ -718,25 +679,23 @@ function parse(score, conductor, defaults) {
       scale: []
     },
     expression: {
-      dynamics: defaults.dynamics,
+      dynamics: defaultExpression.dynamics,
+      pitchbend: defaultExpression.pitchbend,
+      velocity: defaultExpression.velocity,
       controller: {},
-      pitchbend: defaults.pitchbend,
-      velocity: defaults.velocityBase,
-      velocityBase: defaults.velocityBase,
-      velocityStep: defaults.velocityStep,
       keyswitch: undefined,
+      on: 0, //adjust noteon time in ticks
+      off: 0, //adjust noteoff time in ticks
       note: {
+        articulations: [],
         legato: false,
-        staccato: false,
-        glissando: false,//=slur
-        pizzicato: false,
-        accent: false
+        staccato: false
       },
       phrase: {
+        name: '',
+        expression: defaultExpression,
         legato: false,
-        staccato: false,
-        glissando: false,
-        pizzicato: false
+        staccato: false
       }
     },
     pitch: {
@@ -762,21 +721,21 @@ function parse(score, conductor, defaults) {
     if (ignore(score, state.parser)) continue;
 
     parseChars(score, state.parser);
-
+    if (isOnOffset(state.parser, state.expression)) continue;
     if (isKeyScale(state.parser, state.key)) continue;
     if (isKeyswitch(score, state.parser, state.time, state.expression)) continue;
-    if (isAnnotation(score, state.parser, state.expression.phrase)) continue;
+    if (isAnnotation(score, state.parser, state.expression.phrase, annotations)) continue;
     if (isTempo(state.parser, state.time)) continue;
     if (isVelocity(state.parser, state.expression)) continue;
     if (isPitchbend(state.parser, state.expression)) continue;
     if (isDynamics(state.parser, state.expression)) continue;
     if (isController(state.parser, state.expression)) continue;
-    if (isAccidental(state.parser, state.pitch)) continue;
-    if (isNumeric(state.parser)) continue;
+    if (isAccidentalOrNumeric(state.parser, state.pitch)) continue;
     if (isTranspose(state.parser)) continue;
     if (isBeatstep(state.parser, state.time)) continue;
-    if (isArticulation(state.parser, state.expression)) continue;
+    if (isArticulation(state.parser, state.expression.note, annotations)) continue;
     if (isOctave(state.parser, state.pitch)) continue;
+
 
     if (isRest(state.parser.char)) {
       parsed.push({
@@ -816,21 +775,21 @@ function parse(score, conductor, defaults) {
       state.pitch.natural = false
 
       //reset note articulations
-      state.expression.note.accent = false;
-      state.expression.note.pizzicato = false;
-      state.expression.note.staccato = false;
-      state.expression.note.glissando = false;
-      state.expression.note.legato = false;
       state.expression.note.articulations = [];
+      state.expression.note.staccato = false;
+      state.expression.note.legato = false;
 
+      //not sure if i need to reset these here
       //reset velocity
-      state.expression.velocity = state.expression.velocityBase;
+      state.expression.velocity = state.expression.phrase.expression.velocity;
 
       //reset keyswitch
       if (state.expression.keyswitch) {
         state.expression.lastKeyswitch = state.expression.keyswitch;
       }
-      state.expression.keyswitch = undefined;
+      state.expression.keyswitch = state.expression.phrase.expression.keyswitch;
+      state.expression.pitchbend = state.expression.phrase.expression.pitchbend;
+
     }
 
     state.parser.cursor++;
@@ -848,33 +807,18 @@ function parse(score, conductor, defaults) {
 
 }
 
+
 function generateMessages(player, parsed) {
 
   var lastKeySwitch;
   var messages = [];
-  var defaults = player.config.defaults;
-  var phrase = _.merge({}, defaults);
-
-  var expressions = {
-    phrase: ['legato', 'spiccato', 'staccato', 'pizzicato', 'default'],
-    preNote: ['glissando', 'spiccato', 'pizzicato', 'accent'],
-    postNote: ['staccato', 'legato']
-  }
-
-  sendPitchbend(0, phrase.pitchbend, 'default');
-  if (phrase.keyswitch) {
-    sendKeyswitch(0, phrase.keyswitch.pitch, phrase.keyswitch.char, 'default');
-  }
-  sendCC(0, 1, phrase.dynamics, 'default'); //INSTRUMENT SPECIFIC
-  for (var key in phrase.controller) {
-    sendCC(0, parseInt(key, 10), phrase.controller[key], 'default');
-  }
-
+  setDefaultExpression(player);
 
   parsed.forEach(function (event, i) {
+
     var next = i < parsed.length ? parsed[i + 1] : undefined;
     var prev = i > 0 ? parsed[i - 1] : undefined;
-
+    var info = [];
     /*
     note.fittedToScale = note.pitchBeforeFit !== note.pitch;
     if (note.fittedToScale) {
@@ -887,85 +831,99 @@ function generateMessages(player, parsed) {
 
       event.on = event.time.tick;
       event.legato = event.expression.note.legato || (prev && prev.noteon && prev.expression.phrase.legato && event.expression.phrase.legato);
-      
-      if (event.legato) {
-        event.on -= defaults.legatoTransition; // move note on back to compensate for legato transition
-      }
-      
       event.staccato = event.expression.note.staccato || (prev && prev.noteon && prev.expression.phrase.staccato && event.expression.phrase.staccato);
-      var prevDynamics = prev && prev.noteon ? prev.expression.dynamics : defaults.dynamics;
-      var prevPitchbend = prev && prev.noteon ? prev.expression.pitchbend : defaults.pitchbend;
-      var prevVelocity = prev && prev.noteon ? prev.expression.velocity : defaults.velocity;
 
-      var info = [];
+      var phrase = event.expression.phrase.expression;
+      var phraseName = event.expression.phrase.name;
+      var prevDynamics = prev && prev.noteon ? prev.expression.dynamics : phrase.dynamics;
+      var prevPitchbend = prev && prev.noteon ? prev.expression.pitchbend : phrase.pitchbend;
+      var prevVelocity = prev && prev.noteon ? prev.expression.velocity : phrase.velocity;
 
-      event.expression.pitchbend = phrase.pitchbend;
-      event.expression.velocity = phrase.velocity;
+      //   console.log(phrase,'phrase ' + phraseName);
 
-      expressions.phrase.forEach(function (exp) {
-        if (player.annotations[exp] &&
-          event.expression.phrase[exp] &&
-          (!prev || (prev && prev.noteon && !prev.expression.phrase[exp]))) {
+      //    var newAnnotation = event.expression.phrase.annotation && (!prev || event.expression.phrase.annotation !== prev.expression.phrase.annotation);
 
-          phrase = _.merge(defaults, player.annotations[exp].state.expression);
+      //   if (newAnnotation) {
+      //     phrase = event.expression.phrase;
+      if (phrase.keyswitch) {
+        event.expression.keyswitch = phrase.keyswitch;
+        info.push({ keyswitch: true, for: phraseName, phrase: true });
+      }
+      if (phrase.pitchbend !== prevPitchbend) {
+        event.expression.pitchbend = phrase.pitchbend;
+        info.push({ pitchbend: true, for: phraseName, phrase: true });
+      }
 
-          if (phrase.keyswitch) {
-            event.expression.keyswitch = phrase.keyswitch;
-            info.push({ keyswitch: true, for: exp, phrase: true });
+      if (Object.keys(phrase.controller).length) {
+        event.expression.controller = phrase.controller;
+        info.push({ cc: true, for: phraseName, phrase: true });
+      }
+
+      console.log('phrase on', phrase.on)
+      var newPhraseOn = phrase.on && (prev && prev.noteon && (prev.expression.phrase.expression.on === phrase.on));
+      if (newPhraseOn) {
+        event.on += phrase.on;
+        info.push({ on: true, note: true, for: `${event.expression.phrase.name} (${phrase.on})` });
+      }
+      console.log('new phrase on', newPhraseOn)
+
+      event.expression.note.articulations.forEach(function (articulation) {
+        if (articulation.after) {
+          if (articulation.expression.keyswitch) {
+            info.push({ keyswitch: true, for: articulation.name, note: true });
+            sendKeyswitch(
+              event.on - 1,
+              articulation.expression.keyswitch.pitch,
+              articulation.expression.keyswitch.char,
+              info);
+
+            lastKeySwitch = articulation.expression.keyswitch;
+            event.expression.keyswitch = undefined;
           }
-          if (phrase.velocity != prevVelocity && prev) {
-            event.expression.velocity = phrase.velocity;
-            info.push({ velocity: true, for: exp, phrase: true });
-          }
-          if (phrase.pitchbend != prevPitchbend) {
-            event.expression.pitchbend = phrase.pitchbend;
-            info.push({ pitchbend: true, for: exp, phrase: true });
+
+          if (articulation.expression.on) {
+            event.on += articulation.expression.on;
+            info.push({ on: true, for: `${articulation.name} (${articulation.expression.on})`, note: true });
           }
 
-          if (Object.keys(phrase.controller).length) {
-            event.expression.controller = phrase.controller;
-            info.push({ cc: true, for: exp, phrase: true });
+          if (articulation.expression.off) {
+            next.expression.off += articulation.expression.off;
+            info.push({ off: true, for: `${articulation.name} (${articulation.expression.on})`, note: true });
           }
 
+          if (Object.keys(articulation.expression.controller).length) {
+            info.push({ cc: true, for: articulation.name, phrase: true });
+            for (var key in articulation.expression.controller) {
+              sendCC(event.on - 1, parseInt(key, 10), articulation.expression.controller[key], info); //INSTRUM
+            }
+          }
+        }
+      });
+
+
+
+      event.expression.note.articulations.forEach(function (articulation) {
+
+        if (!articulation.after) {
+          if (articulation.expression.keyswitch) {
+            event.expression.keyswitch = articulation.expression.keyswitch;
+            info.push({ keyswitch: true, for: articulation.name, note: true });
+          }
+          if (articulation.expression.velocity != prevVelocity) {
+            event.expression.velocity = articulation.expression.velocity;
+            info.push({ velocity: true, for: articulation.name, note: true });
+          }
+          if (articulation.expression.pitchbend != prevPitchbend) {
+            event.expression.pitchbend = articulation.expression.pitchbend;
+            info.push({ pitchbend: true, for: articulation.name, note: true });
+          }
         }
       });
 
 
-      expressions.preNote.forEach(function (exp) {
-        if (player.annotations[exp] &&
-          event.expression.note[exp]) {
-
-          var e = player.annotations[exp].state.expression;
-
-          if (e.keyswitch) {
-            event.expression.keyswitch = e.keyswitch;
-            info.push({ keyswitch: true, for: exp, note: true });
-          }
-          if (e.velocity != prevVelocity) {
-            event.expression.velocity = e.velocity;
-            info.push({ velocity: true, for: exp, note: true });
-          }
-          if (e.pitchbend != prevPitchbend) {
-            event.expression.pitchbend = e.pitchbend;
-            info.push({ pitchbend: true, for: exp, note: true });
-          }
-        }
-      });
-
-      expressions.postNote.forEach(function (exp) {
-        if (player.annotations[exp] &&
-          next && next.noteon && next.expression.note[exp]) {
-
-          var e = player.annotations[exp].state.expression;
-          if (e.keyswitch) {
-            event.expression.keyswitch = e.keyswitch;
-            info.push({ keyswitch: true, for: exp, note: true });
-          }
-        }
-      });
 
       if (event.expression.keyswitch &&
-        lastKeySwitch !== event.expression.keyswitch.pitch) {
+        event.expression.lastKeySwitch.pitch !== event.expression.keyswitch.pitch) {
         sendKeyswitch(
           event.on - 1,
           event.expression.keyswitch.pitch,
@@ -988,8 +946,8 @@ function generateMessages(player, parsed) {
             ks.revert = revert;
           }
       */
-      if (lastKeySwitch && lastKeySwitch.temp) {
-        sendKeyswitch(lastKeySwitch.revert, event.on - 1);
+      if (event.expression.lastKeySwitch && event.expression.lastKeySwitch.temp) {
+        sendKeyswitch(event.expression.lastKeySwitch.revert, event.on - 1);
         lastKeySwitch = undefined;
       }
 
@@ -999,7 +957,7 @@ function generateMessages(player, parsed) {
 
       for (var key in event.expression.controller) {
         console.log(event.expression.controller, 'key');
-        sendCC(event.on - 1, parseInt(key, 10), event.expression.controller[key], info); //INSTRUMENT SPECIFIC
+        sendCC(event.on - 1, parseInt(key, 10), event.expression.controller[key], info);
       }
 
 
@@ -1008,68 +966,86 @@ function generateMessages(player, parsed) {
         sendPitchbend(event.on - 1, event.expression.pitchbend, info);
       }
 
-      /*
-            if (event.expression.note.glissando && !prevGlissando) {
-              sendPitchbend(0, on - 1, 'glissando'); //INSTRUMENT SPECIFIC
-            } else if (prevGlissando) {
-              sendPitchbend(8192, on - 1, ' glissando off');
-            }
-      */
-
-      var off, offInfo;
-
-      if (prev && prev.noteon) {
-
-        if (event.legato) {
-          off = event.time.tick + defaults.legato; // legato slight overlap
-          offInfo = 'legato';
-        } else if (event.staccato) {
-          off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
-          offInfo = 'staccato';
-        } else {
-          off = event.time.tick + defaults.detach; // default slightly detached
-          offInfo = 'detached';
-        }
-
-        sendNoteOff(
-          off,
-          prev.pitch.value,
-          prev.pitch.char,
-          offInfo)
-      }
-
       sendNoteOn(
         event.on,
         event.pitch.value,
         event.expression.velocity,
         event.pitch.char,
         info);
+
+      if (prev && prev.noteon) {
+
+        event.off = event.time.tick;
+        var shouldAdjustOff = phrase.off && (next && next.noteon && next.expression.phrase.expression.off===phrase.off);
+        if (shouldAdjustOff) {
+          event.off += phrase.off;
+          info.push({ off: true, for: `${event.expression.phrase.name} (${phrase.off})`, phrase: true });
+        }
+        //not sure about this
+        if (prev.expression.off) {
+          event.off += prev.expression.off;
+          info.push({ off: true, for: `$${event.expression.off}`, phrase: true });
+        }
+
+        if (event.staccato) {
+          event.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
+          info.push({ off: true, for: 'staccato' });
+        }
+
+        sendNoteOff(
+          event.off,
+          prev.pitch.value,
+          prev.pitch.char,
+          info);
+      }
+
     }
 
     if (event.noteoff && prev.noteon) {
 
       if (prev.staccato) {
-        off = event.time.tick - 10;
-        offInfo = 'staccato';
+        event.off = event.time.tick - 10;
+        info.push({ off: true, for: 'staccato' });
       } else {
-        off = event.time.tick; // default slightly detached
-        offInfo = 'full';
+        event.off = event.time.tick; // default slightly detached
+        info.push({ off: true, for: 'full' });
       }
       sendNoteOff(
-        off,
+        event.off,
         prev.pitch.value,
         prev.pitch.char,
-        offInfo);
+        info);
     }
 
   });
 
   return messages;
 
+
+  function setDefaultExpression(player) {
+
+    var phrase = _.merge({}, player.config.defaultExpression);
+    var info = 'default';
+
+    sendPitchbend(0, phrase.pitchbend, info);
+
+    if (phrase.keyswitch) {
+      sendKeyswitch(0, phrase.keyswitch.pitch, phrase.keyswitch.char, info);
+    }
+
+    sendCC(0, 1, phrase.dynamics, info);
+
+    for (var key in phrase.controller) {
+      sendCC(0, parseInt(key, 10), phrase.controller[key], info);
+    }
+
+    return phrase;
+  }
+
   function sendNoteOn(tick, pitch, velocity, char, info) {
 
     var noteInfo = info.filter(function (item) {
-      return item.velocity;
+      return item.velocity || item.on;
     }).map(function (item) { return item.for; })
 
     noteInfo = noteInfo.length > 1 ? noteInfo.join(', ') : noteInfo.length === 1 ? noteInfo[0] : ''
@@ -1086,13 +1062,21 @@ function generateMessages(player, parsed) {
   }
 
   function sendNoteOff(tick, pitch, char, info) {
+
+    var noteInfo = info.filter(function (item) {
+      return item.off;
+    }).map(function (item) { return item.for; })
+
+    noteInfo = noteInfo.length > 1 ? noteInfo.join(', ') : noteInfo.length === 1 ? noteInfo[0] : ''
+
+
     messages.push({
       type: 'noteoff',
       pitch: pitch,
       tick: tick,
       channel: player.channel,
       char: char,
-      info: info
+      info: noteInfo
     });
   }
 
@@ -1188,38 +1172,37 @@ function send(player, conductor) {
   conductor = _.merge({}, conductor); //copy object to avoid mutations splling out
   player = _.merge({}, player);
 
-
-
-
-
-
+  player.config = _.merge({
+    detach: -5,
+    legato: 5,
+    legatoTransition: 0,
+    defaultExpression: {
+      velocity: 80,
+      dynamics: 100,
+      pitchbend: 8192
+    }
+  },
+    player.config);
 
   var annotations = {};
   for (var key in player.annotations) {
-    var state = parse(player.annotations[key], null, player.config.defaults)[0];
+    var expression = parse(player.annotations[key], null, null, player.config.defaultExpression)[0].expression;
+    delete expression.note;
+    delete expression.phrase;
     annotations[key] = {
       raw: player.annotations[key],
-      state: state
+      expression: expression
     };
   }
   player.annotations = annotations;
+  /*
+    if (player.annotations.default) {
+      player.config.defaults = _.merge(player.config.defaults, player.annotations.default.state.expression);
+    }
+  */
 
-  if (player.annotations.default) {
-    player.config.defaults = _.merge(player.config.defaults, player.annotations.default.state.expression);
-  }
 
-  player.config.defaults = _.merge({
-    velocityBase: 80,
-    velocityStep: 10,
-    dynamics: 100,
-    pitchbend: 8192,
-    detach: -5,
-    legato: 5,
-    legatoTransition: 0
-  },
-    player.config.defaults);
-
-  var parsed = parse(player.score, conductor, player.config.defaults);
+  var parsed = parse(player.score, conductor, annotations, player.config.defaultExpression);
   return generateMessages(player, parsed);
 }
 

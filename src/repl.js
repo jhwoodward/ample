@@ -11,6 +11,10 @@ var colors = require("colors");
 var config = {};
 
 var triobroz = {
+  rules: {
+
+
+  
   //  'part1': '{staccato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e/c/g/^',
   'part2': '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
   'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
@@ -25,48 +29,49 @@ var triobroz = {
   // part3:''
   //part2:'',
   // part3:''
+  },
   annotations: annotations.triobroz,
   config: {
-    legatoTransition: 7,
-    defaults: {
+    defaultExpression: {
       dynamics: 90
     }
   }
 };
 
-var cinebrass = { 
-  'part1': `48,1: cDEF {staccato} Gfed {legato} c////^`,
+var cinebrass = {
+  rules: {
+    'part1': `24,2:{detached4} cDEF {legato} Gfed  c////^`
+  },
   annotations: annotations.cinebrass,
   config: {
-    defaults: {
-      legatoTransition: 0,
-      velocityBase:40,
-      dynamics: 5,
-      detach: -5
+    defaultExpression: {
+      velocity: 40,
+      dynamics: 10
     }
   }
 };
 
-var rules = cinebrass;
+var settings = cinebrass;
 
+var rules = settings.rules;
 var players = [
   {
     part: 'part1',
     channel: 0,
-    annotations: rules.annotations,
-    config: rules.config
+    annotations: settings.annotations,
+    config: settings.config
   },
   {
     part: 'part2',
     channel: 1,
-    annotations: rules.annotations,
-    config: rules.config
+    annotations: settings.annotations,
+    config: settings.config
   },
   {
     part: 'part3',
     channel: 2,
-    annotations: rules.annotations,
-    config: rules.config
+    annotations: settings.annotations,
+    config: settings.config
   },
 ];
 

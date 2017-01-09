@@ -40,7 +40,7 @@ var triobroz = {
 
 var cinebrass = {
   rules: {
-    'part1': `24,2:{detached4} cDEF {legato} Gfed  c////^`
+    'part1': `24,2:{legato} cDEF {staccato8} Gfed  {legato} cEdG-Bagfe////^`
   },
   annotations: annotations.cinebrass,
   config: {

@@ -282,7 +282,7 @@ function isAnnotation(score, parser, phrase, annotations) {
 
     var annotation = getAnnotation(score, parser.cursor);
     phrase.name = annotation.name;
-    console.log(phrase.name);
+    //  console.log(phrase.name);
     phrase.expression = annotations[phrase.name].expression;
     phrase.legato = phrase.name.indexOf('legato') === 0;
     phrase.staccato = phrase.name.indexOf('staccato') === 0;
@@ -335,6 +335,7 @@ function isTempo(parser, time) {
 function isVelocity(parser, expression) {
   if (matchBase(parser.char3)) {
     expression.phrase.velocity = parseInt(parser.numbers.join(''), 10);
+    expression.velocity = parseInt(parser.numbers.join(''), 10);
     parser.numbers = [];
     parser.cursor += 3;
     return true;
@@ -637,7 +638,7 @@ function isOnOffset(parser, expression) {
   if (parser.char3 === '=ON') {
     if (parser.numbers.length) {
       expression.on = parseInt(parser.numbers.join(''), 10);
-      console.log('xon', expression.on);
+      // console.log('xon', expression.on);
       parser.numbers = [];
     }
     parser.cursor += 3;
@@ -810,7 +811,6 @@ function parse(score, conductor, annotations, defaultExpression) {
 
 function generateMessages(player, parsed) {
 
-  var lastKeySwitch;
   var messages = [];
   setDefaultExpression(player);
 
@@ -833,104 +833,95 @@ function generateMessages(player, parsed) {
       event.legato = event.expression.note.legato || (prev && prev.noteon && prev.expression.phrase.legato && event.expression.phrase.legato);
       event.staccato = event.expression.note.staccato || (prev && prev.noteon && prev.expression.phrase.staccato && event.expression.phrase.staccato);
 
-      var phrase = event.expression.phrase.expression;
-      var phraseName = event.expression.phrase.name;
-      var prevDynamics = prev && prev.noteon ? prev.expression.dynamics : phrase.dynamics;
-      var prevPitchbend = prev && prev.noteon ? prev.expression.pitchbend : phrase.pitchbend;
-      var prevVelocity = prev && prev.noteon ? prev.expression.velocity : phrase.velocity;
-
-      //   console.log(phrase,'phrase ' + phraseName);
+      var pExp = event.expression.phrase.expression;
+      var pName = event.expression.phrase.name;
+      var exp = event.expression;
+      //   console.log(phrase,'phrase ' + pName);
 
       //    var newAnnotation = event.expression.phrase.annotation && (!prev || event.expression.phrase.annotation !== prev.expression.phrase.annotation);
 
       //   if (newAnnotation) {
       //     phrase = event.expression.phrase;
-      if (phrase.keyswitch) {
-        event.expression.keyswitch = phrase.keyswitch;
-        info.push({ keyswitch: true, for: phraseName, phrase: true });
-      }
-      if (phrase.pitchbend !== prevPitchbend) {
-        event.expression.pitchbend = phrase.pitchbend;
-        info.push({ pitchbend: true, for: phraseName, phrase: true });
-      }
 
-      if (Object.keys(phrase.controller).length) {
-        event.expression.controller = phrase.controller;
-        info.push({ cc: true, for: phraseName, phrase: true });
-      }
+      exp.keyswitch = pExp.keyswitch;
+      info.push({ keyswitch: true, for: pName, phrase: true });
 
-      console.log('phrase on', phrase.on)
-      var newPhraseOn = phrase.on && (prev && prev.noteon && (prev.expression.phrase.expression.on === phrase.on));
+      exp.pitchbend = pExp.pitchbend;
+      info.push({ pitchbend: true, for: pName, phrase: true });
+
+      exp.velocity = pExp.velocity;
+      info.push({ velocity: true, for: pName, phrase: true });
+
+      if (Object.keys(pExp.controller)) {
+        exp.controller = pExp.controller;
+        info.push({ cc: true, for: pName, phrase:true });
+      }
+    
+      //  console.log('phrase on', phrase.on)
+      var newPhraseOn = pExp.on && (prev && prev.noteon && (prev.expression.phrase.expression.on === pExp.on));
       if (newPhraseOn) {
-        event.on += phrase.on;
-        info.push({ on: true, note: true, for: `${event.expression.phrase.name} (${phrase.on})` });
+        event.on += pExp.on;
+        info.push({ on: true, note: true, for: `${pName} (${pExp.on})` });
       }
-      console.log('new phrase on', newPhraseOn)
+      //   console.log('new phrase on', newPhraseOn)
 
-      event.expression.note.articulations.forEach(function (articulation) {
-        if (articulation.after) {
-          if (articulation.expression.keyswitch) {
-            info.push({ keyswitch: true, for: articulation.name, note: true });
-            sendKeyswitch(
-              event.on - 1,
-              articulation.expression.keyswitch.pitch,
-              articulation.expression.keyswitch.char,
-              info);
+      var articulations = {
+        before: event.expression.note.articulations.filter(function (item) { return !item.after; }),
+        after: event.expression.note.articulations.filter(function (item) { return item.after; }),
+      }
 
-            lastKeySwitch = articulation.expression.keyswitch;
-            event.expression.keyswitch = undefined;
+      articulations.after.forEach(function (articulation) {
+
+        var aExp = articulation.expression;
+        var aName = articulation.name;
+        if (aExp.keyswitch) {
+          sendKeyswitch(
+            prev.on - 1,
+            e.keyswitch,
+            [{ keyswitch: true, for: aName, note: true }]);
+        }
+
+        if (aExp.on) {
+          event.on += aExp.on;
+          info.push({ on: true, for: `${aName} (${aExp.on})`, note: true });
+        }
+
+        if (aExp.off) {
+          event.off += aExp.off;
+          info.push({ off: true, for: `${aName} (${aExp.on})`, note: true });
+        }
+
+        if (Object.keys(aExp.controller).length) {
+          info.push({ cc: true, for: aName, phrase: true });
+          for (var key in aExp.controller) {
+            sendCC(event.on - 1, parseInt(key, 10), aExp.controller[key], info); //INSTRUM
           }
+        }
 
-          if (articulation.expression.on) {
-            event.on += articulation.expression.on;
-            info.push({ on: true, for: `${articulation.name} (${articulation.expression.on})`, note: true });
-          }
+      });
 
-          if (articulation.expression.off) {
-            next.expression.off += articulation.expression.off;
-            info.push({ off: true, for: `${articulation.name} (${articulation.expression.on})`, note: true });
-          }
+      articulations.before.forEach(function (articulation) {
 
-          if (Object.keys(articulation.expression.controller).length) {
-            info.push({ cc: true, for: articulation.name, phrase: true });
-            for (var key in articulation.expression.controller) {
-              sendCC(event.on - 1, parseInt(key, 10), articulation.expression.controller[key], info); //INSTRUM
-            }
-          }
+        var aExp = articulation.expression;
+        var aName = articulation.name;
+        if (aExp.keyswitch) {
+          exp.keyswitch = aExp.keyswitch;
+          info.push({ keyswitch: true, for: aName, note: true });
+        }
+        if (aExp.velocity != pExp.velocity) {
+          exp.velocity = aExp.velocity;
+          info.push({ velocity: true, for: aName, note: true });
+        }
+        if (aExp.pitchbend != prevPitchbend) {
+          exp.pitchbend = aExp.pitchbend;
+          info.push({ pitchbend: true, for: aName, note: true });
         }
       });
 
-
-
-      event.expression.note.articulations.forEach(function (articulation) {
-
-        if (!articulation.after) {
-          if (articulation.expression.keyswitch) {
-            event.expression.keyswitch = articulation.expression.keyswitch;
-            info.push({ keyswitch: true, for: articulation.name, note: true });
-          }
-          if (articulation.expression.velocity != prevVelocity) {
-            event.expression.velocity = articulation.expression.velocity;
-            info.push({ velocity: true, for: articulation.name, note: true });
-          }
-          if (articulation.expression.pitchbend != prevPitchbend) {
-            event.expression.pitchbend = articulation.expression.pitchbend;
-            info.push({ pitchbend: true, for: articulation.name, note: true });
-          }
-        }
-      });
-
-
-
-      if (event.expression.keyswitch &&
-        event.expression.lastKeySwitch.pitch !== event.expression.keyswitch.pitch) {
-        sendKeyswitch(
-          event.on - 1,
-          event.expression.keyswitch.pitch,
-          event.expression.keyswitch.char,
-          info);
-        lastKeySwitch = event.expression.keyswitch.pitch;
-      }
+      sendKeyswitch(
+        event.on - 1,
+        exp.keyswitch,
+        info);
 
       /*
           
@@ -946,54 +937,50 @@ function generateMessages(player, parsed) {
             ks.revert = revert;
           }
       */
-      if (event.expression.lastKeySwitch && event.expression.lastKeySwitch.temp) {
-        sendKeyswitch(event.expression.lastKeySwitch.revert, event.on - 1);
+
+      //needs looking at
+      if (exp.lastKeySwitch && exp.lastKeySwitch.temp) {
+        sendKeyswitch(exp.lastKeySwitch.revert, event.on - 1);
         lastKeySwitch = undefined;
       }
 
-      if (event.expression.dynamics && event.expression.dynamics !== prevDynamics) {
-        sendCC(event.on - 1, 1, event.expression.dynamics, info); //INSTRUMENT SPECIFIC
+
+      sendCC(event.on - 1, 1, exp.dynamics, info); //INSTRUMENT SPECIFIC
+
+      for (var key in exp.controller) {
+        sendCC(event.on - 1, parseInt(key, 10), exp.controller[key], info);
       }
 
-      for (var key in event.expression.controller) {
-        console.log(event.expression.controller, 'key');
-        sendCC(event.on - 1, parseInt(key, 10), event.expression.controller[key], info);
-      }
-
-
-      if (event.expression.pitchbend !== prevPitchbend) {
-        console.log('send pitchbend');
-        sendPitchbend(event.on - 1, event.expression.pitchbend, info);
-      }
+      sendPitchbend(event.on - 1, exp.pitchbend, info);
 
       sendNoteOn(
         event.on,
         event.pitch.value,
-        event.expression.velocity,
+        exp.velocity,
         event.pitch.char,
         info);
 
       if (prev && prev.noteon) {
 
-        event.off = event.time.tick;
-        var shouldAdjustOff = phrase.off && (next && next.noteon && next.expression.phrase.expression.off===phrase.off);
+        prev.off = event.time.tick;
+        var shouldAdjustOff = pExp.off && (next && next.noteon && next.expression.phrase.expression.off === pExp.off);
         if (shouldAdjustOff) {
-          event.off += phrase.off;
-          info.push({ off: true, for: `${event.expression.phrase.name} (${phrase.off})`, phrase: true });
+          prev.off += pExp.off;
+          info.push({ off: true, for: `${event.expression.phrase.name} (${pExp.off})`, phrase: true });
         }
         //not sure about this
-        if (prev.expression.off) {
-          event.off += prev.expression.off;
-          info.push({ off: true, for: `$${event.expression.off}`, phrase: true });
+        if (exp.off) {
+          prev.off += exp.off;
+          info.push({ off: true, for: `$${exp.off}`, phrase: true });
         }
 
         if (event.staccato) {
-          event.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
-          info.push({ off: true, for: 'staccato' });
+          prev.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
+          info.push({ off: true, for: 'staccato (half)' });
         }
 
         sendNoteOff(
-          event.off,
+          prev.off,
           prev.pitch.value,
           prev.pitch.char,
           info);
@@ -1030,7 +1017,7 @@ function generateMessages(player, parsed) {
     sendPitchbend(0, phrase.pitchbend, info);
 
     if (phrase.keyswitch) {
-      sendKeyswitch(0, phrase.keyswitch.pitch, phrase.keyswitch.char, info);
+      sendKeyswitch(0, phrase.keyswitch, info);
     }
 
     sendCC(0, 1, phrase.dynamics, info);
@@ -1069,7 +1056,6 @@ function generateMessages(player, parsed) {
 
     noteInfo = noteInfo.length > 1 ? noteInfo.join(', ') : noteInfo.length === 1 ? noteInfo[0] : ''
 
-
     messages.push({
       type: 'noteoff',
       pitch: pitch,
@@ -1080,9 +1066,25 @@ function generateMessages(player, parsed) {
     });
   }
 
+
+
   function sendCC(tick, number, value, info) {
 
-    var ccInfo
+    var lastValue = messages.filter(function (m) {
+      return m.channel === player.channel &&
+        m.controller === number &&
+        m.type === 'cc';
+    }).reduce(function (acc, item) {
+      if (item.tick > acc.tick && item.tick <= tick) {
+        return item;
+      } else {
+        return acc;
+      }
+    }, { tick: -1 }).value;
+
+    if (value === lastValue) return;
+
+    var ccInfo;
     if (typeof info === 'string') {
       ccInfo = info;
     } else {
@@ -1101,9 +1103,26 @@ function generateMessages(player, parsed) {
       channel: player.channel,
       info: ccInfo
     });
+
+
   }
 
   function sendPitchbend(tick, value, info) {
+
+    var lastValue = messages.filter(function (m) {
+      return m.channel === player.channel &&
+        m.type === 'pitch';
+    }).reduce(function (acc, item) {
+      if (item.tick > acc.tick && item.tick <= tick) {
+        return item;
+      } else {
+        return acc;
+      }
+    }, { tick: -1 }).value;
+
+    console.log(lastValue,'last pb',tick);
+
+    if (value === lastValue) return;
 
     var pbInfo;
     if (typeof info === 'string') {
@@ -1112,11 +1131,8 @@ function generateMessages(player, parsed) {
       pbInfo = info.filter(function (item) {
         return item.pitchbend;
       }).map(function (item) { return item.for; });
-
       pbInfo = pbInfo.length > 1 ? pbInfo.join(', ') : pbInfo.length === 1 ? pbInfo[0] : '';
-
     }
-
     messages.push({
       type: 'pitch',
       value: value,
@@ -1124,9 +1140,28 @@ function generateMessages(player, parsed) {
       channel: player.channel,
       info: pbInfo
     });
+
   }
 
-  function sendKeyswitch(tick, pitch, char, info) {
+  function sendKeyswitch(tick, ks, info) {
+
+    if (!ks) return;
+    var pitch = ks.pitch;
+    var char = ks.char;
+
+    var lastValue = messages.filter(function (m) {
+      return m.channel === player.channel &&
+        m.type === 'noteon' &&
+        m.keyswitch;
+    }).reduce(function (acc, item) {
+      if (item.tick > acc.tick && item.tick <= tick) {
+        return item;
+      } else {
+        return acc;
+      }
+    }, { tick: -1 }).pitch;
+
+    if (pitch === lastValue) return;
 
     var ksInfo;
     if (typeof info === 'string') {
@@ -1159,6 +1194,8 @@ function generateMessages(player, parsed) {
       char,
       keyswitch: true
     });
+
+
 
 
   }

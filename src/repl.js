@@ -40,7 +40,11 @@ var triobroz = {
 
 var cinebrass = {
   rules: {
-    'part1': `24,2:{legato} cDEF {staccato8} Gfed  {legato} cEdG-Bagfe////^`
+    'part1': `24,2:{legato} cDEF {staccato8} Gfed  {legato} cEdG-Ba {staccato8} gf 
+    12,  eFGA 48, {legato} -B/a
+    12, {staccato8} a-BCD 127=L
+    48, {detached2} -E/ {detached4} dc-ba {staccato4} gf/^
+    `
   },
   annotations: annotations.cinebrass,
   config: {
@@ -51,7 +55,25 @@ var cinebrass = {
   }
 };
 
-var settings = cinebrass;
+
+var herringClarinet = {
+  rules: {
+    'part1': `24,2:  {legato} 20=C11  cDEF {staccato8} Gfed  {legato} 127=C11 cEdG-Ba {staccato8} gf 
+    12,  eFGA 48, {legato} -B/a
+    12, {staccato8} a-BCD 
+    48, {detached} -E/ {detached} dc-ba {staccato} gf/^
+    `
+  },
+  annotations: annotations.herringClarinet,
+  config: {
+    defaultExpression: {
+      velocity: 40,
+      dynamics: 10
+    }
+  }
+};
+
+var settings = herringClarinet;
 
 var rules = settings.rules;
 var players = [

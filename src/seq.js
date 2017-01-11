@@ -6,16 +6,16 @@ var pad = require('pad');
 
 var api = {
 
-  send: function (messages) {
+  send: function (events) {
     var tick = -1;
     var interval = 10;
     setTimeout(onTick, interval);
 
     var space = '                                                   ';
 
-    var maxTick = messages.reduce(function(acc, message) {
-      if (message.tick > acc) {
-        return message.tick;
+    var maxTick = events.reduce(function(acc, event) {
+      if (event.tick > acc) {
+        return event.tick;
       } else {
         return acc;
       }
@@ -23,8 +23,8 @@ var api = {
 
     var indexed = {};
     for (var i = 0; i <= maxTick; i++) {
-      indexed[i] = messages.filter(function (message) {
-        return message.tick === i;
+      indexed[i] = events.filter(function (event) {
+        return event.tick === i;
       });
     }
 
@@ -36,67 +36,68 @@ var api = {
          console.log(space.bgGreen);
       }
 
-      indexed[tick].forEach(function (message) {
+      indexed[tick].forEach(function (event) {
 
         var log = '';
         var data = [];
         var color;
 
-        var name = message.type;
+        var name = event.type;
 
-        switch (message.type) {
+        switch (event.type) {
           case 'noteon':
 
-            data.push(message.char);
-            data.push(`p${message.pitch}`);
+            data.push(event.char);
+            data.push(`p${event.pitch}`);
 
-            if (message.keyswitch) {
+            if (event.keyswitch) {
               name = 'keyswitch';
               color = colors.red;
             } else {
               color = colors.yellow;
-              data.push(`v${message.velocity}`);
+              data.push(`v${event.velocity}`);
             }
            
           
            
           break;
           case 'noteoff':
-           if (message.keyswitch) {
+           if (event.keyswitch) {
                name = 'ks off';
             }
             color = colors.grey;
-             data.push(message.char);
-            data.push(`p${message.pitch}`);
+            data.push(event.char);
+            data.push(`p${event.pitch}`);
+            data.push(`dur${event.duration}`);
           break;
           case 'pitch':
             color = colors.red;
-            data.push(message.value);
+            data.push(event.value);
           break;
           case 'cc':
             color = colors.red;
-            data.push(`cc${message.controller}`);
-            data.push(`${message.value}`);
+            data.push(`cc${event.controller}`);
+            data.push(`${event.value}`);
           break;
 
         }
 
-        log += colors.green(pad(5,message.tick.toString())) + '  ';
-        log += colors.green(pad((message.channel+1).toString(),3));
+        log += colors.green(pad(5,event.tick.toString())) + '  ';
+        log += colors.green(pad((event.channel+1).toString(),3));
         log += color(pad(name,10)) + '  ';
-        log += color(pad(data.join('  '),14));
-        if (message.info) log += color(message.info) + '  ';
+        log += color(pad(data.join('  '),15));
+        if (event.info) log += color(event.info) + '  ';
         console.log(log);
         
-        if (!message.sent) {
-          output.send(message.type, {
-            value: message.value,
-            controller: message.controller,
-            note: message.pitch,
-            velocity: message.velocity,
-            channel: message.channel
+        if (!event.sent) {
+          output.send(event.type, {
+            value: event.value,
+            controller: event.controller,
+            note: event.pitch,
+            velocity: event.velocity,
+            channel: event.channel
           });
-          message.sent = true;
+          event.sent = true;
         }
 
       });

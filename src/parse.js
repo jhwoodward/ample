@@ -303,10 +303,17 @@ function parseChars(score, parser) {
   } else {
     parser.char4 = '';
   }
+    
+  if (parser.cursor < score.length - 4) {
+    parser.char5 = score[parser.cursor + 4];
+  } else {
+    parser.char5 = '';
+  }
 
-  parser.char2 = (parser.char + parser.char2).trim();
-  parser.char3 = (parser.char2 + parser.char3).trim();
-  parser.char4 = (parser.char3 + parser.char4).trim();
+  parser.char2 = (parser.char + parser.char2);//.trim();
+  parser.char3 = (parser.char2 + parser.char3);//.trim();
+  parser.char4 = (parser.char3 + parser.char4);//.trim();
+  parser.char5 = (parser.char4 + parser.char5);//.trim();
 
   return parser;
 }

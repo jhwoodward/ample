@@ -47,7 +47,7 @@ function generateEvents(player, parsed) {
       for (var key in pExp.controller) {
         setCC(event.on - 1, 
           parseInt(key, 10), 
-          aExp.controller[key], 
+          pExp.controller[key], 
           {for: pName, phrase:true }); 
       }
 
@@ -88,8 +88,10 @@ function generateEvents(player, parsed) {
 
         if (Object.keys(aExp.controller).length) {
           for (var key in aExp.controller) {
-            setCC(event.on - 1, parseInt(key, 10), aExp.controller[key],
-            {for: aName, note: true }); 
+            setCC(event.on - 1, 
+              parseInt(key, 10), 
+              aExp.controller[key],
+              {for: aName, note: true }); 
           }
         }
 

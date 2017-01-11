@@ -21,10 +21,10 @@ var annotations = {
     staccato2: '120=VP  0=CP64',
   },
   herringClarinet: { //VELOCITY MAP setting
-    legato: '[-2:C] -7=ON 5=OFF',
+    legato: '[-2:C] -7=ON 5=OFF ',
     detached: '[-2:C] 0=ON -5=OFF',
     staccato: '[-2:D]  120=VP',// 0.5=LEN ? harcoded for now
-    staccato8: '[-2:D] 20=VP '
+    staccato8: '[-2:D] 20=VP 127=CP11'
   }
 };
 

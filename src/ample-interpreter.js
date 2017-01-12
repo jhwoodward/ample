@@ -21,8 +21,10 @@ function send(player, conductor) {
 
   var annotations = {};
   for (var key in player.annotations) {
-    var expression = parse(player.annotations[key], null, null, player.config.defaultExpression)[0].expression.phrase;
+    var expression = parse(player.annotations[key], null, null, player.config.defaultExpression)[0].expression.note;//evaluated against note expression
+    expression.name = key;
     console.log(key, player.annotations[key], expression);
+  
     annotations[key] = {
       raw: player.annotations[key],
       expression: expression

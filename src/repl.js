@@ -15,11 +15,11 @@ var triobroz = {
 
 
   
-  //  'part1': '{staccato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e/c/g/^',
+    'part1': '{legato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e/c/g/^',
   'part2': '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
   'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
   // 'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
-  'part1': `12,1:c_D E_F {pizzicato} >Gf>ed {default} c/////^`,
+ // 'part1': `12,1: {detached} c_D E_F {pizzicato} >Gf>ed {legato} c/////^`,
   // 'part2': `{pizzicato} 2:24,CCCCC`,
   // 'part3':''
   // part3: '',
@@ -73,7 +73,7 @@ var herringClarinet = {
   }
 };
 
-var settings = herringClarinet;
+var settings = triobroz;
 
 var rules = settings.rules;
 var players = [

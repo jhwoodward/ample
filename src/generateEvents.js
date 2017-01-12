@@ -18,18 +18,41 @@ function generateEvents(player, parsed) {
     note.fittedRepeat = note.fittedToScale && lastNote && note.pitch === lastNote.pitch;
   */
 
+    oninfo = [], offinfo = [];
+
+
+
     if (event.noteon) {
 
       event.on = event.time.tick;
-  //    event.legato = event.expression.note.legato || (prev && prev.noteon && prev.expression.phrase.legato && event.expression.phrase.legato);
-  //    event.staccato = event.expression.note.staccato || (prev && prev.noteon && prev.expression.phrase.staccato && event.expression.phrase.staccato);
-
       var pExp = event.expression.phrase;
       var pName = event.expression.phrase.name;
-
       var nExp = event.expression.note;//not yet impleneted - everything is thorugh artiulations currnetly
-    
-      console.log(pExp);
+
+      if (prev && prev.noteon) {
+        prev.off = event.time.tick;
+
+        if (pExp.off) {
+          var insidePhraseOff = pExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === pExp.off));
+          if (insidePhraseOff) {
+            prev.off = event.time.tick + pExp.off;
+            offinfo.push({ for: `${pName} (${pExp.off})`, note: true });
+          }
+        }
+
+      }
+
+  
+
+      if (pExp.on) {
+        var insidePhraseOn = prev && prev.noteon && (prev.expression.phrase.on === pExp.on);
+        if (insidePhraseOn) {
+          event.on = event.time.tick + pExp.on;
+          oninfo.push({ on: true, for: `${pName} (${pExp.on})`, phrase: true });
+        }
+      }
+
+
 
       setKeyswitch(
         event.on - 1,
@@ -37,70 +60,47 @@ function generateEvents(player, parsed) {
         { for: pName, phrase: true });
 
       event.velocity = pExp.velocity;
-      info.push({ velocity: true, for: `${pName} (${pExp.velocity})`, phrase:true });
-    
+      oninfo.push({ velocity: true, for: `${pName} (${pExp.velocity})`, phrase: true });
+
       setPitchbend(
-        event.on - 1, 
-        pExp.pitchbend, 
+        event.on - 1,
+        pExp.pitchbend,
         { for: pName, phrase: true });
 
       for (var key in pExp.controller) {
-        setCC(event.on - 1, 
-          parseInt(key, 10), 
-          pExp.controller[key], 
-          {for: pName, phrase:true }); 
+        setCC(event.on - 1,
+          parseInt(key, 10),
+          pExp.controller[key],
+          { for: pName, phrase: true });
       }
 
-    
-      //  console.log('phrase on', phrase.on)
-      var newPhraseOn = pExp.on && (prev && prev.noteon && (prev.expression.phrase.on === pExp.on));
-      if (newPhraseOn) {
-        event.on += pExp.on;
-        info.push({ on: true, for: `${pName} (${pExp.on})`, phrase:true });
-      }
-      //   console.log('new phrase on', newPhraseOn)
-
-      var articulations = {
-        before: event.expression.note.articulations.filter(function (item) { return !item.after; }),
-        after: event.expression.note.articulations.filter(function (item) { return item.after; }),
-      }
-
-      articulations.after.forEach(function (articulation) {
+      event.expression.note.articulations.forEach(function (articulation) {
 
         var aExp = articulation.expression;
         var aName = articulation.name;
-        if (aExp.keyswitch) {
-          setKeyswitch(
-            prev.on - 1,
-            e.keyswitch,
-            { for: aName, note: true});
-        }
 
         if (aExp.on) {
-          event.on += aExp.on;
-          info.push({ on: true, for: `${aName} (${aExp.on})`, note: true });
-        }
-
-        if (aExp.off) {
-          event.off += aExp.off;
-          info.push({ off: true, for: `${aName} (${aExp.on})`, note: true });
-        }
-
-        if (Object.keys(aExp.controller).length) {
-          for (var key in aExp.controller) {
-            setCC(event.on - 1, 
-              parseInt(key, 10), 
-              aExp.controller[key],
-              {for: aName, note: true }); 
+          console.log(aExp.on,'on');
+          console.log(prev.expression.note.on, 'prev on');
+          event.expression.note.on = aExp.on;//set for reference
+          var insidePhraseOn = aExp.on < 0 || prev && prev.noteon && (prev.expression.note.on === aExp.on);
+          if (insidePhraseOn) {
+            event.on = event.time.tick + aExp.on;
+            oninfo.push({ for: `${aName} (${aExp.on})`, note: true });
           }
         }
 
-      });
+        if (aExp.off && prev && prev.noteon) {
+          event.expression.note.off = aExp.off;//set for reference
+          var insidePhraseOff = aExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === aExp.off));
+          if (insidePhraseOff) {
+            prev.off = event.time.tick + aExp.off;
+            offinfo.push({ for: `${aName} (${aExp.off})`, note: true });
+          }
+        }
 
-      articulations.before.forEach(function (articulation) {
 
-        var aExp = articulation.expression;
-        var aName = articulation.name;
+
         if (aExp.keyswitch) {
           setKeyswitch(
             event.on - 1,
@@ -108,53 +108,40 @@ function generateEvents(player, parsed) {
             { for: aName, note: true });
         }
 
-       if (aExp.velocity !== pExp.velocity) {
+        if (aExp.velocity !== pExp.velocity) {
           event.velocity = aExp.velocity;
-          info.push({ velocity: true, for: aName, note: true });
-      
-       }
-            
+          oninfo.push({ velocity: true, for: aName, note: true });
+
+        }
+
         setPitchbend(
-          event.on - 1, 
-          aExp.pitchbend, 
+          event.on - 1,
+          aExp.pitchbend,
           { for: aName, note: true });
 
         for (var key in aExp.controller) {
-          setCC(event.on - 1, 
-            parseInt(key, 10), 
-            aExp.controller[key], 
-            {for: aName, note: true }); 
+          setCC(event.on - 1,
+            parseInt(key, 10),
+            aExp.controller[key],
+            { for: aName, note: true });
         }
+
       });
 
-
-      setNoteOn(event, info);
-
-      info = [];
+      setNoteOn(event, oninfo);
 
       if (prev && prev.noteon) {
 
-        prev.off = event.time.tick;
-     //   var shouldAdjustOff = true;//pExp.off && (next && next.noteon && next.expression.phrase.expression.off === pExp.off);
-     //   if (shouldAdjustOff) {
-        prev.off += prev.expression.phrase.off;
-        info.push({ off: true, for: `${pName} (${prev.expression.phrase.off})`, phrase: true });
-     //   }
-        //not sure about this
-     //   if (exp.off) {
-      //    prev.off += exp.off;
-      //    info.push({ off: true, for: `$${exp.off}`, phrase: true });
-      //  }
-
         if (pName.indexOf('staccato') === 0) {
           prev.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
-          info.push({ off: true, for: 'staccato (half)' });
+          offinfo.push({  for: 'staccato (half)' });
         }
 
         setNoteOff(
           prev,
-          info);
+          offinfo);
       }
+
 
     }
 
@@ -165,11 +152,11 @@ function generateEvents(player, parsed) {
         info.push({ off: true, for: 'staccato' });
       } else {
         prev.off = event.time.tick; // default slightly detached
-        info.push({ off: true, for: 'full' });
+        offinfo.push({ off: true, for: 'full' });
       }
       setNoteOff(
         prev,
-        info);
+        offinfo);
     }
 
   });
@@ -198,7 +185,7 @@ function generateEvents(player, parsed) {
   }
 
   function setNoteOn(event, info) {
-    info = info.map(function(item){return item.for;});
+    info = info.map(function (item) { return item.for; });
     info = info.length > 1 ? info.join(', ') : info.length === 1 ? info[0] : ''
 
     events.push({
@@ -213,7 +200,7 @@ function generateEvents(player, parsed) {
   }
 
   function setNoteOff(event, info) {
-    info = info.map(function(item){return item.for;});
+    info = info.map(function (item) { return item.for; });
     info = info.length > 1 ? info.join(', ') : info.length === 1 ? info[0] : ''
 
     events.push({

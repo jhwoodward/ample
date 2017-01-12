@@ -415,6 +415,7 @@ function isKeyswitch(score, parser, time, expression) {
   if (isStartKeySwitch(parser.char)) {
     var ks = getKeyswitch(score, parser.cursor);
     expression.phrase.keyswitch = ks;
+    expression.note.keyswitch = ks;
     parser.cursor += ks.length;
     return true;
   }
@@ -502,22 +503,31 @@ function isVelocity(parser, expression) {
   }
 
   function matchPhrase(chars) {
-    return chars === '=VP';
+    return chars === '==V';
   }
 }
 
 function isPitchbend(parser, expression) {
-  if (!match(parser.char2)) return false;
 
-  expression.note.pitchbend = parseInt(parser.numbers.join(''), 10);
-  //also allow phrase pitchbend with =PP
+  if (matchPhrase(parser.char3)) {
+    expression.phrase.pitchbend = parseInt(parser.numbers.join(''), 10);
+    parser.numbers = [];
+    parser.cursor += 3;
+    return true;
+  }
+  if (matchNote(parser.char2)) {
+    expression.note.pitchbend = parseInt(parser.numbers.join(''), 10);
+    parser.numbers = [];
+    parser.cursor += 2;
+    return true;
+  }
 
-  parser.numbers = [];
-  parser.cursor += 2;
-  return true;
-
-  function match(chars) {
+  function matchNote(chars) {
     return chars === '=P';
+  }
+
+  function matchPhrase(chars) {
+    return chars === '==P';
   }
 
 }
@@ -556,10 +566,8 @@ function isController(parser, expression) {
 
   }
 
-
-
   function matchPhrase(chars) {
-    return chars === '=CP';
+    return chars === '==C';
   }
   
   function matchNote(chars) {
@@ -568,16 +576,31 @@ function isController(parser, expression) {
 }
 
 function isDynamics(parser, expression) {
-  if (!match(parser.char2)) return false;
 
-  expression.note.dynamics = parseInt(parser.numbers.join(''), 10);//for accents driven by cc
-  //also allow phrase dynamics with =LP
-  parser.numbers = [];
-  parser.cursor += 2;
-  return true;
+  if (matchPhrase(parser.char3)) {
+    expression.phrase.dynamics = parseInt(parser.numbers.join(''), 10);//for accents driven by cc
+    //also allow phrase dynamics with =LP
+    parser.numbers = [];
+    parser.cursor += 3;
+    return true;
+  }
 
-  function match(chars) {
+  if (matchNote(parser.char2)) {
+    expression.note.dynamics = parseInt(parser.numbers.join(''), 10);//for accents driven by cc
+    //also allow phrase dynamics with =LP
+    parser.numbers = [];
+    parser.cursor += 2;
+    return true;
+  }
+
+
+
+  function matchNote(chars) {
     return chars === '=L';
+  }
+
+  function matchPhrase(chars) {
+    return chars === '==L';
   }
 }
 
@@ -763,11 +786,11 @@ function isArticulation(parser, expression, annotations) {
   }
 
   if (isLegato(parser.char)) {
-    articulation = { name: 'legato', after: true, expression: annotations.legato.expression };
+    articulation = { name: 'legato', expression: annotations.legato.expression };
   }
 
   if (isStaccato(parser.char)) {
-    articulation = { name: 'staccato', after: true, expression: annotations.staccato.expression };
+    articulation = { name: 'staccato', expression: annotations.staccato.expression };
   }
 
   if (isAccent(parser.char)) {
@@ -808,22 +831,41 @@ function isOnOff(parser, expression) {
 
   if (parser.char3 === '=ON') {
     if (parser.numbers.length) {
-      expression.phrase.on = parseInt(parser.numbers.join(''), 10);
+      expression.note.on = parseInt(parser.numbers.join(''), 10);
       // console.log('xon', expression.on);
       parser.numbers = [];
     }
     parser.cursor += 3;
     return true;
   }
-
-  if (parser.char4 === '=OFF') {
+  if (parser.char3 === '==ON') {
     if (parser.numbers.length) {
-      expression.phrase.off = parseInt(parser.numbers.join(''), 10);
+      expression.phrase.on = parseInt(parser.numbers.join(''), 10);
+      // console.log('xon', expression.on);
       parser.numbers = [];
     }
     parser.cursor += 4;
     return true;
   }
+
+  if (parser.char4 === '=OFF') {
+    if (parser.numbers.length) {
+      expression.note.off = parseInt(parser.numbers.join(''), 10);
+      parser.numbers = [];
+    }
+    parser.cursor += 4;
+    return true;
+  }
+
+   if (parser.char5 === '==OFF') {
+    if (parser.numbers.length) {
+      expression.phrase.off = parseInt(parser.numbers.join(''), 10);
+      parser.numbers = [];
+    }
+    parser.cursor += 5;
+    return true;
+  }
+
 }
 
 

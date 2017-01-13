@@ -14,21 +14,22 @@ var triobroz = {
   rules: {
 
 
-  
-    'part1': '{legato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e/c/g/^',
-  'part2': '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
-  'part3': '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
-  // 'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
- // 'part1': `12,1: {detached} c_D E_F {pizzicato} >Gf>ed {legato} c/////^`,
-  // 'part2': `{pizzicato} 2:24,CCCCC`,
-  // 'part3':''
-  // part3: '',
-  //part1: '50=VB 127=L {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
-  //// part1: '50=VB 127=L {spiccato} 48,1:c >c {legato} 24, cD EF ed {spiccato} 48,  >c >c c c >c',
-  //part2:'',
-  // part3:''
-  //part2:'',
-  // part3:''
+    tune: '>GedE>FdcD>Ed>Ed>c//^ ',
+    //  'part1': '{legato} 1:12,eFGA -BCD 127=L {legato-nonvib} E//^F~e/c/g/^',
+    part2: '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
+    part3: '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
+    //   'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
+    // 'part1': `12,1: {detached} c_D_E F_G_A B C {pizzicato} >Gf>ed {legato} c/////^`,
+    part1: '1: 24, {pizzicato} tune {legato} tune {detached} tune   '
+    // 'part2': `{pizzicato} 2:24,CCCCC`,
+    // 'part3':''
+    // part3: '',
+    //part1: '50=VB 127=L {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
+    //// part1: '50=VB 127=L {spiccato} 48,1:c >c {legato} 24, cD EF ed {spiccato} 48,  >c >c c c >c',
+    //part2:'',
+    // part3:''
+    //part2:'',
+    // part3:''
   },
   annotations: annotations.triobroz,
   config: {
@@ -40,7 +41,7 @@ var triobroz = {
 
 var cinebrass = {
   rules: {
-    'part1': `24,2:{legato} cDEF {staccato8} Gfed  {legato} cEdG-Ba {staccato8} gf 
+    'part1': `24,0:{legato} cDEF {staccato8} Gfed  {legato} cEdG-Ba {staccato8} gf 
     12,  eFGA 48, {legato} -B/a
     12, {staccato8} a-BCD 127=L
     48, {detached2} -E/ {detached4} dc-ba {staccato4} gf/^
@@ -58,7 +59,7 @@ var cinebrass = {
 
 var herringClarinet = {
   rules: {
-    'part1': `24,2:  {legato} 20=C11  cDEF {staccato8} Gfed  {legato} 127=C11 cEdG-Ba {staccato8} gf 
+    'part1': `24,1:  {legato} 20=C11  cDEF {staccato8} Gfed  {legato} 127=C11 cEdG-Ba {staccato8} gf 
     12,  eFGA 48, {legato} -B/a
     12, {staccato8} a-BCD 
     48, {detached} -E/ {detached} dc-ba {staccato} gf/^
@@ -73,7 +74,45 @@ var herringClarinet = {
   }
 };
 
-var settings = triobroz;
+
+var chapmanTrumpet = {
+  rules: {
+    'part1': `24,1:  {detached}  c_D E_F {staccato} Gfed  {legato} cEdG-Ba {staccato} gf 
+    12,  eFGA 48, {legato} -B/a
+    12, {staccato} a-BCD 
+    48, {detached} -E/ {detached} dc-ba {staccato} gf/^
+    `
+  },
+  annotations: annotations.chapmanTrumpet,
+  config: {
+    alwaysAffectOn: true,//force on offset to apply even at the start of a phrase
+    defaultExpression: {
+      velocity: 40,
+      dynamics: 10
+    }
+  }
+};
+
+var friedlanderViolin = {
+  rules: {
+    tune: '>GedE>FdcD>Ed>Ed>c//^ ',
+ //   part1: '{legato} 1:24,e~FGA -BCD  E/^>F~e/c/g/^',
+    part2: '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
+    part3: '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
+    //   'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
+   part1: `24,1: {detached} >c_D >E_F >G_A_B C {staccato} >Gf>ed {legato} c/////^`,
+   // part1: '1: 24, {legato} tune {detached} tune {staccato} tune  '
+  },
+  annotations: annotations.friedlanderViolin,
+  config: {
+    defaultExpression: {
+      velocity: 100,
+      dynamics: 100
+    }
+  }
+};
+
+var settings = friedlanderViolin;
 
 var rules = settings.rules;
 var players = [

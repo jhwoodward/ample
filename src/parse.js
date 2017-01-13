@@ -59,7 +59,7 @@ function parse(score, conductor, annotations, defaultExpression) {
     time: {
       beat: 0,
       tempo: 120,
-      tick: 10,
+      tick: 50, //start 50 ticks in to allow for on offsets
       step: 48
     }
   }

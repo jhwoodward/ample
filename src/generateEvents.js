@@ -33,7 +33,7 @@ function generateEvents(player, parsed) {
         prev.off = event.time.tick;
 
         if (pExp.off) {
-          var insidePhraseOff = pExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === pExp.off));
+          var insidePhraseOff = pExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === pExp.off));//last notes of staccato phrase arent picked up
           if (insidePhraseOff) {
             prev.off = event.time.tick + pExp.off;
             offinfo.push({ for: `${pName} (${pExp.off})`, note: true });
@@ -42,10 +42,10 @@ function generateEvents(player, parsed) {
 
       }
 
-  
+
 
       if (pExp.on) {
-        var insidePhraseOn = prev && prev.noteon && (prev.expression.phrase.on === pExp.on);
+        var insidePhraseOn = player.config.alwaysAffectOn || prev && prev.noteon && (prev.expression.phrase.on === pExp.on);
         if (insidePhraseOn) {
           event.on = event.time.tick + pExp.on;
           oninfo.push({ on: true, for: `${pName} (${pExp.on})`, phrase: true });
@@ -80,16 +80,11 @@ function generateEvents(player, parsed) {
         var aName = articulation.name;
 
         if (aExp.on) {
-          console.log(aExp.on,'on');
-          console.log(prev.expression.note.on, 'prev on');
-          event.expression.note.on = aExp.on;//set for reference
-          var insidePhraseOn = aExp.on < 0 || prev && prev.noteon && (prev.expression.note.on === aExp.on);
-          if (insidePhraseOn) {
-            event.on = event.time.tick + aExp.on;
-            oninfo.push({ for: `${aName} (${aExp.on})`, note: true });
-          }
+          event.on = event.time.tick + aExp.on;
+          oninfo.push({ for: `${aName} (${aExp.on})`, note: true });
         }
 
+      //not sure about this
         if (aExp.off && prev && prev.noteon) {
           event.expression.note.off = aExp.off;//set for reference
           var insidePhraseOff = aExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === aExp.off));
@@ -98,8 +93,6 @@ function generateEvents(player, parsed) {
             offinfo.push({ for: `${aName} (${aExp.off})`, note: true });
           }
         }
-
-
 
         if (aExp.keyswitch) {
           setKeyswitch(
@@ -132,9 +125,9 @@ function generateEvents(player, parsed) {
 
       if (prev && prev.noteon) {
 
-        if (pName.indexOf('staccato') === 0) {
+        if (pName.indexOf('staccato') === 0) { //last notes of staccato phrase arent picked up
           prev.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
-          offinfo.push({  for: 'staccato (half)' });
+          offinfo.push({ for: 'staccato (half)' });
         }
 
         setNoteOff(

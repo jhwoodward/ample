@@ -27,13 +27,23 @@ var annotations = {
     staccato: '[-2:D]  120=V',// 0.5=LEN ? harcoded for now
     staccato8: '[-2:D] 20=V '
   },
+  diamantiClarinet: {
+    staccato: '[-3:D]   50=C1',//currently having to set dynamics in every phrase to revert after cc accent
+    staccatosoft: '[-3:+D]  50=C1',
+    staccatotight: '[-3:E]  50=C1',
+    detached: '[-3:C] 0=ON -5=OFF  50=C1',
+    legato: '[-3:C] -5=ON 1=OFF 50=C1',//need to split out phrase legato from note legato
+    'legato-nonvib': '[-3:+C] -7=ON 5=OFF  50=C1',
+    accent: '120=C1'
+  },
   chapmanTrumpet: {//CC11 = volume, CC1 = vibrato
     legato: '[-2:C] -9=ON 2=OFF ',//this instrument always requires legato -9 at the beginning of the phrase
     detached: '[-2:C] 0=ON -7=OFF',
     staccato: '[-2:+D]  '
   },
   friedlanderViolin: { 
-    legato: '[-1:F] 127=C15 0=C14  -13=ON 1=OFF',//keyswitch -1:F = legato mode, C15=slur, C14 = porta
+    legato: '[-1:F] 127=C15 0=C14  -13=ON 1=OFF 0=C17',//keyswitch -1:F = legato mode, C15=slur, C14 = porta, CC17 = legato transition speed
+    legatoquick: '[-1:F] 127=C15 0=C14  -6=ON 1=OFF 80=C17',//keyswitch -1:F = legato mode, C15=slur, C14 = porta, CC17 = legato transition speed
     detached: ' [-1:F]  0=C15 0=C14  0=ON  -7=OFF',
     staccato: '[-1:A]  0=C14 ',// 0.5=LEN ? harcoded for now
     pizzicato: '[-1:+A]  0=C14 ',

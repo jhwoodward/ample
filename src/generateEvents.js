@@ -85,7 +85,7 @@ function generateEvents(player, parsed) {
         { for: pName, phrase: true });
 
       for (var key in pExp.controller) {
-        setCC(event.on - 1,
+        setCC(event.on - 2,//needs to be before anything caused by a note articulation so that it resets correctly
           parseInt(key, 10),
           pExp.controller[key],
           { for: pName, phrase: true });
@@ -236,6 +236,8 @@ function generateEvents(player, parsed) {
         return acc;
       }
     }, { tick: -1 }).value;
+
+console.log('set cc' + number + ' to ' + value,lastValue);
 
     if (value === lastValue) return;
 

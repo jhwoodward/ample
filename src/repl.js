@@ -20,7 +20,8 @@ var triobroz = {
     part3: '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
     //   'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
     // 'part1': `12,1: {detached} c_D_E F_G_A B C {pizzicato} >Gf>ed {legato} c/////^`,
-    part1: '1: 24, {pizzicato} tune {legato} tune {detached} tune   '
+   // part1: '1: 24, {pizzicato} tune {legato} tune {detached} tune   '
+    part1: `24,1: {detached} >c_D >E_F >G_A_B C {staccato} >Gf>ed {legato} >c/////^`
     // 'part2': `{pizzicato} 2:24,CCCCC`,
     // 'part3':''
     // part3: '',
@@ -34,7 +35,8 @@ var triobroz = {
   annotations: annotations.triobroz,
   config: {
     defaultExpression: {
-      dynamics: 90
+      dynamics: 90,
+      keyswitch: { pitch: 24, char: 'C'}
     }
   }
 };
@@ -75,6 +77,24 @@ var herringClarinet = {
 };
 
 
+var diamantiClarinet = {
+  rules: {
+    'part1': `24,1:  {legato} 20=C11  cDEF {staccato} >Gfed  {legato} 127=C11 cEdG-Ba {staccatotight} >g>f 
+    12,  eFGA 48, {legato} -B/a 12,  a-BCD 
+    48, {detached} -E/ {detached} dc-ba {staccatotight} 30==C1 gf////^
+    `
+  },
+  annotations: annotations.diamantiClarinet,
+  config: {
+    defaultExpression: {
+      velocity: 40,
+      dynamics: 50 // should set back to default after accent. currently have to have dynamics set in phrase to revert after accent
+    }
+  }
+};
+
+
+
 var chapmanTrumpet = {
   rules: {
     'part1': `24,1:  {detached}  c_D E_F {staccato} Gfed  {legato} cEdG-Ba {staccato} gf 
@@ -100,7 +120,8 @@ var friedlanderViolin = {
     part2: '127=L {legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
     part3: '127=L {staccato} 0:12,cbagfed  {legato} c//^G~c//^',
     //   'part': '{legato} 1:c {default} D  {legato} E {default} F  G',
-   part1: `24,1: {detached} >c_D >E_F >G_A_B C {staccato} >Gf>ed {legato} c/////^`,
+  // part1: `24,1: {detached} >c_D >E_F >G_A_B C {staccato} >Gf>ed {legato} >c/////^`,
+    part1: '{legatoquick} 12,1:e~FGA -BCD////  E/^>F~e/c/g/^',
    // part1: '1: 24, {legato} tune {detached} tune {staccato} tune  '
   },
   annotations: annotations.friedlanderViolin,
@@ -112,7 +133,7 @@ var friedlanderViolin = {
   }
 };
 
-var settings = friedlanderViolin;
+var settings = diamantiClarinet;
 
 var rules = settings.rules;
 var players = [

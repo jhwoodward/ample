@@ -25,19 +25,36 @@ function generateEvents(player, parsed) {
     if (event.noteon) {
 
       event.on = event.time.tick;
+   
       var pExp = event.expression.phrase;
       var pName = event.expression.phrase.name;
       var nExp = event.expression.note;//not yet impleneted - everything is thorugh artiulations currnetly
 
       if (prev && prev.noteon) {
-        prev.off = event.time.tick;
 
+        event.prev = prev;
+
+        prev.off = event.time.tick;
+/*
         if (pExp.off) {
           var insidePhraseOff = pExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === pExp.off));//last notes of staccato phrase arent picked up
           if (insidePhraseOff) {
             prev.off = event.time.tick + pExp.off;
             offinfo.push({ for: `${pName} (${pExp.off})`, note: true });
           }
+        }
+*/
+        if (prev.expression.phrase.off) {
+          var insidePhraseOff = prev.expression.phrase.off < 0 || (prev.prev && prev.prev.noteon && (prev.prev.expression.note.off === prev.expression.phrase.off));//last notes of staccato phrase arent picked up
+          if (insidePhraseOff) {
+            prev.off = event.time.tick + prev.expression.phrase.off;
+            offinfo.push({ for: `${prev.expression.phrase.name} (${pExp.off})`, note: true });
+          }
+        }
+
+        if (prev.expression.phrase.name.indexOf('staccato') === 0) { //last notes of staccato phrase arent picked up
+          prev.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
+          offinfo.push({ for: 'staccato (half)' });
         }
 
       }
@@ -84,7 +101,7 @@ function generateEvents(player, parsed) {
           oninfo.push({ for: `${aName} (${aExp.on})`, note: true });
         }
 
-      //not sure about this
+        //not sure about this
         if (aExp.off && prev && prev.noteon) {
           event.expression.note.off = aExp.off;//set for reference
           var insidePhraseOff = aExp.off < 0 || (prev && prev.noteon && (prev.expression.note.off === aExp.off));
@@ -125,10 +142,7 @@ function generateEvents(player, parsed) {
 
       if (prev && prev.noteon) {
 
-        if (pName.indexOf('staccato') === 0) { //last notes of staccato phrase arent picked up
-          prev.off = prev.time.tick + ((event.time.tick - prev.time.tick) / 2);
-          offinfo.push({ for: 'staccato (half)' });
-        }
+ 
 
         setNoteOff(
           prev,

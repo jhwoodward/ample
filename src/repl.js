@@ -79,16 +79,38 @@ var herringClarinet = {
 
 var diamantiClarinet = {
   rules: {
+    /*
     'part1': `24,1:  {legato} 20=C11  cDEF {staccato} >Gfed  {legato} 127=C11 cEdG-Ba {staccatotight} >g>f 
     12,  eFGA 48, {legato} -B/a 12,  a-BCD 
     48, {detached} -E/ {detached} dc-ba {staccatotight} 30==C1 gf////^
-    `
+    `*/
+     tune: `cEGe  cEGec//^`,
+    part1: `24,1: {legato} tune {staccato} tune`
   },
   annotations: annotations.diamantiClarinet,
   config: {
     defaultExpression: {
       velocity: 40,
       dynamics: 50 // should set back to default after accent. currently have to have dynamics set in phrase to revert after accent
+    }
+  }
+};
+
+var fattoriBassoon = {
+  rules: {
+    /*
+    part1: `24,-1:  {legato} 20=C11  cDEF {staccato} Gfed  {legato} 127=C11 cEdG-Ba {staccato} gf 
+    12,  eFGA 48, {legato} -B/ 24,a^ 12,  a-BCD 
+    48, {detached} -E/ {detached} dc-ba {staccato} 30==C1 gf////^
+    `,*/
+    tune: `dEGe  dEGed//^`,
+    part1: `24,-1: {legato} tune {staccato} tune`
+  },
+  annotations: annotations.fattoriBassoon,
+  config: {
+    defaultExpression: {
+      velocity: 40,
+      dynamics: 70 // should set back to default after accent. currently have to have dynamics set in phrase to revert after accent
     }
   }
 };
@@ -133,7 +155,7 @@ var friedlanderViolin = {
   }
 };
 
-var settings = diamantiClarinet;
+var settings =  fattoriBassoon;
 
 var rules = settings.rules;
 var players = [

@@ -36,6 +36,13 @@ var annotations = {
     'legato-nonvib': '[-3:+C] -7=ON 5=OFF  50=C1',
     accent: '120=C1'
   },
+  fattoriBassoon: {
+    staccato: '[-3:+D]   50=C1',//currently having to set dynamics in every phrase to revert after cc accent
+    detached: '[-3:C] 0=ON -5=OFF  50=C1',
+    legato: '[-3:C] -5=ON 1=OFF 50=C1',//need to split out phrase legato from note legato
+    'legato-nonvib': '[-3:D] -7=ON 5=OFF  50=C1',
+    accent: '120=C1'
+  },
   chapmanTrumpet: {//CC11 = volume, CC1 = vibrato
     legato: '[-2:C] -9=ON 2=OFF ',//this instrument always requires legato -9 at the beginning of the phrase
     detached: '[-2:C] 0=ON -7=OFF',

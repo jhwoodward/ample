@@ -868,6 +868,4 @@ function isOnOff(parser, expression) {
 
 }
 
-
-
 module.exports = parse;

@@ -28,20 +28,20 @@ function parse(score, conductor, annotations, defaultExpression) {
     expression: {
       note: {
         articulations: [],
-        dynamics: defaultExpression.dynamics,
-        pitchbend: defaultExpression.pitchbend,
-        velocity: defaultExpression.velocity,
-        controller: {},
+        dynamics: defaultExpression.dynamics || 90,
+        pitchbend: defaultExpression.pitchbend || 8192,
+        velocity: defaultExpression.velocity || 90,
+        controller: defaultExpression.controller || {},
         keyswitch: undefined,
         on: 0, //adjust noteon time in ticks
         off: 0, //adjust noteoff time in ticks
       },
       phrase: {
         name: 'default',
-        dynamics: defaultExpression.dynamics,
-        pitchbend: defaultExpression.pitchbend,
-        velocity: defaultExpression.velocity,
-        controller: {},
+        dynamics: defaultExpression.dynamics || 90,
+        pitchbend: defaultExpression.pitchbend || 8192,
+        velocity: defaultExpression.velocity || 90,
+        controller: defaultExpression.controller || {},
         keyswitch: undefined,
         on: 0, //adjust noteon time in ticks
         off: 0, //adjust noteoff time in ticks

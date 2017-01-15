@@ -1,8 +1,15 @@
 var utils = require('jsmidgen').Util;
 var _ = require('lodash');
 
-function parse(score, conductor, annotations, defaultExpression) {
-  conductor = conductor || {};
+function parse(score, conductor, annotations) {
+  conductor = _.merge({}, conductor);
+  var defaultExpression = {};
+  if (annotations) {
+    defaultExpression = _.merge({}, annotations.default.expression);
+    
+  }
+  console.log(defaultExpression,'default exp');
+
   var messages = [];
   var parsed = [];
   var log = [];
@@ -28,7 +35,7 @@ function parse(score, conductor, annotations, defaultExpression) {
     expression: {
       note: {
         articulations: [],
-        dynamics: defaultExpression.dynamics || 90,
+      //  dynamics: defaultExpression.dynamics || 90,
         pitchbend: defaultExpression.pitchbend || 8192,
         velocity: defaultExpression.velocity || 90,
         controller: defaultExpression.controller || {},
@@ -38,7 +45,7 @@ function parse(score, conductor, annotations, defaultExpression) {
       },
       phrase: {
         name: 'default',
-        dynamics: defaultExpression.dynamics || 90,
+      //  dynamics: defaultExpression.dynamics || 90,
         pitchbend: defaultExpression.pitchbend || 8192,
         velocity: defaultExpression.velocity || 90,
         controller: defaultExpression.controller || {},
@@ -77,7 +84,7 @@ function parse(score, conductor, annotations, defaultExpression) {
     if (isTempo(state.parser, state.time)) continue;
     if (isVelocity(state.parser, state.expression)) continue;
     if (isPitchbend(state.parser, state.expression)) continue;
-    if (isDynamics(state.parser, state.expression)) continue;
+   // if (isDynamics(state.parser, state.expression)) continue;
     if (isController(state.parser, state.expression)) continue;
     if (isAccidentalOrNumeric(state.parser, state.pitch)) continue;
     if (isTranspose(state.parser)) continue;
@@ -574,7 +581,7 @@ function isController(parser, expression) {
     return chars === '=C';
   }
 }
-
+/*
 function isDynamics(parser, expression) {
 
   if (matchPhrase(parser.char3)) {
@@ -603,6 +610,7 @@ function isDynamics(parser, expression) {
     return chars === '==L';
   }
 }
+*/
 
 function setOctave(parser, pitch, key) {
   if (pitch.char && !parser.octaveReset) {

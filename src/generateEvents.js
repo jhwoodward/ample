@@ -62,7 +62,7 @@ function generateEvents(player, parsed) {
 
     if (exp.on) {
       event.on = event.time.tick + exp.on;
-      oninfo.push({ for: `${name} (${exp.on})`, note: true });
+      oninfo.on = { for: `${name} (${exp.on})`, note: true };
     }
 
     //not sure about this
@@ -86,7 +86,7 @@ function generateEvents(player, parsed) {
 
     if (exp.velocity !== event.expression.phrase.velocity) {
       event.velocity = exp.velocity;
-      oninfo.push({ velocity: true, for: name, note: true });
+      oninfo.velocity = {for: name, note: true };
 
     }
 
@@ -129,7 +129,7 @@ function generateEvents(player, parsed) {
     }
 
     if (exp.on) {
-      var insidePhraseOn = player.config.alwaysAffectOn || (prevExp && prevExp.on === exp.on);
+      var insidePhraseOn = prevExp && prevExp.on === exp.on;
       if (insidePhraseOn) {
         event.on = event.time.tick + exp.on;
         oninfo.on = {for: `${name} (${exp.on})`, phrase: true };
@@ -159,13 +159,12 @@ function generateEvents(player, parsed) {
   }
 
   function setDefaultExpression(player) {
-    var phrase = _.merge({}, player.config.defaultExpression);
+    var phrase = _.merge({}, player.annotations.default);
     var info = { for:'default', phrase:true };
     setPitchbend(0, phrase.pitchbend, info);
     if (phrase.keyswitch) {
       setKeyswitch(0, phrase.keyswitch, info);
     }
-    setCC(0, 1, phrase.dynamics, info);
     for (var key in phrase.controller) {
       setCC(0, parseInt(key, 10), phrase.controller[key], info);
     }
@@ -218,8 +217,6 @@ function generateEvents(player, parsed) {
         return acc;
       }
     }, { tick: -1 }).value;
-
-  //  console.log('set cc' + number + ' to ' + value, lastValue);
 
     if (value === lastValue) return;
 

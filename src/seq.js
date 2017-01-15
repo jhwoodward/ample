@@ -8,7 +8,7 @@ var api = {
 
   send: function (events) {
     var tick = -1;
-    var interval = 20;
+    var interval = 10;
     setTimeout(onTick, interval);
 
     var space = '                                                   ';

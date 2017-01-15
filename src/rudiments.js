@@ -1,7 +1,7 @@
 
 module.exports =
   {
-    keys: {
+    key: {
       cmaj: 'K()K', //aminor
       fmaj: 'K(-b)K', //dminor
       bflat: 'K(-b-e)K', //gminor
@@ -16,17 +16,10 @@ module.exports =
       gmaj: 'K(+f)K', // e minor
       cmaj: 'K()K' //a minor
     },
-    chords: {
+    chord: {
       c7: 'S(CD-EEGA-B)S', //aminor
       f7: 'S(FG-AAC-E)S', //dminor
       g7: 'S(GA-BBDF)S' //gminor
     },
-    triobroz: {
-      vib: '[-3:C]',
-      nonv: '[-3:+C]',
-      spic: '[-3:D]',
-      stac: '[-3:+D]',
-      pizz: '[-3:E]'
-    }
-
+    scale: {}
   };

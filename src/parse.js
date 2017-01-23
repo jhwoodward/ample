@@ -8,7 +8,6 @@ function parse(score, conductor, annotations) {
     defaultExpression = _.merge({}, annotations.default.expression);
     
   }
-  console.log(defaultExpression,'default exp');
 
   var messages = [];
   var parsed = [];
@@ -87,7 +86,7 @@ function parse(score, conductor, annotations) {
    // if (isDynamics(state.parser, state.expression)) continue;
     if (isController(state.parser, state.expression)) continue;
     if (isAccidentalOrNumeric(state.parser, state.pitch)) continue;
-    if (isTranspose(state.parser)) continue;
+    if (isTranspose(state.parser,state.pitch)) continue;
     if (isBeatstep(state.parser, state.time)) continue;
     if (isArticulation(state.parser, state.expression, annotations)) continue;
     if (isOctave(state.parser, state.pitch)) continue;
@@ -766,6 +765,7 @@ function isTranspose(parser, pitch) {
     if (parser.numbers.length) {
       pitch.transpose = parseInt(parser.numbers.join(''), 10);
       parser.numbers = [];
+      pitch.accidental = 0;
     }
     parser.cursor++;
     return true;

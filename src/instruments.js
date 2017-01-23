@@ -208,30 +208,32 @@ var instrument = {
   },
   strings: {
     violin: {
+      name: 'violin',
       test: {
         rules: {
           tune: '>GedE>FdcD>Ed>Ed>c//^ '
         },
         parts: {
-          gliss: '24,2: {detached} cGc {legato} 12,cDEFGA-B  C//^b~C//^',
-          phrase: `12,1: {detached} c_D_E F_G_A B C {pizzicato} >Gf>ed {legato} c/////^`,
-          pizz: `1: 24, {pizzicato} tune {legato} tune {detached} tune `,
-          accent: `24,1: {detached} >c_D >E_F >G_A_B C {staccato} >Gf>ed {legato} >c/////^`,
-          spic: '50=VB 127=L {spiccato} 48,1:c >c {default} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
-          part1: '{legato} 1:24,e~FGA -BCD  E/^>F~e/c/g/^',
-          legato: '{legato} 1:12,cDEFGA-B {legato} C^^^b~C//^',
+          gliss: '24,2:  {detached} cGc {legato} 12,cDEFGA-B  C//^b~C//^',
+          phrase: `24,2: {detached} c_D_E F_G_A B C {pizzicato} >Gf>ed {legato} c/////^`,
+          pizz: `2: 24, {pizzicato} tune {legatoslow} tune {detached} tune `,
+          accent: `24,2: {detached} >c_D >E_F >G_A_B C {staccato} >Gf>ed {legato} >c/////^`,
+          spic: '{spiccato} 48,2:c >c {detached} 24, c_D E_F e_d {spiccato} 48,  >c >c c c >c',
+          part1: '{legato} 2:24,e~FGA -BCD  E/^>F~e/c/g/^',
+          legato: '{legato} 2:12,cDEFGA-B {legato} C^^^b~C//^',
           staccato: '{staccato} 2:12,cbagfed  {legato} c//^G~c//^',
-          legatoquick: '{legatoquick} 12,1:e~FGA -BCD////  E/^>F~e/c/g/^',
+          legatoquick: '{legato} 12,2:e~FGA -BCD////  E/^>F~e/c/g/^',
         }
       },
       annotations: {
         triobroz: {
-          default: '120=C1 [-3:C]',// not sure whether C1 or C11 controls dynamics
+          name: 'triobroz',
+          default: '[-3:C] 85=C1 8192=P 0=ON -5=OFF',
           staccato: '[-3:+D]',
           detached: '[-3:C] 8192=P 0=ON -5=OFF',
           legato: '[-3:C] 8192=P -7=ON 5=OFF',//need to split out phrase legato from note legato
-          legatoquick: '[-3:C] 8192=P -7=ON 5=OFF',//need to split out phrase legato from note legato
-          'legato-nonvib': '[-3:+C] -7=ON 5=OFF',
+          legatoslow: '[-3:C] 8192=P -7=ON 5=OFF',//need to split out phrase legato from note legato
+          legatononvib: '[-3:+C] -7=ON 5=OFF',
           spiccato: '[-3:D]',
           spic: '[-3:D]',
           pizzicato: '[-3:E] 50=V',
@@ -240,9 +242,10 @@ var instrument = {
           glissando: '0=P'
         },
         friedlander: {
-          default: '100=V 100=C1',
-          legato: '[-1:F] 127=C15 0=C14  -13=ON 1=OFF 0=C17',//keyswitch -1:F = legato mode, C15=slur, C14 = porta, CC17 = legato transition speed
-          legatoquick: '[-1:F] 127=C15 0=C14  -6=ON 1=OFF 80=C17',//keyswitch -1:F = legato mode, C15=slur, C14 = porta, CC17 = legato transition speed
+          name: 'friedlander',
+          default: '100=V 100=C1 0=C14 0=C15  -10=ON 1=OFF  ',
+          legatoslow: '[-1:F] 127=C15 0=C14  -13=ON 1=OFF 0=C17',//keyswitch -1:F = legato mode, C15=slur, C14 = porta, CC17 = legato transition speed
+          legato: '[-1:F] 127=C15 0=C14  -10=ON 1=OFF 80=C17',//keyswitch -1:F = legato mode, C15=slur, C14 = porta, CC17 = legato transition speed
           detached: ' [-1:F]  0=C15 0=C14  0=ON  -7=OFF',
           staccato: '[-1:A]  0=C14 ',// 0.5=LEN ? harcoded for now
           spiccato: '',
@@ -254,6 +257,7 @@ var instrument = {
 
     },
     viola: {
+      name: 'viola',
       test: {
         parts: {
           legato: '24,2: {detached} cGc {legato} 12,cDEFGA-B  C//^b~C//^'
@@ -261,9 +265,13 @@ var instrument = {
       },
       annotations: {
         triobroz: {
+          name: 'triobroz',
           staccato: '[-3:+D]',
+          default: '[-3:C] 95=C1 8192=P 0=ON -5=OFF',
           detached: '[-3:C] 8192=P 0=ON -5=OFF',
-          legato: '[-3:C] 8192=P -7=ON 5=OFF',//need to split out phrase legato from note legato
+          legatoslow: '[-3:C] 8192=P -12=ON 1=OFF 70=C17 50=C18',
+          legatoquick: '[-3:C] 8192=P -3=ON 1=OFF 127=C17 0=C18',
+          legato: '[-3:C] 8192=P -9=ON 1=OFF 100=C17 35=C18',//need to split out phrase legato from note legato
           'legato-nonvib': '[-3:+C] -7=ON 5=OFF',
           spiccato: '[-3:D]',
           spic: '[-3:D]',
@@ -275,6 +283,7 @@ var instrument = {
       }
     },
     cello: {
+      name: 'cello',
       test: {
         parts: {
           stacc: '{staccato} 0:12,cbagfed  {legato} c//^G~c//^'
@@ -282,8 +291,12 @@ var instrument = {
       },
       annotations: {
         triobroz: {
+          name: 'triobroz',
+          default: '[-3:C] 110=C1 8192=P 0=ON -5=OFF',
           staccato: '[-3:+D]',
           detached: '[-3:C] 8192=P 0=ON -5=OFF',
+          legatoslow: '[-3:C] 8192=P -12=ON 1=OFF 70=C17 50=C18',
+          legatoquick: '[-3:C] 8192=P -3=ON 1=OFF 127=C17 0=C18',
           legato: '[-3:C] 8192=P -7=ON 5=OFF',//need to split out phrase legato from note legato
           'legato-nonvib': '[-3:+C] -7=ON 5=OFF',
           spiccato: '[-3:D]',

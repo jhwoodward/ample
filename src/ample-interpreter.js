@@ -19,6 +19,8 @@ function send(player, conductor) {
     expression: defaultExpression
   } 
 
+  console.log(player.annotations.default)
+
   for (var key in player.annotations) {
     if (key !== 'default') {
       var expression = parse(player.annotations[key], null, {default: {expression:defaultExpression}})[0].expression.note;//evaluated against note expression

@@ -33,7 +33,9 @@ function generateEvents(player, parsed) {
       event.expression.note.articulations.forEach(function (articulation) {
         setNoteExpression(event, articulation.expression);
       });
-      // setNoteExpressions(event.expression.note, 'inline');
+     
+    //  setNoteExpression(event, event.expression.note)
+
       setNoteOn(event, oninfo);
       if (event.prev && event.prev.noteon) {
         setNoteOff(
@@ -58,7 +60,7 @@ function generateEvents(player, parsed) {
 
   function setNoteExpression(event, exp) {
 
-    var name = exp.name;
+    var name = exp.name || 'inline';
 
     if (exp.on) {
       event.on = event.time.tick + exp.on;
@@ -66,16 +68,15 @@ function generateEvents(player, parsed) {
     }
 
     //not sure about this
-    /*
     if (exp.off && event.prev && event.prev.noteon) {
       event.expression.note.off = exp.off;//set for reference
-      var insidePhraseOff = exp.off < 0 || (event.prev && event.prev.noteon && (event.prev.expression.note.off === exp.off));
+      var insidePhraseOff = true;//exp.off < 0 || (event.prev && event.prev.noteon && (event.prev.expression.note.off === exp.off));
       if (insidePhraseOff) {
         event.prev.off = event.time.tick + exp.off;
-        offinfo.push({ for: `${name} (${exp.off})`, note: true });
+        offinfo= { for: `${name} (${exp.off})`, note: true };
       }
     }
-    */
+    
 
     if (exp.keyswitch) {
       setKeyswitch(
@@ -96,7 +97,8 @@ function generateEvents(player, parsed) {
       { for: name, note: true });
 
     for (var key in exp.controller) {
-      setCC(event.on,
+      console.log(event,'cc')
+      setCC(event.on-1,
         parseInt(key, 10),
         exp.controller[key],
         { for: name, note: true });
@@ -159,10 +161,12 @@ function generateEvents(player, parsed) {
   }
 
   function setDefaultExpression(player) {
-    var phrase = _.merge({}, player.annotations.default);
+    console.log('SET DEFAULT EXP',player)
+    var phrase = _.merge({}, player.annotations.default.expression);
     var info = { for:'default', phrase:true };
     setPitchbend(0, phrase.pitchbend, info);
     if (phrase.keyswitch) {
+      console.log('set default keyswitch', phrase.keyswitch)
       setKeyswitch(0, phrase.keyswitch, info);
     }
     for (var key in phrase.controller) {

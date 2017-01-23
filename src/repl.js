@@ -12,41 +12,64 @@ var _ = require('lodash');
 
 var config = {};
 
-var ensemble = ensembles.stringTrio;
-var prefs = ['triobroz'];
-
+var ensemble = ensembles.stringQuartet;
 var players = [];
 var rules = {};
-ensemble.players.forEach(function(player,i) {
-  var selectedAnnotation;
-  for (var key in player.annotations) {
-    if (prefs.indexOf(key) > -1) {
-      selectedAnnotation = player.annotations[key];
-    }
-  }
-  if (!selectedAnnotation) {
-    selectedAnnotation = player.annotations[Object.keys(player.annotations)[0]];
-  }
-
-  var part = '', arrParts = [];
-  for (var key in player.test.parts) {
-    arrParts.push(key);
-  }
-  rules = _.merge(rules,player.test.parts,player.test.rules);
-  part = arrParts.join(' ');
-
-  players.push({
-    part: part,
-    channel: i,
-    annotations: selectedAnnotation
-    });
-});
-console.log(players,'players');
-console.log(rules,'rules');
-
-function getPlayers() {
-  return players;
+setupEnsemble();
+function setupEnsemble() {
+  rules = ensemble.test;
+  players = ensemble.performers.map(function(performer, i){
+    return {
+      name: `${performer.instrument.name} (${performer.annotations.name})`,
+      part: 'part' + (i+1),
+      channel: i,
+      annotations: performer.annotations
+    };
+  });
 }
+
+//create 'demo' parts for each player in the ensemble from the instrument test parts
+function setupTest() {
+  ensemble.performers.forEach(function (performer, i) {
+    
+
+    var part = '', arrParts = [];
+    var uniqueKey;
+    for (var kr in performer.instrument.test.rules) {
+      uniqueKey = i + '_' + kr;
+      performer.instrument.test.rules[uniqueKey] = performer.instrument.test.rules[kr];
+      delete performer.instrument.test.rules[kr];
+      var re = new RegExp(kr + '(?![^{]*})', 'g');
+      for (var kp in performer.instrument.test.parts) {
+        performer.instrument.test.parts[kp] = performer.instrument.test.parts[kp].replace(re, uniqueKey);
+      }
+    }
+
+    var cnt = 0;
+    for (var key in performer.instrument.test.parts) {
+      uniqueKey = i.toString() + cnt.toString() + '_' + key;
+      performer.instrument.test.parts[uniqueKey] = performer.instrument.test.parts[key];
+      delete performer.instrument.test.parts[key];
+      arrParts.push(uniqueKey);
+      cnt += 1;
+    }
+    rules = _.merge(rules, performer.instrument.test.parts, performer.instrument.test.rules);
+    part = arrParts.join(' ');
+
+    players.push({
+      parts: performer.instrument.test.parts,
+      part: part,
+      channel: i,
+      annotations: performer.annotations
+    });
+  });
+}
+
+
+
+console.log(players, 'players');
+console.log(rules, 'rules');
+
 
 function set(cmd, callback) {
   var s = cmd.replace('set ', '');
@@ -90,19 +113,22 @@ function play(cmd, callback) {
   var playerId = parseInt(args[0], 10) - 1;
 
   if (args.length > 1) {
-    var part = args[1];
+    var part = args[1].trim();
     player = Object.assign({}, players[playerId]);
-    player.part = part;
+    for (var key in player.parts) {
+      if (key.indexOf(part) > -1) {
+        player.part = player.parts[key];
+      }
+    }
   } else {
     player = players[playerId];
   }
-  console.log(player,'player');
+  console.log(player, 'player');
   make({ name: 'repl', players: [player] }, rules).play();
   callback('\n');
 }
 
 function run(callback) {
-  var players = getPlayers();
   make({ name: 'repl', players: players }, rules).play();
   callback('\n');
 }
@@ -129,7 +155,7 @@ function save(cmd, callback) {
     }
     var req = `var make = require('../src/ample').make;\nvar utils = require('../src/utils');\nvar loop = utils.loop;\n\n`;
     var data = `var rules = ${JSON.stringify(rules, null, 2).replace(/\"/g, '\'')};\n\n`;
-    var players = `var players = ${JSON.stringify(getPlayers(), null, 2).replace(/\"/g, '\'')};\n\n`;
+    var players = `var players = ${JSON.stringify(players, null, 2).replace(/\"/g, '\'')};\n\n`;
     var make = `make({ name: '${filename}', players: players }, rules).play();\n`;
     fs.writeFile('./repl/' + filename + '.config.json', JSON.stringify(config, null, 2));
     fs.writeFile('./repl/' + filename + '.js', req + data + players + make, function () {
@@ -139,6 +165,7 @@ function save(cmd, callback) {
   }
 }
 
+var defaultPlayer = 0; //the default player (channel) when typing notes straight into the repl
 function myEval(cmd, context, filename, callback) {
 
   if (cmd.indexOf('rules') === 0) {
@@ -153,12 +180,19 @@ function myEval(cmd, context, filename, callback) {
     generate(cmd, callback);
   } else if (cmd.indexOf('use') === 0) {
     use(cmd, callback);
+  } else if (cmd.indexOf('player') === 0) {
+    var args = cmd.replace('player ', '').split(' ');
+    defaultPlayer = parseInt(args[0], 10) - 1;
   } else if (cmd.indexOf('play') === 0) {
     play(cmd, callback);
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
-      var results = make(cmd, rules).play();
+      console.log(cmd,'cmd');
+      var player = players[defaultPlayer];
+      player.part = cmd;
+      console.log(player);
+      var results = make({name: 'repl',players:[player]}, rules).play();
       var parts = results.map(function (result) { return result.part; });
       callback(parts);
     } else {

@@ -314,7 +314,7 @@ function send(player, conductor) {
   var phrase = {
     legato: false,
     staccato: false,
-    glissando: false
+    portamento: false
   };
 
   var cursor = 0;
@@ -389,20 +389,20 @@ function send(player, conductor) {
         case annotation.value.indexOf('staccato') === 0:
           phrase.staccato = true;
           phrase.legato = false;
-          phrase.glissando = false;
+          phrase.portamento = false;
         case annotation.value.indexOf('pizzicato') === 0:
           phrase.legato = false;
-          phrase.glissando = false;
+          phrase.portamento = false;
         case annotation.value.indexOf('spiccato') === 0:
           phrase.legato = false;
-          phrase.glissando = false;
-        case annotation.value.indexOf('glissando') === 0:
-          phrase.glissando = true;
+          phrase.portamento = false;
+        case annotation.value.indexOf('portamento') === 0:
+          phrase.portamento = true;
           phrase.staccato = false;
         case annotation.value.indexOf('default') === 0:
           phrase.legato = false;
           phrase.staccato = false;
-          phrase.glissando = false;
+          phrase.portamento = false;
           break;
       }
       cursor += annotation.length;
@@ -581,7 +581,7 @@ function send(player, conductor) {
         staccato: phrase.staccato, // single note staccato needs to be applied after the note, before send
         legato: (!staccato && !accent && !pizzicato) && phrase.legato, // single note legato needs to be applied after the note, before send
         previous: lastNote,
-        slur: slur || phrase.glissando,
+        slur: slur || phrase.portamento,
         lastNoteSlur: lastNote && lastNote.slur,
         velocity: velocity
       };

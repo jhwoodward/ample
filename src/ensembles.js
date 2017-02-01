@@ -1,17 +1,23 @@
-var instruments = require('./instruments');
-
+var instruments = require('./instruments/all');
+var key = require('./rudiments').key;
 //player channel dictated by order
 var ensemble = {
   stringQuartet: {
     test: {
-      p1a: `1:48, C//_~b////////////////////////^`,
-      p2a: `0:48, E////////////_~dcba///////////^`,
-      p3a: `0:48, G/////////_~f/////////////////^`,
-      p4a: '-1:48, C/////_~G///////////f/d/_~g//^',
-      part1: `p1a p1a`,
-      part2: `p2a p2a`,
-      part3: `p3a p3a`,
-      part4: `p4a p4a`
+      conductor: {
+        28: key.fsharp,
+        56: key.aflat,
+        84: key.dflat,
+        112: key.cmaj
+      },
+      p1a: `1:48,  C//_~b  ////    ////    ////    ////  ////    ///^`,
+      p2a: `0:48,  E///    ////    ////    /_~dcb  a///  ////    ///^`,
+      p3a: `0:48,  G///    ////    //_~f/  ////    ////  ////    //^`,
+      p4a: '-1:48, C///    //_~G/  ////    ////    //f/  d/_~g/  //^',
+      part1: `p1a p1a p1a p1a p1a`,
+      part2: `p2a p2a p2a p2a p2a`,
+      part3: `p3a p3a p3a p3a p3a`,
+      part4: `p4a p4a p4a p4a p4a`
 
       /*
       part1: '{legato} 2:24,e~FGA -BCD  E/^>F~e/c/g/^',
@@ -20,30 +26,45 @@ var ensemble = {
       part4: '{legato} 12,0:e~FGA -BCD////  E/^>F~e/c/g/^'
       */
     },
-    performers: [
-      {
-        instrument: instruments.strings.violin,
-        annotations: instruments.strings.violin.annotations.triobroz
-      },
-      {
-        instrument: instruments.strings.violin,
-        annotations: instruments.strings.violin.annotations.friedlander
-      },
-      {
-        instrument: instruments.strings.viola,
-        annotations: instruments.strings.violin.annotations.triobroz
-      },  
-      {
-        instrument: instruments.strings.cello,
-        annotations: instruments.strings.cello.annotations.triobroz
-      }
-    ]
+    instruments: [
+      instruments.strings.violin,
+      instruments.strings.violin,
+      instruments.strings.viola, 
+      instruments.strings.cello,
+    ],
+    performers: {
+      triobroz:[ 
+        instruments.strings.violin.performers.triobroz,
+        instruments.strings.violin.performers.triobroz,
+        instruments.strings.viola.performers.triobroz,
+        instruments.strings.cello.performers.triobroz
+      ],
+      triobrozfried:[ 
+        instruments.strings.violin.performers.friedlander,
+        instruments.strings.violin.performers.triobroz,
+        instruments.strings.viola.performers.triobroz,
+        instruments.strings.cello.performers.triobroz
+      ],
+      cinestrings: [
+        instruments.strings.violin.performers.cinestrings,
+        instruments.strings.violin.performers.cinestrings,
+        instruments.strings.viola.performers.cinestrings,
+        instruments.strings.cello.performers.cinestrings
+      ],
+      sacconi: [
+        instruments.strings.violin.performers.sacconi,
+        instruments.strings.violin.performers.sacconi,
+        instruments.strings.viola.performers.sacconi,
+        instruments.strings.cello.performers.sacconi
+      ]
+    }
+
   },
   stringTrio: {
     test: {
 
     },
-    players: [
+    instruments: [
       instruments.strings.violin,
       instruments.strings.viola,
       instruments.strings.cello
@@ -53,7 +74,7 @@ var ensemble = {
     test: {
 
     },
-    players: [
+    instruments: [
       instruments.woodwind.clarinet,
       instruments.woodwind.bassoon,
       instruments.brass.horn,

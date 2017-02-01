@@ -27,22 +27,22 @@ var rules = {
 };
 
 var players = [
-  { part: 'player1', channel: 1},
-  { part: 'player2', channel: 3},
-  { part: 'player3', channel: 3}
+  { part: 'player1', channel: 1 },
+  { part: 'player2', channel: 3 },
+  { part: 'player3', channel: 3 }
 ];
 
 var conductor = {
   0: 'S(CEG)S',
   16: '5@ S(D+FAC)S',
- 32: 'S(F-ACD)S',
-  42: '0@ S(CEG)S', 
+  32: 'S(F-ACD)S',
+  42: '0@ S(CEG)S',
   60: 'S(C-EG-B)S',
   72: 'S(F-ACD)S',
-   84: '0@ S(CEG)S',
-   96: '5@ S(D+FAC)S',
-   100: '12@ S(F-ACD)S',
-   102:'S(CEG)S'
+  84: '0@ S(CEG)S',
+  96: '5@ S(D+FAC)S',
+  100: '12@ S(F-ACD)S',
+  102: 'S(CEG)S'
 }
 
 var parts = make({ name: 'john', players: players }, rules, conductor).play();

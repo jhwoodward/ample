@@ -1,12 +1,11 @@
 var utils = require('jsmidgen').Util;
 var _ = require('lodash');
 
-function parse(score, conductor, annotations) {
-  conductor = _.merge({}, conductor);
+function parse(score, conduct, annotations) {
+  var conductor = _.merge({}, conduct);
   var defaultExpression = {};
   if (annotations) {
-    defaultExpression = _.merge({}, annotations.default.expression);
-    
+    defaultExpression = _.merge({}, annotations.default.expression)
   }
 
   var messages = [];
@@ -25,7 +24,7 @@ function parse(score, conductor, annotations) {
       octaveReset: false,
       octaveBeforeKeySwitch: 0,
       octaveJump: 0
-    }, 
+    },
     key: {
       flats: [],
       sharps: [],
@@ -34,7 +33,7 @@ function parse(score, conductor, annotations) {
     expression: {
       note: {
         articulations: [],
-      //  dynamics: defaultExpression.dynamics || 90,
+        //  dynamics: defaultExpression.dynamics || 90,
         pitchbend: defaultExpression.pitchbend || 8192,
         velocity: defaultExpression.velocity || 90,
         controller: defaultExpression.controller || {},
@@ -44,7 +43,7 @@ function parse(score, conductor, annotations) {
       },
       phrase: {
         name: 'default',
-      //  dynamics: defaultExpression.dynamics || 90,
+        //  dynamics: defaultExpression.dynamics || 90,
         pitchbend: defaultExpression.pitchbend || 8192,
         velocity: defaultExpression.velocity || 90,
         controller: defaultExpression.controller || {},
@@ -83,10 +82,10 @@ function parse(score, conductor, annotations) {
     if (isTempo(state.parser, state.time)) continue;
     if (isVelocity(state.parser, state.expression)) continue;
     if (isPitchbend(state.parser, state.expression)) continue;
-   // if (isDynamics(state.parser, state.expression)) continue;
+    // if (isDynamics(state.parser, state.expression)) continue;
     if (isController(state.parser, state.expression)) continue;
     if (isAccidentalOrNumeric(state.parser, state.pitch)) continue;
-    if (isTranspose(state.parser,state.pitch)) continue;
+    if (isTranspose(state.parser, state.pitch)) continue;
     if (isBeatstep(state.parser, state.time)) continue;
     if (isArticulation(state.parser, state.expression, annotations)) continue;
     if (isOctave(state.parser, state.pitch)) continue;
@@ -228,7 +227,7 @@ function isColon(char) {
   return char === ':';
 }
 
-function isGlissando(char) {
+function isPortamento(char) {
   return char === '~';
 }
 
@@ -309,7 +308,7 @@ function parseChars(score, parser) {
   } else {
     parser.char4 = '';
   }
-    
+
   if (parser.cursor < score.length - 4) {
     parser.char5 = score[parser.cursor + 4];
   } else {
@@ -326,9 +325,10 @@ function parseChars(score, parser) {
 
 function spliceConductorInstructions(conductor, score, state) {
   var beat = Math.round(state.time.tick / 48);
-  if (conductor[beat] && !conductor[beat].sent) {
-    score = splice(player.score, state.parser.cursor, conductor[beat]);
-    conductor[beat].sent = true;
+  if (conductor[beat]) {
+    score = splice(score, state.parser.cursor, conductor[beat]);
+    console.log(score, 'spliced');
+    delete conductor[beat];
   }
   return score;
 }
@@ -438,10 +438,26 @@ function isAnnotation(score, parser, expression, annotations) {
   if (matchStart(parser.char)) {
 
     var annotation = getAnnotation(score, parser.cursor);
+
+    if (annotation.expression) {
+      expression.phrase = _.merge({}, annotations[annotation.name].expression);
+      expression.phrase.name = annotation.name;
+    }
+
+    if (annotation.animation) {
+      //if trigger = noteon attach animation to phrase
+      //otherwise push events relative to current time
+      /*
+      var event = {
+        controller: true,
+        time: ,
+        number: ,
+        value
   
-    expression.phrase = _.merge({},annotations[annotation.name].expression);
-    expression.phrase.name = annotation.name;
-   
+      }*/
+      // parsed.push(event);
+    }
+
     parser.cursor += annotation.length;
 
     return true;
@@ -575,7 +591,7 @@ function isController(parser, expression) {
   function matchPhrase(chars) {
     return chars === '==C';
   }
-  
+
   function matchNote(chars) {
     return chars === '=C';
   }
@@ -789,8 +805,8 @@ function isBeatstep(parser, time) {
 function isArticulation(parser, expression, annotations) {
 
   var articulation;
-  if (isGlissando(parser.char)) {
-    articulation = { name: 'glissando', expression: annotations.glissando.expression };
+  if (isPortamento(parser.char)) {
+    articulation = { name: 'portamento', expression: annotations.portamento.expression };
   }
 
   if (isLegato(parser.char)) {
@@ -865,7 +881,7 @@ function isOnOff(parser, expression) {
     return true;
   }
 
-   if (parser.char5 === '==OFF') {
+  if (parser.char5 === '==OFF') {
     if (parser.numbers.length) {
       expression.phrase.off = parseInt(parser.numbers.join(''), 10);
       parser.numbers = [];

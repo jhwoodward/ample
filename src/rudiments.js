@@ -16,10 +16,9 @@ module.exports =
       gmaj: 'K(+f)K', // e minor
       cmaj: 'K()K' //a minor
     },
-    chord: {
+    scale: {
       c7: 'S(CD-EEGA-B)S', //aminor
       f7: 'S(FG-AAC-E)S', //dminor
       g7: 'S(GA-BBDF)S' //gminor
-    },
-    scale: {}
+    }
   };

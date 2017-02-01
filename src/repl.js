@@ -5,7 +5,6 @@ var make = require('./ample').make;
 var fs = require('fs');
 var cp = require('child_process');
 var rudiments = require('./rudiments');
-var intruments = require('./instruments');
 var colors = require("colors");
 var ensembles = require("./ensembles");
 var _ = require('lodash');
@@ -13,54 +12,58 @@ var _ = require('lodash');
 var config = {};
 
 var ensemble = ensembles.stringQuartet;
+var performer = ensembles.stringQuartet.performers.triobrozfried;
 var players = [];
 var rules = {};
+var conductor = {};
+rules = _.merge(rules, rudiments.key);
+rules = _.merge(rules, rudiments.scale);
 setupEnsemble();
 function setupEnsemble() {
-  rules = ensemble.test;
-  players = ensemble.performers.map(function(performer, i){
+  conductor = ensemble.test.conductor;
+  rules = _.merge(rules, ensemble.test);
+  delete rules.conductor;
+  players = ensemble.instruments.map(function(instrument, i){
     return {
-      name: `${performer.instrument.name} (${performer.annotations.name})`,
+      name: `${instrument.name} (${performer[i].name})`,
       part: 'part' + (i+1),
       channel: i,
-      annotations: performer.annotations
+      annotations: performer[i]
     };
   });
 }
 
 //create 'demo' parts for each player in the ensemble from the instrument test parts
 function setupTest() {
-  ensemble.performers.forEach(function (performer, i) {
-    
-
+  ensemble.instruments.forEach(function (instrument, i) {
     var part = '', arrParts = [];
     var uniqueKey;
-    for (var kr in performer.instrument.test.rules) {
+    for (var kr in instrument.test.rules) {
       uniqueKey = i + '_' + kr;
-      performer.instrument.test.rules[uniqueKey] = performer.instrument.test.rules[kr];
-      delete performer.instrument.test.rules[kr];
+      instrument.test.rules[uniqueKey] = instrument.test.rules[kr];
+      delete instrument.test.rules[kr];
       var re = new RegExp(kr + '(?![^{]*})', 'g');
-      for (var kp in performer.instrument.test.parts) {
-        performer.instrument.test.parts[kp] = performer.instrument.test.parts[kp].replace(re, uniqueKey);
+      for (var kp in instrument.test.parts) {
+        instrument.test.parts[kp] = instrument.test.parts[kp].replace(re, uniqueKey);
       }
     }
 
     var cnt = 0;
-    for (var key in performer.instrument.test.parts) {
+    for (var key in instrument.test.parts) {
       uniqueKey = i.toString() + cnt.toString() + '_' + key;
-      performer.instrument.test.parts[uniqueKey] = performer.instrument.test.parts[key];
-      delete performer.instrument.test.parts[key];
+      instrument.test.parts[uniqueKey] = instrument.test.parts[key];
+      delete instrument.test.parts[key];
       arrParts.push(uniqueKey);
       cnt += 1;
     }
-    rules = _.merge(rules, performer.instrument.test.parts, performer.instrument.test.rules);
+    rules = _.merge(rules, instrument.test.parts, instrument.test.rules);
     part = arrParts.join(' ');
 
     players.push({
-      parts: performer.instrument.test.parts,
+      parts: instrument.test.parts,
       part: part,
       channel: i,
-      annotations: performer.annotations
+      annotations: performer[i]
     });
   });
 }
@@ -124,12 +127,12 @@ function play(cmd, callback) {
     player = players[playerId];
   }
   console.log(player, 'player');
-  make({ name: 'repl', players: [player] }, rules).play();
+  make({ name: 'repl', players: [player] }, rules, conductor).play();
   callback('\n');
 }
 
 function run(callback) {
-  make({ name: 'repl', players: players }, rules).play();
+  make({ name: 'repl', players: players }, rules, conductor).play();
   callback('\n');
 }
 

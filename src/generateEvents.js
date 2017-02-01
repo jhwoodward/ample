@@ -4,7 +4,9 @@ function generateEvents(player, parsed) {
 
   var events = [], oninfo, offinfo;
   setDefaultExpression(player);
-  parsed.forEach(function (event, i) {
+  parsed
+  .filter(function(event){ return event.noteon || event.noteoff})
+  .forEach(function (event, i) {
     event.next = i < parsed.length ? parsed[i + 1] : undefined;
     event.prev = i > 0 ? parsed[i - 1] : undefined;
     process(event);
@@ -97,7 +99,6 @@ function generateEvents(player, parsed) {
       { for: name, note: true });
 
     for (var key in exp.controller) {
-      console.log(event,'cc')
       setCC(event.on-1,
         parseInt(key, 10),
         exp.controller[key],
@@ -161,12 +162,11 @@ function generateEvents(player, parsed) {
   }
 
   function setDefaultExpression(player) {
-    console.log('SET DEFAULT EXP',player)
+
     var phrase = _.merge({}, player.annotations.default.expression);
     var info = { for:'default', phrase:true };
     setPitchbend(0, phrase.pitchbend, info);
     if (phrase.keyswitch) {
-      console.log('set default keyswitch', phrase.keyswitch)
       setKeyswitch(0, phrase.keyswitch, info);
     }
     for (var key in phrase.controller) {

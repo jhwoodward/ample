@@ -56,14 +56,14 @@ function make(song, rules, conductor, iterations) {
   var results = makeSong(song, rules, conductor, iterations);
 
   return {
-    play: function () {
+    play: function (startBeat, endBeat) {
       var allMidi = [];
       results.forEach(function (result) {
         allMidi = allMidi.concat(result.midi);
         console.log(result.player.part + ' -> ' + result.player.score);
 
       });
-      seq.send(allMidi);
+      seq.start(allMidi, startBeat, endBeat);
       return results;
     }
   }

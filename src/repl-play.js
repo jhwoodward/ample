@@ -8,72 +8,17 @@ var rudiments = require('./rudiments');
 var colors = require("colors");
 var ensembles = require("./ensembles");
 var _ = require('lodash');
+var argv = require('yargs').argv;
+//var watcher = require('filewatcher')();
 var seq = require('./seq');
 
 var config = {};
 
-var ensemble = ensembles.stringQuartet;
-var performer = ensembles.stringQuartet.performers.sacconi.playable;
-var players = [];
-var rules = {};
-var conductor = {};
-rules = _.merge(rules, rudiments.key);
-rules = _.merge(rules, rudiments.scale);
-setupEnsembleTest();
-function setupEnsembleTest() {
-  conductor = ensemble.test.conductor;
-  rules = _.merge(rules, ensemble.test);
-  delete rules.conductor;
-  players = ensemble.instruments.map(function(instrument, i){
-    return {
-      name: `${instrument.name} (${performer[i].name})`,
-      part: 'part' + (i+1),
-      channel: i,
-      annotations: performer[i]
-    };
-  });
+var players, rules, conductor;
+
+if (argv.load) {
+  load(argv.load);
 }
-
-//create 'demo' parts for each player in the ensemble from the instrument test parts
-function setupInstrumentTest() {
-  ensemble.instruments.forEach(function (instrument, i) {
-    var part = '', arrParts = [];
-    var uniqueKey;
-    for (var kr in instrument.test.rules) {
-      uniqueKey = i + '_' + kr;
-      instrument.test.rules[uniqueKey] = instrument.test.rules[kr];
-      delete instrument.test.rules[kr];
-      var re = new RegExp(kr + '(?![^{]*})', 'g');
-      for (var kp in instrument.test.parts) {
-        instrument.test.parts[kp] = instrument.test.parts[kp].replace(re, uniqueKey);
-      }
-    }
-
-    var cnt = 0;
-    for (var key in instrument.test.parts) {
-      uniqueKey = i.toString() + cnt.toString() + '_' + key;
-      instrument.test.parts[uniqueKey] = instrument.test.parts[key];
-      delete instrument.test.parts[key];
-      arrParts.push(uniqueKey);
-      cnt += 1;
-    }
-    rules = _.merge(rules, instrument.test.parts, instrument.test.rules);
-    part = arrParts.join(' ');
-
-    players.push({
-      parts: instrument.test.parts,
-      part: part,
-      channel: i,
-      annotations: performer[i]
-    });
-  });
-}
-
-
-
-console.log(players, 'players');
-console.log(rules, 'rules');
-
 
 function set(cmd, callback) {
   var s = cmd.replace('set ', '');
@@ -110,30 +55,42 @@ function generate(cmd, callback) {
   }
 
 }
-
 function play(cmd, callback) {
-  var player;
-  var args = cmd.replace('play ', '').split(' ');
-  var playerId = parseInt(args[0], 10) - 1;
+  var args = getArgs(cmd);
 
-  if (args.length > 1) {
-    var part = args[1].trim();
-    player = Object.assign({}, players[playerId]);
-    for (var key in player.parts) {
-      if (key.indexOf(part) > -1) {
-        player.part = player.parts[key];
-      }
+  var playerIds = args.parts.split(',').map(function (i) {
+    if (!isNaN(i)) {
+      return parseInt(i, 10) - 1;
+    } else {
+      return i;
     }
-  } else {
-    player = players[playerId];
-  }
-  console.log(player, 'player');
-  make({ name: 'repl', players: [player] }, rules, conductor).play();
+  });
+
+  var filteredPlayers = players.filter(function (player, i) {
+    return playerIds.indexOf(player.part) > -1 || playerIds.indexOf(i) > -1;
+  });
+
+  make({ name: 'repl', players: filteredPlayers }, rules, conductor).play(args.from, args.to);
   callback('\n');
 }
 
-function run(callback) {
-  make({ name: 'repl', players: players }, rules, conductor).play();
+function getArgs(cmd){
+  var bits = cmd.split(' ');
+  var args = bits.filter(function(bit){ return bit.indexOf('--') === 0; });
+  var out = {};
+  args.forEach(function(arg){
+    var kv = arg.split('=');
+    if (!isNaN(kv[1])) {
+      kv[1] = parseInt(kv[1],10);
+    }
+    out[kv[0].replace('--','')] = kv[1];
+  });
+  return out;
+}
+
+function run(cmd, callback) {
+  var args = getArgs(cmd);
+  make({ name: 'repl', players: players }, rules, conductor).play(args.from, args.to);
   callback('\n');
 }
 
@@ -147,6 +104,84 @@ function use(cmd, callback) {
   } else {
     callback(`No rule found called ${rule}`.red);
   }
+}
+
+/*
+watcher.on('change', function (file, stat) {
+  console.log('File modified: %s', file);
+  if (!stat) console.log('deleted');
+});
+*/
+
+var filename;
+function load(cmd, callback) {
+  unwatch(filename);
+  if (filename) {
+    watcher.remove(filename);
+  }
+  if (cmd.indexOf('load') === 0) {
+    filename = cmd.replace('load', '').trim()
+  } else {
+    filename = cmd;
+  }
+  var out;
+  try {
+    var loaded = require('../repl/' + filename);
+    players = loaded.players;
+    rules = loaded.rules;
+    conductor = loaded.conductor;
+
+    watch(filename);
+
+    out = `Loaded ${filename} & watching...`.green;
+
+  } catch (e) {
+    out = `Error in file ${filename}`.red;
+  }
+
+  if (callback) {
+    callback(out);
+  } else {
+    console.log(out);
+  }
+}
+
+function watch(filename) {
+  filename = `./repl/${filename}.js`;
+  fs.watchFile(filename, (curr, prev) => {
+    reload();
+  });
+}
+
+function unwatch(filename) {
+  if (filename) {
+    filename = `./repl/${filename}.js`;
+    fs.unwatchFile(filename);
+  }
+
+}
+
+function reload(callback) {
+  if (!filename) { callback('No file loaded'.red); }
+  var out;
+  try {
+    delete require.cache[require.resolve('../repl/' + filename)]
+    var loaded = require('../repl/' + filename);
+    players = loaded.players;
+    rules = loaded.rules;
+    conductor = loaded.conductor;
+    out = `Reloaded ${filename}.`.green;
+  } catch (e) {
+    out = `Error in file ${filename}`.red;
+  }
+
+  if (callback) {
+    callback(out);
+  } else {
+    console.log(out);
+  }
+
+
 }
 
 function save(cmd, callback) {
@@ -166,7 +201,7 @@ function save(cmd, callback) {
       fs.writeFile('./repl/' + filename + '.config.json', JSON.stringify(config, null, 2));
     }
     fs.writeFile('./repl/' + filename + '.js', sReq + sRules + sConductor + sPlayers + sMake, function () {
-      callback('Saved');
+      callback('Saved'.green);
     });
 
   }
@@ -175,14 +210,26 @@ function save(cmd, callback) {
 var defaultPlayer = 0; //the default player (channel) when typing notes straight into the repl
 function myEval(cmd, context, filename, callback) {
 
-  if (cmd.indexOf('rules') === 0) {
+  if (cmd === '\n') {
+    seq.stop();
+    callback();
+  }
+  else if (cmd.indexOf('rules') === 0) {
     callback(null, rules);
   } else if (cmd.indexOf('set') === 0) {
     set(cmd, callback);
   } else if (cmd.indexOf('run') === 0) {
-    run(callback);
+    run(cmd, callback);
   } else if (cmd.indexOf('save') === 0) {
     save(cmd, callback);
+  } else if (cmd.indexOf('load') === 0) {
+    load(cmd, callback);
+  }
+    else if (cmd.indexOf('stop') === 0) {
+    seq.stop();
+  
+  } else if (cmd.indexOf('reload') === 0) {
+    reload(callback);
   } else if (cmd.indexOf('gen') === 0) {
     generate(cmd, callback);
   } else if (cmd.indexOf('use') === 0) {
@@ -195,11 +242,11 @@ function myEval(cmd, context, filename, callback) {
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
-      console.log(cmd,'cmd');
+      console.log(cmd, 'cmd');
       var player = players[defaultPlayer];
       player.part = cmd;
       console.log(player);
-      var results = make({name: 'repl',players:[player]}, rules).play();
+      var results = make({ name: 'repl', players: [player] }, rules).play();
       var parts = results.map(function (result) { return result.part; });
       callback(parts);
     } else {

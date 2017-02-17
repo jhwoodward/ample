@@ -1,3 +1,6 @@
+var rudiments = require('./rudiments');
+var _ = require('lodash');
+
 
 function gcd2(x, y) {
   if ((typeof x !== 'number') || (typeof y !== 'number'))
@@ -54,6 +57,58 @@ var api = {
       a = gcd2(a, b);
     }
     return a;
+  },
+  playersFromEnsemble: function(ensemble, performer, instrumentPartNames) {
+
+    var partNames = [];
+    if (instrumentPartNames) {
+      ensemble.instruments.forEach(function(ins) {
+        partNames.push(ins.name);
+      });
+      partNames.forEach(function(n){
+        if (partNames.filter(function(n2){return n2 === n}).length > 1) {
+          addCountToName(n);
+        }
+      });
+    }
+    function addCountToName(n) {
+      var count = 0;
+      partNames.forEach(function(name,i){
+        if (name === n) {
+          count +=1;
+          partNames[i]  += count;
+        }
+      
+      });
+    }
+
+    return ensemble.instruments.map(mapInstrumentToChannelAndPart);
+    var instruments = {};
+    function mapInstrumentToChannelAndPart(instrument, i) {
+
+
+      return {
+        name: `${instrument.name} (${performer[i].name})`,
+        part: instrumentPartNames ? partNames[i] : 'part' + i,
+        channel: i,
+        annotations: performer[i]
+      };
+    }
+  },
+  addPlayer: function(players, performer, part) {
+    players = players || [];
+    var player = {
+      name: performer.name,
+      part: part || 'part' + (players.length+1),
+      channel: players.length,
+      annotations: performer
+    };
+    players.push(player);
+    return players;
+  },
+  addRudiments(rules) {
+    rules = _.merge(rules, rudiments.key);
+    rules = _.merge(rules, rudiments.scale);
   }
 };
 

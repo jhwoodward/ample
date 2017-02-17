@@ -19,74 +19,96 @@ module.exports = {
     portamento: '0=P'
   },
   sacconi: {
-    name: 'sacconi',
+    playable: {
+      name: 'sacconi-playable',
+      vibrato: {
+        trigger: 'noteon',
+        c: 103,
+        values: {
+          0: 0,
+          48: 100
+        }
+      },
+      swellnote: {
+        trigger: 'noteon',
+        c: 11,
+        values: {
+          12: '+10',
+          24: '+10',
+          48: '+10',
+          72: '-10',
+          84: '-10',
+          96: '-10'
+        }
+      },
+      swellphrase96: {
+        // trigger: 'noteon',
+        c: 11,
+        values: {
+          12: '+10',
+          24: '+10',
+          36: '+10',
+          48: '+10',
+          60: '-10',
+          72: '-10',
+          84: '-10',
+          96: '-10'
+        }
+      },
+      swellphrase192: {
+        // trigger: 'noteon',
+        c: 11,
+        values: {
+          24: '+10',
+          48: '+10',
+          72: '+10',
+          96: '+10',
+          120: '-10',
+          144: '-10',
+          168: '-10',
+          196: '-10'
+        }
+      },
+      /*
+        dynamics: C11 mod wheel
+        vibrato: C104
+        expression: expression pedal
+        portamento: low velocity
+      */
+      //  default: '100=V 100=C1 0=C14 0=C15  -10=ON 1=OFF  ',
+      default: {
+        velocity: 100,
+        controller: { 1: 100, 14: 0, 15: 0 },
+        on: -10,
+        off: 1
+      },
+      //  portamento: '10=V'
+      portamento: {
+        velocity: 10
+      }
+    },
 
-    vibrato: {
-      trigger: 'noteon',
-      c: 103,
-      values: {
-        0: 0,
-        48: 100
-      }
-    },
-    swellnote: {
-      trigger: 'noteon',
-      c: 11,
-      values: {
-        12: '+10',
-        24: '+10',
-        48: '+10',
-        72: '-10',
-        84: '-10',
-        96: '-10'
-      }
-    },
-    swellphrase96: {
-      // trigger: 'noteon',
-      c: 11,
-      values: {
-        12: '+10',
-        24: '+10',
-        36: '+10',
-        48: '+10',
-        60: '-10',
-        72: '-10',
-        84: '-10',
-        96: '-10'
-      }
-    },
-    swellphrase192: {
-      // trigger: 'noteon',
-      c: 11,
-      values: {
-        24: '+10',
-        48: '+10',
-        72: '+10',
-        96: '+10',
-        120: '-10',
-        144: '-10',
-        168: '-10',
-        196: '-10'
-      }
-    },
-    /*
-      dynamics: C11 mod wheel
-      vibrato: C104
-      expression: expression pedal
-      portamento: low velocity
-    */
-    //  default: '100=V 100=C1 0=C14 0=C15  -10=ON 1=OFF  ',
-    default: {
-      velocity: 100,
-      controller: { 1: 100, 14: 0, 15: 0 },
-      on: -10,
-      off: 1
-    },
-    //  portamento: '10=V'
-    portamento: {
-      velocity: 10
+    individual: {
+      name: 'sacconi-individual',
+      default: '90=V',
+      accent: '120=V',
+      spiccato: '[-3:C]',
+      staccato: '[-3:+C]',
+      pizzicato: '[-3:D]',
+      pizzbartok: '[-3:+D]',
+      collegno: '[-3:E]',
+      harmshort: '[-3:F]',
+      long: '[-3:+F]',
+      marcato: '[-3:G]',
+      flautlong: '[-3:+G]',
+      harmlong: '[-3:A]',
+      tremolo: '[-3:-B]',
+      trem2: '[-3:B]',
+      trillmin: '[-2:C]',
+      trillmaj: '[-2:+C]'
     }
-  },
+  }
+  ,
   cinestrings: {
     name: 'cinestrings'
   }

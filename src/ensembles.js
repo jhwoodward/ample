@@ -29,17 +29,17 @@ var ensemble = {
     instruments: [
       instruments.strings.violin,
       instruments.strings.violin,
-      instruments.strings.viola, 
+      instruments.strings.viola,
       instruments.strings.cello,
     ],
     performers: {
-      triobroz:[ 
+      triobroz: [
         instruments.strings.violin.performers.triobroz,
         instruments.strings.violin.performers.triobroz,
         instruments.strings.viola.performers.triobroz,
         instruments.strings.cello.performers.triobroz
       ],
-      triobrozfried:[ 
+      triobrozfried: [
         instruments.strings.violin.performers.friedlander,
         instruments.strings.violin.performers.triobroz,
         instruments.strings.viola.performers.triobroz,
@@ -51,12 +51,20 @@ var ensemble = {
         instruments.strings.viola.performers.cinestrings,
         instruments.strings.cello.performers.cinestrings
       ],
-      sacconi: [
-        instruments.strings.violin.performers.sacconi,
-        instruments.strings.violin.performers.sacconi,
-        instruments.strings.viola.performers.sacconi,
-        instruments.strings.cello.performers.sacconi
-      ]
+      sacconi: {
+        playable: [
+          instruments.strings.violin.performers.sacconi.playable,
+          instruments.strings.violin.performers.sacconi.playable,
+          instruments.strings.viola.performers.sacconi.playable,
+          instruments.strings.cello.performers.sacconi.playable
+        ],
+        individual: [
+          instruments.strings.violin.performers.sacconi.individual,
+          instruments.strings.violin.performers.sacconi.individual,
+          instruments.strings.viola.performers.sacconi.individual,
+          instruments.strings.cello.performers.sacconi.individual
+        ]
+      }
     }
 
   },

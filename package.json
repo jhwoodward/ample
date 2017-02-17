@@ -11,10 +11,13 @@
   "dependencies": {
     "colors": "^1.1.2",
     "easymidi": "0.0.2",
+    "filewatcher": "^3.0.1",
     "jsmidgen": "^0.1.5",
     "lodash": "^4.17.4",
     "midi": "^0.9.5",
+    "nodemon": "^1.11.0",
     "pad": "^1.0.2",
-    "prompt": "^1.0.0"
+    "prompt": "^1.0.0",
+    "yargs": "^6.6.0"
   }
 }

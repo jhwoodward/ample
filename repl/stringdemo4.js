@@ -23,9 +23,9 @@ var rules = {
 };
 
 var conductor = {
-  0: key.bflat,
-  16: key.fsharp,
-  28: key.dmaj,
+  0: key.bflat + ' 144=T',
+  16: key.fsharp + ' 113=T',
+  28: key.dmaj + ' 153=T',
   32: key.aflat,
   48: key.dflat,
   64: key.cmaj

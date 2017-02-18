@@ -69,12 +69,6 @@ function setupInstrumentTest() {
   });
 }
 
-
-
-console.log(players, 'players');
-console.log(rules, 'rules');
-
-
 function set(cmd, callback) {
   var s = cmd.replace('set ', '');
   var key = s.split('=')[0].trim();
@@ -127,7 +121,7 @@ function play(cmd, callback) {
   } else {
     player = players[playerId];
   }
-  console.log(player, 'player');
+
   make({ name: 'repl', players: [player] }, rules, conductor).play();
   callback('\n');
 }
@@ -195,10 +189,10 @@ function myEval(cmd, context, filename, callback) {
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
-      console.log(cmd,'cmd');
+
       var player = players[defaultPlayer];
       player.part = cmd;
-      console.log(player);
+
       var results = make({name: 'repl',players:[player]}, rules).play();
       var parts = results.map(function (result) { return result.part; });
       callback(parts);

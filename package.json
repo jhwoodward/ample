@@ -13,6 +13,7 @@
     "easymidi": "0.0.2",
     "filewatcher": "^3.0.1",
     "jsmidgen": "^0.1.5",
+    "keypress": "^0.2.1",
     "lodash": "^4.17.4",
     "midi": "^0.9.5",
     "nodemon": "^1.11.0",

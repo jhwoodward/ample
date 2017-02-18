@@ -327,7 +327,6 @@ function spliceConductorInstructions(conductor, score, state) {
   var beat = Math.round(state.time.tick / 48);
   if (conductor[beat]) {
     score = splice(score, state.parser.cursor, conductor[beat]);
-    console.log(score, 'spliced');
     delete conductor[beat];
   }
   return score;
@@ -492,9 +491,7 @@ function isAnnotation(score, parser, expression, annotations) {
 
 function isTempo(parser, time) {
   if (!match(parser.char2)) return false;
-
   time.tempo = parseInt(parser.numbers.join(''), 10);
-  sendTempo(tempo);
   parser.numbers = [];
   parser.cursor += 2;
   return true;

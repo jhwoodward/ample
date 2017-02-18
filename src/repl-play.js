@@ -57,39 +57,45 @@ function generate(cmd, callback) {
 }
 function play(cmd, callback) {
   var args = getArgs(cmd);
+  var filteredPlayers;
+  if (args.parts) {
+    var playerIds = args.parts.split(',').map(function (i) {
+      if (!isNaN(i)) {
+        return parseInt(i, 10) - 1;
+      } else {
+        return i;
+      }
+    });
 
-  var playerIds = args.parts.split(',').map(function (i) {
-    if (!isNaN(i)) {
-      return parseInt(i, 10) - 1;
-    } else {
-      return i;
-    }
-  });
+    filteredPlayers = players.filter(function (player, i) {
+      return playerIds.indexOf(player.part) > -1 || playerIds.indexOf(i) > -1;
+    });
+  } else {
+    filteredPlayers = players;
+  }
 
-  var filteredPlayers = players.filter(function (player, i) {
-    return playerIds.indexOf(player.part) > -1 || playerIds.indexOf(i) > -1;
-  });
 
   make({ name: 'repl', players: filteredPlayers }, rules, conductor).play(args.from, args.to);
   callback('\n');
 }
 
-function getArgs(cmd){
+function getArgs(cmd) {
   var bits = cmd.split(' ');
-  var args = bits.filter(function(bit){ return bit.indexOf('--') === 0; });
+  var args = bits.filter(function (bit) { return bit.indexOf('--') === 0; });
   var out = {};
-  args.forEach(function(arg){
+  args.forEach(function (arg) {
     var kv = arg.split('=');
     if (!isNaN(kv[1])) {
-      kv[1] = parseInt(kv[1],10);
+      kv[1] = parseInt(kv[1], 10);
     }
-    out[kv[0].replace('--','')] = kv[1];
+    out[kv[0].replace('--', '')] = kv[1];
   });
   return out;
 }
 
 function run(cmd, callback) {
   var args = getArgs(cmd);
+
   make({ name: 'repl', players: players }, rules, conductor).play(args.from, args.to);
   callback('\n');
 }
@@ -210,11 +216,7 @@ function save(cmd, callback) {
 var defaultPlayer = 0; //the default player (channel) when typing notes straight into the repl
 function myEval(cmd, context, filename, callback) {
 
-  if (cmd === '\n') {
-    seq.stop();
-    callback();
-  }
-  else if (cmd.indexOf('rules') === 0) {
+  if (cmd.indexOf('rules') === 0) {
     callback(null, rules);
   } else if (cmd.indexOf('set') === 0) {
     set(cmd, callback);
@@ -224,10 +226,6 @@ function myEval(cmd, context, filename, callback) {
     save(cmd, callback);
   } else if (cmd.indexOf('load') === 0) {
     load(cmd, callback);
-  }
-    else if (cmd.indexOf('stop') === 0) {
-    seq.stop();
-  
   } else if (cmd.indexOf('reload') === 0) {
     reload(callback);
   } else if (cmd.indexOf('gen') === 0) {
@@ -242,10 +240,10 @@ function myEval(cmd, context, filename, callback) {
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
-      console.log(cmd, 'cmd');
+    
       var player = players[defaultPlayer];
       player.part = cmd;
-      console.log(player);
+     
       var results = make({ name: 'repl', players: [player] }, rules).play();
       var parts = results.map(function (result) { return result.part; });
       callback(parts);

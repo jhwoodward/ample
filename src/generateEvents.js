@@ -5,12 +5,14 @@ function generateEvents(player, parsed) {
   var events = [], oninfo, offinfo;
   setDefaultExpression(player);
   parsed
-  .filter(function(event){ return event.noteon || event.noteoff})
-  .forEach(function (event, i) {
-    event.next = i < parsed.length ? parsed[i + 1] : undefined;
-    event.prev = i > 0 ? parsed[i - 1] : undefined;
-    process(event);
-  });
+    .filter(function(event){ return event.noteon || event.noteoff})
+    .forEach(function (event, i) {
+      event.next = i < parsed.length ? parsed[i + 1] : undefined;
+      event.prev = i > 0 ? parsed[i - 1] : undefined;
+      process(event);
+    });
+
+
   return events;
 
   function process(event) {
@@ -24,6 +26,10 @@ function generateEvents(player, parsed) {
      */
     oninfo = {};
     offinfo = {};
+
+    if (!event.prev || event.prev.time.tempo !== event.time.tempo) {
+      setTempo(event.time);
+    }
 
     if (event.noteon) {
       event.on = event.time.tick;
@@ -203,6 +209,14 @@ function generateEvents(player, parsed) {
       char: event.pitch.char,
       duration: event.off - event.on,
       info: info.for
+    });
+  }
+
+  function setTempo(time) {
+    events.push({
+      type: 'tempo',
+      tick: time.tick,
+      tempo: time.tempo
     });
   }
 

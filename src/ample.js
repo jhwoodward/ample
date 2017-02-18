@@ -60,7 +60,6 @@ function make(song, rules, conductor, iterations) {
       var allMidi = [];
       results.forEach(function (result) {
         allMidi = allMidi.concat(result.midi);
-        console.log(result.player.part + ' -> ' + result.player.score);
 
       });
       seq.start(allMidi, startBeat, endBeat);

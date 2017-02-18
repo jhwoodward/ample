@@ -50,10 +50,6 @@ function send(player, conductor) {
     expression: defaultExpression
   }
 
-  console.log(defaultExpression)
-
-
-
   for (var key in player.annotations) {
     if (key !== 'default') {
       var expression, animation;

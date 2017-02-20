@@ -135,7 +135,7 @@ function logInfo(event) {
   var data = [];
   var color;
   var log = '';
-  var beat = Math.round(event.tick / 48);
+  var beat = Math.floor(event.tick / 48);
 
   switch (event.type) {
     case 'noteon':
@@ -199,7 +199,7 @@ function logInfo(event) {
 
 function logPianoRoll() {
 
-  var beat = Math.round(tick / 48);
+  var beat = Math.floor(tick / 48);
 
   var showBeat = !prLastBeat || beat !== prLastBeat;
   prLastBeat = beat;
@@ -288,11 +288,12 @@ var api = {
     process.stdin.on('keypress', onKeyPress);
     var startTick = -1;
     if (startBeat) {
-      startTick = (parseInt(startBeat, 10) * 48) - 1;
+      startTick = (parseInt(startBeat, 10) * 48) - 12;
     }
     if (endBeat) {
       endTick = (parseInt(endBeat, 10) * 48);
     }
+    console.log('\n\n\n');
 
     stopped = false;
     paused = false;

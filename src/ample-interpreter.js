@@ -50,6 +50,7 @@ function send(player, conductor) {
     expression: defaultExpression
   }
 
+  
   for (var key in player.annotations) {
     if (key !== 'default') {
       var expression, animation;
@@ -77,6 +78,8 @@ function send(player, conductor) {
 
     }
   }
+
+ 
 
 
   var parsed = parse(player.score, conductor, player.annotations);

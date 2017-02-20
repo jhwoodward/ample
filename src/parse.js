@@ -324,7 +324,7 @@ function parseChars(score, parser) {
 }
 
 function spliceConductorInstructions(conductor, score, state) {
-  var beat = Math.round(state.time.tick / 48);
+  var beat = Math.floor(state.time.tick / 48);
   if (conductor[beat]) {
     score = splice(score, state.parser.cursor, conductor[beat]);
     delete conductor[beat];
@@ -438,12 +438,12 @@ function isAnnotation(score, parser, expression, annotations) {
 
     var annotation = getAnnotation(score, parser.cursor);
 
-    if (annotation.expression) {
+    if (annotations[annotation.name] && annotations[annotation.name].expression) {
       expression.phrase = _.merge({}, annotations[annotation.name].expression);
       expression.phrase.name = annotation.name;
     }
 
-    if (annotation.animation) {
+    if (annotations[annotation.name] && annotations[annotation.name].animation) {
       //if trigger = noteon attach animation to phrase
       //otherwise push events relative to current time
       /*

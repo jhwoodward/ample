@@ -90,12 +90,12 @@ module.exports = {
 
     individual: {
       name: 'sacconi-individual',
-      default: '90=V',
+      default: '90=V 100=C11 100=C1',
       accent: '120=V',
       spiccato: '[-3:C]',
       staccato: '[-3:+C]',
       pizzicato: '[-3:D]',
-      pizzbartok: '[-3:+D]',
+      bartok: '[-3:+D]',
       collegno: '[-3:E]',
       harmshort: '[-3:F]',
       long: '[-3:+F]',

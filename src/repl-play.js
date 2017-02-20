@@ -58,14 +58,20 @@ function generate(cmd, callback) {
 function play(cmd, callback) {
   var args = getArgs(cmd);
   var filteredPlayers;
+  var playerIds;
   if (args.parts) {
-    var playerIds = args.parts.split(',').map(function (i) {
-      if (!isNaN(i)) {
-        return parseInt(i, 10) - 1;
-      } else {
-        return i;
-      }
-    });
+    if (!isNaN(args.parts)) {
+      playerIds = [args.parts -1];
+    } else {
+      playerIds = args.parts.split(',').map(function (i) {
+        if (!isNaN(i)) {
+          return parseInt(i, 10) - 1;
+        } else {
+          return i;
+        }
+      });
+    }
+    console.log(playerIds);
 
     filteredPlayers = players.filter(function (player, i) {
       return playerIds.indexOf(player.part) > -1 || playerIds.indexOf(i) > -1;
@@ -240,10 +246,10 @@ function myEval(cmd, context, filename, callback) {
   } else {
     cmd = cmd.replace(/\/n/g, '').trim();
     if (cmd) {
-    
+
       var player = players[defaultPlayer];
       player.part = cmd;
-     
+
       var results = make({ name: 'repl', players: [player] }, rules).play();
       var parts = results.map(function (result) { return result.part; });
       callback(parts);

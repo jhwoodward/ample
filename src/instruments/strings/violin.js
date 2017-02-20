@@ -47,7 +47,7 @@ var performers = {
     staccato / spiccato: ks -1:A
     sustain (must be on for legato): ks -1:G
     */
-    default: '[-1:F] 100=V 100=C1 0=C14 0=C15  -10=ON 1=OFF  ',
+    default: '[-1:F] 80=V 100=C1 0=C14 0=C15  -10=ON 1=OFF  ',
     legatoslow: '[-1:G] 127=C15 -13=ON 1=OFF 0=C17',
     legato: '[-1:G] 127=C15 -10=ON 1=OFF 80=C17',
     detached: '[-1:G]  0=C15 0=ON  -7=OFF',

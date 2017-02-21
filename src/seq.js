@@ -2,6 +2,8 @@ var easymidi = require('easymidi');
 var output = new easymidi.Output('IAC Driver Bus 1');
 var colors = require('colors');
 var pad = require('pad');
+var NanoTimer = require('nanotimer');
+var timer = new NanoTimer();
 //var keypress = require('keypress');
 
 var stopped = false;
@@ -13,7 +15,7 @@ var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = 
 var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
 function allNotesOff() {
 
-  setTimeout(offAll, 1);
+  offAll();
   function off() {
     for (var i = 0; i < 10; i++) {
       for (var channelKey in noteState) {
@@ -73,10 +75,12 @@ function resetNoteState() {
   }
 }
 
-var interval = 10;
+var interval = 10000;
 var tick = -1, endTick, maxTick, lastBeat, prLastBeat;
 var timeout;
 function onTick() {
+  if (stopped || paused) return;
+
   tick++;
 
   if (tick === 0) {
@@ -85,6 +89,8 @@ function onTick() {
   }
 
   indexed[tick].forEach(function (event) {
+
+  
 
     if (event.type === 'noteon') {
       noteState[event.channel][event.pitch] = true;
@@ -95,7 +101,14 @@ function onTick() {
     //  logInfo(event);
 
     if (event.type === 'tempo') {
-      interval = 1000 / (event.tempo * 0.8);
+  
+      var newInterval = Math.round(1000000 / (event.tempo * 0.8));
+      if (newInterval !== interval) {
+        interval = newInterval;
+        timer.clearInterval();
+        timer.setInterval(onTick,'', interval + 'u');
+      }
+     
     } else if (!event.sent) {
       output.send(event.type, {
         value: event.value,
@@ -119,7 +132,8 @@ function onTick() {
 
 
   if (tick < maxTick && (!endTick || tick < endTick) && !stopped && !paused) {
-    timeout = setTimeout(onTick, interval);
+
+
   } else if (!paused) {
     if (endTick < maxTick) {
       api.stop();
@@ -257,33 +271,33 @@ function logPianoRoll() {
 
 var api = {
   stop: function () {
-    var wasPlaying = !stopped;
+    timer.clearInterval();
     stopped = true;
     allNotesOff();
     console.log(sStopped);
     console.log('\n');
     process.stdin.removeListener('keypress', onKeyPress);
-
-    return wasPlaying;
   },
   end: function () {
+    timer.clearInterval();
     console.log(sEnd);
     console.log('\n');
     stopped = true;
   },
   togglePause: function () {
     paused = !paused;
-    if (!paused) {
-      setTimeout(onTick, interval);
-    } else {
+    if (paused) {
+      timer.clearInterval();
       allNotesOff();
       console.log(sPaused);
+    } else {
+      timer.setInterval(onTick,'', interval + 'u');
     }
 
   },
   start: function (events, startBeat, endBeat) {
     resetNoteState();
-    clearTimeout(timeout);
+    clearInterval(timeout);
     process.stdin.removeListener('keypress', onKeyPress);
     process.stdin.on('keypress', onKeyPress);
     var startTick = -1;
@@ -314,7 +328,7 @@ var api = {
       });
     }
 
-    timeout = setTimeout(onTick, interval);
+    timer.setInterval(onTick,'', interval + 'u');
 
   }
 };

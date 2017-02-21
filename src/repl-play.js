@@ -128,9 +128,6 @@ watcher.on('change', function (file, stat) {
 var filename;
 function load(cmd, callback) {
   unwatch(filename);
-  if (filename) {
-    watcher.remove(filename);
-  }
   if (cmd.indexOf('load') === 0) {
     filename = cmd.replace('load', '').trim()
   } else {

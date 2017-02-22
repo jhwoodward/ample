@@ -135,17 +135,15 @@ function load(cmd, callback) {
   }
   var out;
   try {
+    watch(filename);
     var loaded = require('../repl/' + filename);
     players = loaded.players;
     rules = loaded.rules;
     conductor = loaded.conductor;
-
-    watch(filename);
-
     out = `Loaded ${filename} & watching...`.green;
 
   } catch (e) {
-    out = `Error in file ${filename}`.red;
+    out = `${e} (${filename})`.red;
   }
 
   if (callback) {

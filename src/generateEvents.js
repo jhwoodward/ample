@@ -34,7 +34,7 @@ function generateEvents(player, parsed) {
     if (event.noteon) {
       event.on = event.time.tick;
       if (event.prev && event.prev.noteon) {
-        event.prev.off = event.time.tick; //default prev off before any adjustments
+        event.prev.off = event.time.tick - 5; //default prev off before any adjustments - should come from default
       }
       setPhraseExpression(event);
 
@@ -57,7 +57,7 @@ function generateEvents(player, parsed) {
         event.prev.off = event.time.tick - 10;
         offinfo = { for: 'staccato (end phrase)' };
       } else {
-        event.prev.off = event.time.tick -5; // should come from default
+        event.prev.off = event.time.tick - 5; // should come from default
         offinfo = { for: 'default detach (end phrase)' };
       }
       setNoteOff(

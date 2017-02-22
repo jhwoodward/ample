@@ -89,15 +89,9 @@ function onTick() {
   }
 
   indexed[tick].forEach(function (event) {
-
-  
-
     if (event.type === 'noteon') {
       noteState[event.channel][event.pitch] = true;
     }
-
-
-
     //  logInfo(event);
 
     if (event.type === 'tempo') {
@@ -214,11 +208,8 @@ function logInfo(event) {
 function logPianoRoll() {
 
   var beat = Math.floor(tick / 48);
-
-  var showBeat = !prLastBeat || beat !== prLastBeat;
+  var showBeat = beat > 0 && (!prLastBeat || beat !== prLastBeat);
   prLastBeat = beat;
-
-
 
   var pianoRoll = [];
   for (var channelKey in noteState) {
@@ -296,6 +287,7 @@ var api = {
 
   },
   start: function (events, startBeat, endBeat) {
+    console.log(events);
     resetNoteState();
     clearInterval(timeout);
     process.stdin.removeListener('keypress', onKeyPress);

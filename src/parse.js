@@ -64,7 +64,7 @@ function parse(score, conduct, annotations) {
     time: {
       beat: 0,
       tempo: 120,
-      tick: 50, //start 50 ticks in to allow for on offsets
+      tick: 48, //start at beat 1 (also enables keyswitch events to kick in prior to first beat)
       step: 48
     }
   }
@@ -111,7 +111,7 @@ function parse(score, conduct, annotations) {
         pitch: _.merge({}, state.pitch),
         expression: _.merge({}, state.expression)
       }
-
+   
       parsed.push(event);
     }
 

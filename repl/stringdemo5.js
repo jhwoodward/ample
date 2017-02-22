@@ -1,6 +1,7 @@
 var make = require('../src/ample').make;
 var utils = require('../src/utils');
 var key = require('../src/rudiments').key;
+var scale = require('../src/rudiments').scale;
 var ensembles = require("../src/ensembles");
 var instruments = require("../src/instruments/all");
 
@@ -9,13 +10,13 @@ var performer = ensembles.stringQuartet.performers.sacconi.individual;
 var players = utils.playersFromEnsemble(ensemble, performer, true)
 
 var rules = {
-  'p1a': '1:24, {pizzicato} >fGf>GfG>fG  f>GfG>fGf>G  ', 
-  'p2a': '1:24, {pizzicato} >dbD>bDb>Db  D>bDb>DbD>b ', // 24 x 6 = 144... 48
-  'p3a': '0:36, {spiccato} c  ', //36 x 4 = 144... 32
-  'p4a': '-1:48,{spiccato} c/// //// //// D///',// 24 
+  'p1a': '2:24, {pizzicato} >eee>eee>ee  >fGf>GfG>fG  f>GfG>fGf>G  ', 
+  'p2a': '1:24, {pizzicato} //////// >dbD>bDb>Db  D>bDb>DbD>b ', // 24 x 6 = 144... 48
+  'p3a': '0:12, {pizzicato} cEbEaFgBDc  cEbEaFgBDc cEbEaFgBDc cEbEaFgBDc  cEbEaFgBDc cEbEaFgBDc ', //36 x 4 = 144... 32
+  'p4a': '-1:48,{pizzicato} C//g C//g ',// 24 
   'violin1': 'p1a p1a p1a p1a p1a      p1a 0@ p1a  ^',
-  'violin2': 'p2a p2a p2a p2a p2a   3@  p2a p2a  ^',
-  'viola': ' p3a p3a p3a p3a p3a     p3a p3a ^',
+  'violin2':'p2a p2a p2a p2a p2a   3@  p2a p2a  ^',
+  'viola': 'p3a p3a p3a p3a p3a     p3a p3a ^',
   'cello': 'p4a p4a p4a p4a      p4b p4b p4a p4b^'
 };
 

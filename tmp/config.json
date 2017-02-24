@@ -20,7 +20,7 @@
     {
       "name": "phrase3",
       "timeSignature": "24,4",
-      "content": "24, ^///",
+      "content": "\\",
       "ticksPerBeat": 24,
       "beatCount": 4,
       "tickCount": 96

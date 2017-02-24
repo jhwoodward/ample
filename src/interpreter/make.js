@@ -1,7 +1,5 @@
-
-var interpreter = require('./ample-interpreter');
-var seq = require('./seq');
-
+var interpret = require('./interpret');
+var seq = require('../sequencer');
 
 function makeSong(song, rules, conductor, iterations) {
   var output = [];
@@ -19,7 +17,7 @@ function makeSong(song, rules, conductor, iterations) {
 
   function generate(player) {
     player.score = substitute(player.part);
-    var midi = interpreter.send(player, conductor);
+    var midi = interpret(player, conductor);
     return { player: player, midi: midi };
   }
 
@@ -33,6 +31,11 @@ function makeSong(song, rules, conductor, iterations) {
       i += 1;
       return substitute(part, i)
     } else {
+      //strip out any remaining rules
+      for (var key in rules) {
+        var re = new RegExp(key + '(?![^{]*})','g'); //leave anything inside {} alone (annotations)
+        part = part.replace(re, '');
+      }
       return part;
     }
   }
@@ -68,8 +71,6 @@ function make(song, rules, conductor, iterations) {
   }
 }
 
-module.exports = {
-  make: make
-};
+module.exports = make;
 
 

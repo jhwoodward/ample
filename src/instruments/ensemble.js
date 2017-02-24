@@ -1,5 +1,5 @@
-var instruments = require('./instruments/all');
-var key = require('./rudiments').key;
+var instruments = require('./instruments');
+var key = require('../rudiments').key;
 //player channel dictated by order
 var ensemble = {
   stringQuartet: {

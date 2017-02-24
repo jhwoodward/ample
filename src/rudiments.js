@@ -17,8 +17,10 @@ module.exports =
       cmaj: 'K()K' //a minor
     },
     scale: {
-      c7: 'S(CD-EEGA-B)S', //aminor
-      f7: 'S(FG-AAC-E)S', //dminor
-      g7: 'S(GA-BBDF)S' //gminor
+      none: 'S()S',
+      cblues: 'S(CD-EEGA-B)S', 
+      cmajtriad: 'S(CEG)S',
+      fblues: 'S(FG-AACD-E)S', 
+      gblues: 'S(GA-BBDEF)S' 
     }
   };

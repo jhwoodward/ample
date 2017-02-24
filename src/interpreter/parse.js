@@ -1,4 +1,4 @@
-var utils = require('jsmidgen').Util;
+var utils = require('../utils');
 var _ = require('lodash');
 
 function parse(score, conduct, annotations) {
@@ -103,7 +103,7 @@ function parse(score, conduct, annotations) {
       //order is important
       setOctave(state.parser, state.pitch, state.key);
       setPitch(state.parser, state.pitch, state.key);
-      fitToScale(state.parser, state.pitch, state.key);
+      fitToScale(state.pitch, state.key);
 
       var event = {
         noteon: true,
@@ -387,7 +387,7 @@ function isKeyScale(parser, key) {
   }
 
   if (parser.settingScale) {
-    if (isFlat(char) || isSharp(char)) {
+    if (isFlat(parser.char) || isSharp(parser.char)) {
       key.scale.push(parser.char2.toUpperCase());
       parser.cursor += 2;
     } else {
@@ -672,7 +672,7 @@ function setOctave(parser, pitch, key) {
 
 }
 
-function fitToScale(parser, pitch, key) {
+function fitToScale(pitch, key) {
 
   pitch.value = fit(pitch.raw, key.scale);
 

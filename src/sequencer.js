@@ -287,7 +287,7 @@ var api = {
 
   },
   start: function (events, startBeat, endBeat) {
-    console.log(events);
+
     resetNoteState();
     clearInterval(timeout);
     process.stdin.removeListener('keypress', onKeyPress);
@@ -299,7 +299,7 @@ var api = {
     if (endBeat) {
       endTick = (parseInt(endBeat, 10) * 48);
     }
-    console.log('\n\n\n');
+    console.log('\n');
 
     stopped = false;
     paused = false;

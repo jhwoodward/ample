@@ -1,9 +1,8 @@
 var parse = require('./parse');
-var generateEvents = require('./generateEvents');
+var midi = require('./midi');
 var _ = require('lodash');
 
-function send(player, conductor) {
-
+function interpret(player, conductor) {
 
   var def = {
     default: '',
@@ -50,7 +49,6 @@ function send(player, conductor) {
     expression: defaultExpression
   }
 
-  
   for (var key in player.annotations) {
     if (key !== 'default') {
       var expression, animation;
@@ -75,29 +73,11 @@ function send(player, conductor) {
           animation: animation
         };
       }
-
     }
   }
 
- 
-
-
   var parsed = parse(player.score, conductor, player.annotations);
-  return generateEvents(player, parsed);
+  return midi(player, parsed);
 }
 
-function sendTempo(tempo) {
-
-  events.push({
-    type: 'tempo',
-    value: tempo,
-  });
-
-}
-
-
-var api = {
-  send: send
-};
-
-module.exports = api;
+module.exports = interpret;

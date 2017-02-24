@@ -1,6 +1,6 @@
 var _ = require('lodash');
 
-function generateEvents(player, parsed) {
+function midi(player, parsed) {
 
   var events = [], oninfo, offinfo;
   setDefaultExpression(player);
@@ -317,4 +317,4 @@ function generateEvents(player, parsed) {
     });
   }
 }
-module.exports = generateEvents;
+module.exports = midi;

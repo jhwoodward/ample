@@ -4,7 +4,6 @@ var colors = require('colors');
 var pad = require('pad');
 var NanoTimer = require('nanotimer');
 var timer = new NanoTimer();
-//var keypress = require('keypress');
 
 var stopped = false;
 var paused = false;
@@ -13,6 +12,9 @@ var sPaused = '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - P A U S
 var sStart = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = S T A R T = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.yellow;
 var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.red;
 var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
+
+var logMode = 'pianoroll';
+
 function allNotesOff() {
 
   offAll();
@@ -50,15 +52,26 @@ function allNotesOff() {
 }
 
 function onKeyPress(ch, key) {
-  //  console.log('got "keypress"', key);
+  
   if (!stopped) {
-    if (key && key.name == 'escape') {
+    if (key && key.name === 'escape') {
       api.stop();
     }
-    if (key && key.name == 'space') {
+    if (key && key.name === 'space') {
       api.togglePause();
     }
   }
+
+/*
+  if (key && key.name === 'f1') {
+    console.log('Log information'.green);
+    logMode = 'info';
+  }
+  if (key && key.name === 'f2') {
+    console.log('Log piano roll'.green);
+    logMode = 'pianoroll';
+  }
+*/
 
 }
 
@@ -92,7 +105,11 @@ function onTick() {
     if (event.type === 'noteon') {
       noteState[event.channel][event.pitch] = true;
     }
-    //  logInfo(event);
+
+    if (logMode === 'info') {
+      logInfo(event);
+    }
+
 
     if (event.type === 'tempo') {
   
@@ -120,7 +137,7 @@ function onTick() {
 
   });
 
-  if (tick % 12 === 0) {
+  if (logMode === 'pianoroll' && tick % 12 === 0) {
     logPianoRoll();
   }
 
@@ -137,7 +154,6 @@ function onTick() {
   }
 }
 function logInfo(event) {
-
 
   var name = event.type;
   var data = [];
@@ -189,7 +205,7 @@ function logInfo(event) {
   }
 
   lastBeat = beat;
-  if (event.channel) {
+  if (event.channel !== undefined) {
     log += colors.blue(pad((event.channel + 1).toString(), 3));
   } else {
     log += '   ';
@@ -199,9 +215,6 @@ function logInfo(event) {
   log += color(pad(data.join('  '), 15));
   if (event.info) log += colors.gray(event.info) + '  ';
   console.log(log);
-
-
-
 }
 
 
@@ -283,6 +296,14 @@ var api = {
       console.log(sPaused);
     } else {
       timer.setInterval(onTick,'', interval + 'u');
+    }
+
+  },
+  setLogMode: function(mode) {
+    if (mode === 'info' || mode === 'pianoroll') {
+          logMode = mode;
+    } else {
+      console.log('Invalid log mode: ${mode} (can be either info or pianoroll)'.red);
     }
 
   },

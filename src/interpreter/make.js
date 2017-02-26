@@ -17,6 +17,7 @@ function makeSong(song, rules, conductor, iterations) {
 
   function generate(player) {
     player.score = substitute(player.part);
+    console.log(player.score);
     var midi = interpret(player, conductor);
     return { player: player, midi: midi };
   }
@@ -25,7 +26,7 @@ function makeSong(song, rules, conductor, iterations) {
     i = i || 0;
     if (i < iterations) {
       for (var key in rules) {
-        var re = new RegExp(key + '(?![^{]*})','g'); //leave anything inside {} alone (annotations)
+        var re = new RegExp(key + '(?![^{]*})', 'g'); //leave anything inside {} alone (annotations)
         part = part.replace(re, rules[key]);
       }
       i += 1;
@@ -33,8 +34,11 @@ function makeSong(song, rules, conductor, iterations) {
     } else {
       //strip out any remaining rules
       for (var key in rules) {
-        var re = new RegExp(key + '(?![^{]*})','g'); //leave anything inside {} alone (annotations)
-        part = part.replace(re, '');
+        if (key.length > 1) {
+          var re = new RegExp(key + '(?![^{]*})', 'g'); //leave anything inside {} alone (annotations)
+          part = part.replace(re, '');
+        }
+
       }
       return part;
     }
@@ -52,7 +56,7 @@ function make(song, rules, conductor, iterations) {
 
   if (!song.players) {
     song = {
-      players: [{part: song, channel: 1 }]
+      players: [{ part: song, channel: 1 }]
     };
   }
 

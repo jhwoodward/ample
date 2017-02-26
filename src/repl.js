@@ -9,7 +9,7 @@ var argv = require('yargs').argv;
 
 var config = {};
 
-var players, rules, conductor;
+var players, rules, conductor, iterations;
 
 if (argv.load) {
   load(argv.load);
@@ -82,7 +82,7 @@ function run(cmd, callback) {
     filteredPlayers = players;
   }
 
-  make({ name: 'repl', players: filteredPlayers }, rules, conductor).play(args.from, args.to);
+  make({ name: 'repl', players: filteredPlayers }, rules, conductor, iterations).play(args.from, args.to);
   callback('\n');
 }
 
@@ -98,19 +98,12 @@ function use(cmd, callback) {
   }
 }
 
-/*
-watcher.on('change', function (file, stat) {
-  console.log('File modified: %s', file);
-  if (!stat) console.log('deleted');
-});
-*/
-
 var filename;
 function load(cmd, callback) {
   unwatch(filename);
-  var args = getArgs(cmd);
-  if (args.load) {
-    filename = args.load;
+
+  if (cmd.indexOf('load') === 0) {
+    filename = cmd.split(' ')[1].trim();
   } else {
     filename = cmd;
   }
@@ -121,6 +114,7 @@ function load(cmd, callback) {
     players = loaded.players;
     rules = loaded.rules;
     conductor = loaded.conductor;
+    iterations = loaded.iterations;
     out = `Loaded ${filename} & watching...`.green;
 
   } catch (e) {
@@ -158,6 +152,7 @@ function reload(callback) {
     players = loaded.players;
     rules = loaded.rules;
     conductor = loaded.conductor;
+    iterations = loaded.iterations;
     out = `Reloaded ${filename}.`.green;
   } catch (e) {
     out = `${e} (${filename})`.red;

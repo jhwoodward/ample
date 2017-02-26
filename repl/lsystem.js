@@ -10,29 +10,41 @@ var players = utils.playersFromEnsemble(stringQuartet, performer, true);
 utils.addPlayer(players, instruments.piano, 'piano1');
 utils.addPlayer(players, instruments.piano, 'piano2',5);
 
-var rules = {
-  v1a: '  >e F  ', 
-  v1b: ' cD  ', 
-  v1c: '  BC^///DE^',
-  v1d: '  Fd/+FGAg',
-  v1e: ' 48,v1a 24,v1b 48,v1a 0:24, v1c v1f',
-  v1f: ' 24,v1b v1d 1: 24,v1b  v1d  v1e',
-  violin1: '{pizzicato} 0:24, v1e v1f ^', 
-  violin2:'v1b 0:  48,v1a v1d 0: 3@ v1a 24,v1c v1e 0@ v1f',
-
-  c1a: '-1:24, cE^/G',
-  c1b: '-1:48, g^//',
-  c1c: '-1:48, /24,aB^',
-  c1d: '-1:48, ////',
-  c1e: 'c1a c1b v1c c1a c1c c1f',
-  c1f: 'c1b c1d c1b v1a v1b v1a c1d c1e',
-  cello: '{pizzicato} c1e c1f ^',
-
-  p1e: '12, v1a 24,v1b 12,v1a 0: v1c v1f',
-  p1f: '12, v1b {pedaldown} v1d 48, 1: v1b 24, v1d {pedalup} v1e',
-  piano1: '0: 12, p1e p1f',
-  piano2: '3@ 12, p1f p1e '
+var hilbert = {
+  hilbertstart: '1=RPS hilbert1a',
+  hilbert1a : '+ hilbert1b X- hilbert1a >X hilbert1a -X hilbert1b +',
+  hilbert1b : '- hilbert1a >X+ hilbert1b X hilbert1b >+X hilbert1a -',
 };
+
+var island = {//iterations 3
+  islandstart: '1=RPS X',
+  X: 'X+Y++>Y-X--X->Y+',
+  Y: '-X+>Y++Y+X-->X-Y'
+}
+
+//these cycle out of pitch range - consider constrain pitch within limits (octave ?) and cyling around the octave
+var koch = {
+  kochstart: '2=RPS X',
+  X: 'X-X+X+X-X'
+}
+var dragon = {
+  dragonstart: 'X dragon1a',
+  dragon1a: 'dragon1a + dragon1b X',
+  dragon1b: 'X dragon1a - dragon1b'
+}
+
+var rules = {
+  'violin1': ' ',
+  'violin2' : '',
+  'viola' : '',//
+  'cello' : '',
+  'piano1': '1:24, 1=RPS a hilbertstart ',
+  'piano2': ''
+};
+
+Object.assign(rules, hilbert);
+//Object.assign(rules, dragon);
+//Object.assign(rules, island);
 
 var conductor = {
   1: scale.cblues + ' 144=T',
@@ -47,10 +59,13 @@ var conductor = {
   58: scale.cblues
 };
 
+
 utils.addRudiments(rules);
 
 module.exports = {
   players: players,
   rules: rules,
-  conductor: conductor
+  conductor: conductor,
+  iterations: 3
 };
+

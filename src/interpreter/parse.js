@@ -1,12 +1,16 @@
 var utils = require('../utils');
 var _ = require('lodash');
 
+
+
 function parse(score, conduct, annotations) {
   var conductor = _.merge({}, conduct);
   var defaultExpression = {};
   if (annotations) {
     defaultExpression = _.merge({}, annotations.default.expression)
   }
+
+
 
   var messages = [];
   var parsed = [];
@@ -59,7 +63,8 @@ function parse(score, conduct, annotations) {
       octave: 4,
       transpose: 0,
       accidental: 0,
-      natural: false
+      natural: false,
+      relativeStep: 1
     },
     time: {
       beat: 0,
@@ -75,6 +80,7 @@ function parse(score, conduct, annotations) {
     if (ignore(score, state.parser)) continue;
 
     parseChars(score, state.parser);
+    if (isRelativePitchStep(state.parser, state.pitch)) continue;
     if (isOnOff(state.parser, state.expression)) continue;
     if (isKeyScale(state.parser, state.key)) continue;
     if (isKeyswitch(score, state.parser, state.time, state.expression)) continue;
@@ -156,7 +162,7 @@ function isNote(char) {
 
 
 function isRelativePitch(char) {
-  return 'xX'.indexOf(char) > -1;
+  return 'xXyYzZ'.indexOf(char) > -1;
 }
 
 
@@ -489,6 +495,17 @@ function isAnnotation(score, parser, expression, annotations) {
 
 }
 
+function isRelativePitchStep(parser, pitch) {
+  if (!match(parser.char4)) return false;
+  pitch.relativeStep = parseInt(parser.numbers.join(''), 10);
+  parser.numbers = [];
+  parser.cursor += 4;
+  return true;
+  function match(chars) {
+    return chars === '=RPS';
+  }
+}
+
 function isTempo(parser, time) {
   if (!match(parser.char2)) return false;
   time.tempo = parseInt(parser.numbers.join(''), 10);
@@ -735,7 +752,7 @@ function fitToScale(pitch, key) {
 function setPitch(parser, pitch, key) {
   pitch.char = parser.char
   if (isRelativePitch(parser.char)) {
-    pitch.raw = pitch.raw + pitch.accidental
+    pitch.raw = pitch.raw + (pitch.accidental * pitch.relativeStep);
   } else {
     pitch.raw = getPitch(parser.char, pitch.octave, pitch.accidental, pitch.natural, key.sharps, key.flats, pitch.transpose);
   }
@@ -853,7 +870,6 @@ function isOnOff(parser, expression) {
   if (parser.char3 === '=ON') {
     if (parser.numbers.length) {
       expression.note.on = parseInt(parser.numbers.join(''), 10);
-      // console.log('xon', expression.on);
       parser.numbers = [];
     }
     parser.cursor += 3;
@@ -862,7 +878,6 @@ function isOnOff(parser, expression) {
   if (parser.char3 === '==ON') {
     if (parser.numbers.length) {
       expression.phrase.on = parseInt(parser.numbers.join(''), 10);
-      // console.log('xon', expression.on);
       parser.numbers = [];
     }
     parser.cursor += 4;

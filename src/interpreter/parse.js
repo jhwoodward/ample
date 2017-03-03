@@ -1,9 +1,149 @@
 var utils = require('../utils');
 var _ = require('lodash');
 
+function State() {
+  var state = {
+    parser: {
+      cursor: 0,
+      numbers: [],
+      char1: '',
+      char2: '',
+      char3: '',
+      settingKey: false,
+      settingScale: false,
+      octaveReset: false,
+      octaveBeforeKeySwitch: 0,
+      octaveJump: 0
+    },
+    key: {
+      flats: [],
+      sharps: [],
+      scale: []
+    },
+    expression: {
+      note: {
+        articulations: [],
+        //  dynamics: defaultExpression.dynamics || 90,
+        pitchbend: defaultExpression.pitchbend || 8192,
+        velocity: defaultExpression.velocity || 90,
+        controller: defaultExpression.controller || {},
+        keyswitch: undefined,
+        on: 0, //adjust noteon time in ticks
+        off: 0, //adjust noteoff time in ticks
+      },
+      phrase: {
+        name: 'default',
+        //  dynamics: defaultExpression.dynamics || 90,
+        pitchbend: defaultExpression.pitchbend || 8192,
+        velocity: defaultExpression.velocity || 90,
+        controller: defaultExpression.controller || {},
+        keyswitch: undefined,
+        on: 0, //adjust noteon time in ticks
+        off: 0, //adjust noteoff time in ticks
+      }
+    },
+    pitch: {
+      char: '',
+      raw: 0,
+      value: 0,
+      octave: 4,
+      transpose: 0,
+      accidental: 0,
+      natural: false,
+      relativeStep: 1
+    },
+    time: {
+      beat: 0,
+      tempo: 120,
+      tick: 48, //start at beat 1 (also enables keyswitch events to kick in prior to first beat)
+      step: 48
+    }
+  };
+
+  _.extend(this, state);
+
+}
 
 
-function parse(score, conduct, annotations) {
+
+
+var parsed = [];
+var state = new State();
+
+function Parse(score, rules) {
+  state.parser.cursor = 0;
+  while (state.parser.cursor < score.length) {
+
+    parseChars(score, state.parser);
+    if (isMacro(score, state.parser, rules)) continue;
+    if (ignore(score, state.parser)) continue;
+    if (isRelativePitchStep(state.parser, state.pitch)) continue;
+    if (isOnOff(state.parser, state.expression)) continue;
+    if (isKeyScale(state.parser, state.key)) continue;
+    if (isKeyswitch(score, state.parser, state.time, state.expression)) continue;
+   
+   // if (isAnnotation(score, state.parser, state.expression, annotations)) continue;
+    if (isTempo(state.parser, state.time)) continue;
+    if (isVelocity(state.parser, state.expression)) continue;
+    if (isPitchbend(state.parser, state.expression)) continue;
+    // if (isDynamics(state.parser, state.expression)) continue;
+    if (isController(state.parser, state.expression)) continue;
+    if (isAccidentalOrNumeric(state.parser, state.pitch)) continue;
+    if (isTranspose(state.parser, state.pitch)) continue;
+    if (isBeatstep(state.parser, state.time)) continue;
+    if (isArticulation(state.parser, state.expression, annotations)) continue;
+    if (isOctave(state.parser, state.pitch)) continue;
+
+
+    if (isRest(state.parser.char)) {
+      parsed.push({
+        noteoff: true,
+        time: _.merge({}, state.time)
+      });
+    }
+
+    if (isNote(state.parser.char)) {
+
+      //order is important
+      setOctave(state.parser, state.pitch, state.key);
+      setPitch(state.parser, state.pitch, state.key);
+      fitToScale(state.pitch, state.key);
+
+      var event = {
+        noteon: true,
+        time: _.merge({}, state.time),
+        pitch: _.merge({}, state.pitch),
+        expression: _.merge({}, state.expression)
+      }
+   
+      parsed.push(event);
+    }
+
+    if (isSustain(state.parser.char) ||
+      isNote(state.parser.char) ||
+      isRest(state.parser.char)) {
+
+      state.time.tick += state.time.step;
+
+      state.parser.octaveJump = 0;
+      state.parser.numbers = [];
+
+      //reset accidentals
+      state.pitch.accidental = 0;
+      state.pitch.natural = false
+
+      //reset note expressions to phrase
+      state.expression.note = _.merge({}, state.expression.phrase);
+      state.expression.note.articulations = [];
+
+    }
+
+    state.parser.cursor++;
+  }
+  return parsed;
+}
+
+function parseold(score, conduct, annotations) {
   var conductor = _.merge({}, conduct);
   var defaultExpression = {};
   if (annotations) {
@@ -72,7 +212,7 @@ function parse(score, conduct, annotations) {
       tick: 48, //start at beat 1 (also enables keyswitch events to kick in prior to first beat)
       step: 48
     }
-  }
+  };
 
   while (state.parser.cursor < score.length) {
 
@@ -155,17 +295,57 @@ function parse(score, conduct, annotations) {
 
 }
 
-function isNote(char) {
-  var notes = 'abcdefgABCDEFGxX';
-  return notes.indexOf(char) > -1;
+function isMacro(score, state, rules) {
+  if (matchStart(state.parser.char)) {
+    var macro = testForMacro(score, state.parser.cursor);
+    var cursor = state.parser.cursor;
+    if (rules[macro.name]) {
+      parse(rules[macro.name], rules, state);
+    } else {
+      console.log('Macro ${macro.name} not found');
+    }
+    state.parser.cursor = cursor + macro.length;
+    return true;
+  }
+
+  return false;
+
+  function testForMacro(s, start) {
+    var cursor = start;
+    var char;
+    var macro = '';
+    while (cursor < s.length && !matchEnd(char)) {
+      char = s[cursor];
+      if (!matchStart(char) && !matchEnd(char)) {
+        macro += char;
+      }
+      cursor++;
+    }
+    return {
+      name: macro.trim(),
+      length: cursor - start
+    };
+  }
+  function matchEnd(char) {
+    return char === '}';
+  }
+  function matchStart(char) {
+    return char === '{';
+  }
+
 }
 
 
-function isRelativePitch(char) {
-  return 'xXyYzZ'.indexOf(char) > -1;
+var prototype = {
+  isNote: function(char) {
+    var notes = 'abcdefgABCDEFGxX';
+    return notes.indexOf(char) > -1;
+  },
+  isRelativePitch: function(char) {
+    return 'xXyYzZ'.indexOf(char) > -1;
+  }
+
 }
-
-
 function isRest(char) {
   return char === '^';
 }

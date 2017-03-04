@@ -1,77 +1,138 @@
 function Parser(rules) {
 
+  const parseValue = s => {
+    const value = parseInt(/[\d]{1,3}/.exec(s)[0], 10);
+    const phrase = s.indexOf('==') > -1;
+    if (phrase) {
+      return { value, phrase };
+    } else {
+      return { value };
+    }
+  };
+
+  const parseArtic = s => {
+    const artic = /[>'~_]/.exec(s) ? /[>'~_]/.exec(s)[0] : false;
+    return {
+      accent: artic === '>',
+      portamento: artic === '~',
+      staccato: artic === '\'',
+      legato: artic === '_'
+    };
+  }
+
+  const parsePitch = s => {
+    var char = /[a-zA-Z]/.exec(s)[0];
+    return {
+      down: char === char.toLowerCase(),
+      up: char === char.toUpperCase(),
+      octJump: !!/!/.exec(s)
+    };
+  }
+
+  const strip = obj => {
+    for (var key in obj) {
+      if (!obj[key]) {
+        delete obj[key];
+      }
+    }
+    return obj;
+  }
+
   this.rules = rules;
- 
   this.matches = [
-    { 
-      id: 'macro',
+    {
+      type: 'macro',
       test: /^{\w+}/
     },
     {
-      id: 'note',
-      test: /^[>'~_]?\!?\+?\-?\=?[a-gA-G]/
+      type: 'note',
+      test: /^[>'~_]?\!?\+?\-?\=?[a-gA-G]/,
+      parse: s => {
+        var acc = /[+-=]/.exec(s) ? /[+-=]/.exec(s)[0] : false;
+        var out = {
+          char: /[a-gA-G]/.exec(s)[0].toUpperCase(),
+          flat: acc === '-',
+          sharp: acc === '+',
+          natural: acc === '=',
+        };
+        Object.assign(out,parseArtic(s),parsePitch(s));
+        return strip(out);
+      },
+      process: part => {
+
+      }
     },
     {
-      id: 'relativeNote',
-      test: /^[>'~_]?\!?\+*\-*[x-zX-Z]/
+      type: 'relativeNote',
+      test: /^[>'~_]?\!?\+*\-*[x-zX-Z]/,
+      parse: s => {
+        var acc = /[+-=]/.exec(s) ? /[+-=]/.exec(s)[0] : false;
+        var out = {
+ 
+        };
+        Object.assign(out,parseArtic(s),parsePitch(s));
+        return strip(out);
+      }
     },
     {
-      id: 'rest',
+      type: 'rest',
       test: /^\^/
     },
     {
-      id: 'sustain',
+      type: 'sustain',
       test: /^\//
     },
     {
-      id: 'velocity',
-      test: /^[\d]{1,3}==?V/
+      type: 'velocity',
+      test: /^[\d]{1,3}==?V/,
+      parse: parseValue
     },
     {
-      id: 'pitchbend',
-      test: /^[\d]{1,3}==?P/
+      type: 'pitchbend',
+      test: /^[\d]{1,3}==?P/,
+      parse: parseValue
     },
     {
-      id: 'controller',
-      test: /^[\d]{1,3}==?C[\d]{1,3}/
+      type: 'controller',
+      test: /^[\d]{1,3}==?C[\d]{1,3}/,
+      parse: s => {
+        var out = parseValue(s);
+      }
     },
     {
-      id: 'transpose',
+      type: 'transpose',
       test: /^-?[\d]{1,3}@/
     },
     {
-      id: 'tempo',
-      test: /^[\d]{1,3}=T/
+      type: 'tempo',
+      test: /^[\d]{1,3}=T/,
+      parse: parseValue
     },
     {
-      id: 'duration',
+      type: 'duration',
       test: /^[\d]{1,3},/
     },
     {
-      id: 'octave',
+      type: 'octave',
       test: /^\-?[0-4]:/
     },
     {
-      id: 'key', 
+      type: 'key',
       test: /^K\((?:[+-][A-G])+\)K/
     },
     {
-      id: 'scale', 
+      type: 'scale',
       test: /^S\((?:[+-]?[A-G])+\)S/
     },
     {
-      id: 'keyswitch',
-      test: /^\[[+-]?[A-G]\]/
+      type: 'keyswitch',
+      test: /^\[(?:\-?[0-4]:)?[+-]?[A-G]\]/
     }
- 
-
-
   ]
-}
+};
 
 Parser.prototype = {
-  test: function(part) {
-
+  test: function (part) {
     var result;
     for (var i = 0; i < this.matches.length; i++) {
       var item = this.matches[i];
@@ -81,36 +142,34 @@ Parser.prototype = {
       }
     }
     if (!result) return undefined;
-    return {
-      type: item.id,
-      value: result[0],
-      length: result[0].length
-    };
+    return Object.assign({}, item, { s: result[0], length: result[0].length });
+
   },
-  parse: function(part) {
+  parse: function (part) {
     var instructions = [], instruction;
     var cursor = 0;
     while (part.length && instructions.length < 100) {
       instruction = this.test(part);
-     
+
       if (instruction) {
-        console.log(instruction);
-       // console.log(part);
+        if (instruction.parse) {
+          instruction.parsed = instruction.parse(instruction.s);
+        }
         instructions.push(instruction);
+
         part = part.substring(instruction.length, part.length);
       } else {
-       // console.log('nothing');
-         instructions.push('nothing');
+        instructions.push(null);
         part = part.substring(1, part.length)
       }
-     
+
     }
-    return instructions;
+    return instructions.filter(i => !!i);
   }
 }
 
 var parser = new Parser();
-parser.parse('120=T a-bc 48, 3:defg');
+console.log(parser.parse('120=T {part1} [-2:+A] a~-b!c 48, 3:defg'));
 
 module.exports = Parser;
 

@@ -1,4 +1,5 @@
-var utils = require('./utils');
+var utils = require('./parserUtils');
+var _ = require('lodash');
 
 function ScaleParser() {
   this.type = 'Scale';
@@ -8,8 +9,8 @@ ScaleParser.prototype = {
   parse: function (s) {
     return { scale: utils.parseNotes(s) };
   },
-  process: function (state) {
-    
+  mutateState: function (state) {
+    state.scale = this.parsed.scale;
   }
 }
 

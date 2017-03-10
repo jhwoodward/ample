@@ -1,4 +1,5 @@
-var utils = require('./utils');
+var utils = require('./parserUtils');
+var _ = require('lodash');
 
 function DurationParser() {
   this.type = 'Duration';
@@ -8,7 +9,7 @@ DurationParser.prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
-  process: function (state) {
+  mutateState: function (state) {
     state.time.step = this.parsed.value;
   }
 }

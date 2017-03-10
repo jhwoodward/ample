@@ -1,5 +1,5 @@
 var parsers = [
-  require('./MacroParser'),
+  require('./AnnotationParser'),
   require('./KeyswitchParser'),
   require('./KeyParser'),
   require('./ControllerParser'),
@@ -13,7 +13,10 @@ var parsers = [
   require('./ScaleParser'),
   require('./SustainParser'),
   require('./TempoParser'),
-  require('./TransposeParser')
+  require('./TransposeParser'),
+  require('./OnParser'),
+  require('./OffParser'),
+  require('./VelocityParser')
 ];
 
 parsers.forEach(parser => {

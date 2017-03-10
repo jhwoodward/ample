@@ -1,3 +1,5 @@
+var _ = require('lodash');
+var utils = require('./parserUtils');
 
 function VelocityParser() {
   this.type = 'velocity';
@@ -7,8 +9,12 @@ VelocityParser.prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
-  process: function (state) {
-    
+  mutateState: function (state) {
+    if (this.parsed.phrase) {
+      state.phrase.velocity = this.parsed.value;
+    } else {
+      state.note.velocity = this.parsed.value;
+    }
   }
 }
 

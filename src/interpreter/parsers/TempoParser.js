@@ -1,4 +1,6 @@
-var utils = require('./utils');
+var utils = require('./parserUtils');
+var event = require('./event');
+var _ = require('lodash');
 
 function TempoParser() {
   this.type = 'Tempo';
@@ -8,9 +10,15 @@ TempoParser.prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
-  process: function (state) {
-    
+  mutateState: function (state) {
+    state.time.tempo = this.parsed.value;
+    state.events.push({
+      tick: state.time.tick,
+      type: event.tempo,
+      value: this.parsed.value
+    });
   }
+
 }
 
 module.exports = TempoParser;

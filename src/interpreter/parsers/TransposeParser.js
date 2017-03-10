@@ -1,4 +1,5 @@
-var utils = require('./utils');
+var utils = require('./parserUtils');
+var _ = require('lodash');
 
 function TransposeParser() {
   this.type = 'transpose';
@@ -8,8 +9,8 @@ TransposeParser.prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
-  process: function (state) {
-    
+  mutateState: function (state) {
+    state.pitch.transpose = this.parsed.value;
   }
 }
 

@@ -4,7 +4,7 @@ var _ = require('lodash');
 function State() {
   var state = {
     parser: {
-      cursor: 0,
+      cursor:0,
       numbers: [],
       char1: '',
       char2: '',
@@ -63,9 +63,12 @@ function State() {
   _.extend(this, state);
 
 }
-
-
-
+/*
+function Parser(rules) {
+  this.rules = rules;
+  this.state = new State();
+}
+*/
 
 var parsed = [];
 var state = new State();
@@ -335,17 +338,17 @@ function isMacro(score, state, rules) {
 
 }
 
-
-var prototype = {
-  isNote: function(char) {
-    var notes = 'abcdefgABCDEFGxX';
-    return notes.indexOf(char) > -1;
-  },
-  isRelativePitch: function(char) {
-    return 'xXyYzZ'.indexOf(char) > -1;
-  }
-
+function isNote(char) {
+  var notes = 'abcdefgABCDEFGxX';
+  return notes.indexOf(char) > -1;
 }
+
+
+function isRelativePitch(char) {
+  return 'xXyYzZ'.indexOf(char) > -1;
+}
+
+
 function isRest(char) {
   return char === '^';
 }

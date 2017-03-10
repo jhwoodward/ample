@@ -1,54 +1,22 @@
 var _ = require('lodash');
 
-function State(defaultExpression) {
-
-  defaultExpression = defaultExpression || {
-    pitchbend: 8192,
-    velocity: 90,
-    controller: {},
-    keyswitch: undefined,
-    on: 0,
-    off: -5
-  };
+function State(init) {
 
   var state = {
+    noteon: false,
     key: {
       flats: [],
-      sharps: [],
-      scale: []
+      sharps: []
     },
-    expression: {
-      note: {
-        articulations: [],
-        //  dynamics: defaultExpression.dynamics || 90,
-        pitchbend: defaultExpression.pitchbend,
-        velocity: defaultExpression.velocity,
-        controller: defaultExpression.controller,
-        keyswitch: undefined,
-        on: 0, //adjust noteon time in ticks
-        off: 0, //adjust noteoff time in ticks
-      },
-      phrase: {
-        name: 'default',
-        //  dynamics: defaultExpression.dynamics || 90,
-        pitchbend: defaultExpression.pitchbend,
-        velocity: defaultExpression.velocity,
-        controller: defaultExpression.controller,
-        keyswitch: undefined,
-        on: 0, //adjust noteon time in ticks
-        off: 0, //adjust noteoff time in ticks
-      }
-    },
+    scale: [],
     pitch: {
-      char: '',
-      raw: 0,
-      value: 0,
       octave: 4,
-      transpose: 0,
-      accidental: 0,
-      natural: false,
-      relativeStep: 1
+      relativeStep: 1,
+      transpose: 0
     },
+    note: {},
+    phrase: init
+    ,
     time: {
       beat: 0,
       tempo: 120,
@@ -59,6 +27,12 @@ function State(defaultExpression) {
 
   _.extend(this, state);
 
+}
+
+State.prototype.clone = function() {
+  var clone = _.merge({}, this);
+  clone.events = [];
+  return clone;
 }
 
 module.exports = State;

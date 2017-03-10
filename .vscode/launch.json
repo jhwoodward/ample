@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceRoot}/src/repl.js",
+      "program": "${workspaceRoot}/src/interpreter/Interpreter.js",
       "cwd": "${workspaceRoot}"
     },
     {

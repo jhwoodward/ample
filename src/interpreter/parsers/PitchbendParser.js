@@ -1,6 +1,6 @@
 var _ = require('lodash');
-var utils = require('./parserUtils');
-var event = require('./event');
+var utils = require('../parserUtils');
+var eventType = require('../constants').eventType;
 
 function PitchbendParser() {
   this.type = 'pitchbend';
@@ -17,7 +17,7 @@ PitchbendParser.prototype = {
       state.note.pitchbend = this.parsed.value;
     }
     state.events.push({
-      type: event.pitchbend,
+      type: eventType.pitchbend,
       value: this.parsed.value
     });
   }

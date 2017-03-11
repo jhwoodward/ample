@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var event = require('./event');
+var eventType = require('../constants').eventType;
 
 function RestParser() {
   this.type = 'rest';
@@ -10,13 +10,18 @@ RestParser.prototype = {
     return {rest: true};
   },
   mutateState: function (state) {
-    state.noteon = false;
-    var off = state.note.off !== undefined ? state.note.off : state.phrase.off;
+    var offset = state.note.off !== undefined ? state.note.off : state.phrase.off;
+    var offTick = state.time.tick + offset;
+    var annotation = state.note.off !== undefined ? state.note.name : state.phrase.name;
     state.events.push({
-      tick: state.time.tick + off,
-      type: event.noteoff,
-      pitch: state.pitch.value
+      tick: offTick,
+      type: eventType.noteoff,
+      pitch: state.pitch,
+      duration: offTick - state.note.onTick,
+      annotation,
+      offset
     });
+    delete state.note.onTick;
   },
   after: function(state) {
     state.time.tick += state.time.step;

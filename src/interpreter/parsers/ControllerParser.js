@@ -1,5 +1,5 @@
-var utils = require('./parserUtils');
-var event = require('./event');
+var utils = require('../parserUtils');
+var eventType = require('../constants').eventType;
 var _ = require('lodash');
 
 function ControllerParser() {
@@ -27,7 +27,7 @@ ControllerParser.prototype = {
     }
     state.events.push({
       tick: state.time.tick-1,
-      type: event.controller,
+      type: eventType.controller,
       controller: this.parsed.controller,
       value: this.parsed.value
     })

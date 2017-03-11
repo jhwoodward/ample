@@ -1,5 +1,5 @@
-var pitchUtils = require('./pitchUtils');
-var event = require('./event');
+var pitchUtils = require('../pitchUtils');
+var eventType = require('../constants').eventType;
 var _ = require('lodash');
 
 function RelativeNoteParser() {
@@ -45,7 +45,7 @@ RelativeNoteParser.prototype = {
 
     state.trigger = event.noteon;
     state.events.push({
-      type: event.noteon,
+      type: eventType.noteon,
       pitch: state.pitch.value,
       velocity: state.note.velocity,
       info: '${state.pitch.string}  (${state.note.articulationInfo})'  

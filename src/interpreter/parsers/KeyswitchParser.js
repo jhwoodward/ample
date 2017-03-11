@@ -1,7 +1,7 @@
-var utils = require('./parserUtils');
-var pitchUtils = require('./pitchUtils');
+var utils = require('../parserUtils');
+var pitchUtils = require('../pitchUtils');
 var _ = require('lodash');
-var event = require('./event');
+var eventType = require('../constants').eventType;
 
 function KeyswitchParser() {
   this.type = 'Keyswitch';
@@ -19,9 +19,9 @@ KeyswitchParser.prototype = {
     state.phrase.keyswitch = this.parsed;
     state.events.push({
       tick: state.time.tick,
-      type: 'noteon',
-      pitch: this.parsed.pitch,
-      info: `${this.parsed.string}  (keyswitch)`
+      type: eventType.noteon,
+      pitch: {value: this.parsed.pitch, string: this.parsed.string },
+      keyswitch: true
     })
   }
 }

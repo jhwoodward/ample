@@ -1,4 +1,4 @@
-var utils = require('./parserUtils');
+var utils = require('../parserUtils');
 var _ = require('lodash');
 
 function ScaleParser() {

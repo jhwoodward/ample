@@ -1,5 +1,5 @@
-var utils = require('./parserUtils');
-var event = require('./event');
+var utils = require('../parserUtils');
+var eventType = require('../constants').eventType;
 var _ = require('lodash');
 
 function TempoParser() {
@@ -14,7 +14,7 @@ TempoParser.prototype = {
     state.time.tempo = this.parsed.value;
     state.events.push({
       tick: state.time.tick,
-      type: event.tempo,
+      type: eventType.tempo,
       value: this.parsed.value
     });
   }

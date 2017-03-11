@@ -3,7 +3,6 @@ var _ = require('lodash');
 function State(init) {
 
   var state = {
-    noteon: false,
     key: {
       flats: [],
       sharps: []

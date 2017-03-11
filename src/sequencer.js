@@ -1,6 +1,7 @@
 var easymidi = require('easymidi');
 var output = new easymidi.Output('IAC Driver Bus 1');
 var colors = require('colors');
+var eventType = require('./interpreter/constants').eventType;
 var pad = require('pad');
 var NanoTimer = require('nanotimer');
 var timer = new NanoTimer();
@@ -13,7 +14,7 @@ var sStart = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = S T A R T 
 var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.red;
 var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
 
-var logMode = 'pianoroll';
+var logMode = 'info';// 'pianoroll';
 
 function allNotesOff() {
 
@@ -103,36 +104,67 @@ function onTick() {
 
   indexed[tick].forEach(function (event) {
     if (event.type === 'noteon') {
-      noteState[event.channel][event.pitch] = true;
+      noteState[event.channel][event.pitch.value] = true;
     }
 
     if (logMode === 'info') {
       logInfo(event);
     }
 
-
-    if (event.type === 'tempo') {
-  
-      var newInterval = Math.round(1000000 / (event.tempo * 0.8));
-      if (newInterval !== interval) {
-        interval = newInterval;
-        timer.clearInterval();
-        timer.setInterval(onTick,'', interval + 'u');
-      }
-     
-    } else if (!event.sent) {
-      output.send(event.type, {
-        value: event.value,
-        controller: event.controller,
-        note: event.pitch,
-        velocity: event.velocity,
-        channel: event.channel
-      });
-      event.sent = true;
+    switch (event.type) {
+      case eventType.tempo:
+        var newInterval = Math.round(1000000 / (event.value * 0.8));
+        if (newInterval !== interval) {
+          interval = newInterval;
+          timer.clearInterval();
+          timer.setInterval(onTick,'', interval + 'u');
+        }
+      break;
+      case eventType.controller:
+        if (!event.sent) {
+          output.send(eventType.controller, {
+            value: event.value,
+            controller: event.controller,
+            channel: event.channel
+          });
+          event.sent = true;
+        }
+      break;
+      case eventType.pitchbend:
+       if (!event.sent) {
+          output.send(eventType.pitchbend, {
+            value: event.value,
+            channel: event.channel
+          });
+          event.sent = true;
+        }
+      break;
+      case eventType.noteon:
+        if (!event.sent) {
+          output.send(eventType.noteon, {
+            note: event.pitch.value,
+            velocity: event.velocity,
+            channel: event.channel
+          });
+          event.sent = true;
+        }
+      break;
+      case eventType.noteoff:
+        if (!event.sent) {
+          output.send(eventType.noteoff, {
+            note: event.pitch.value,
+            channel: event.channel
+          });
+          event.sent = true;
+        }
+      break;
+      default:
+        throw 'Unknown event type: ' + event.type
+      break
     }
 
-    if (event.type === 'noteoff') {
-      noteState[event.channel][event.pitch] = false;
+    if (event.type === eventType.noteoff) {
+      noteState[event.channel][event.pitch.value] = false;
     }
 
   });
@@ -162,9 +194,9 @@ function logInfo(event) {
   var beat = Math.floor(event.tick / 48);
 
   switch (event.type) {
-    case 'noteon':
-      data.push(event.char);
-      data.push(`p${event.pitch}`);
+    case eventType.noteon:
+      data.push(event.pitch.string);
+      data.push(`p${event.pitch.value}`);
       if (event.keyswitch) {
         name = 'keyswitch';
         color = colors.red;
@@ -173,25 +205,26 @@ function logInfo(event) {
         data.push(`v${event.velocity}`);
       }
       break;
-    case 'noteoff':
+    case eventType.noteoff:
       if (event.keyswitch) {
         name = 'ks off';
       }
       color = colors.grey;
-      data.push(event.char);
-      data.push(`p${event.pitch}`);
+      data.push(event.pitch.string);
+      data.push(`p${event.pitch.value}`);
       data.push(`dur${event.duration}`);
+      data.push(`(${event.offset} ${event.annotation})`);
       break;
-    case 'pitch':
+    case eventType.pitchbend:
       color = colors.red;
       data.push(event.value);
       break;
-    case 'cc':
+    case eventType.controller:
       color = colors.red;
       data.push(`cc${event.controller}`);
       data.push(`${event.value}`);
       break;
-    case 'tempo':
+    case eventType.tempo:
       color = colors.blue;
       data.push(event.tempo);
       break;

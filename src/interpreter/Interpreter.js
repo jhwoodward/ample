@@ -1,6 +1,7 @@
-var parsers = require('./parsers/parsers');
-var parserUtils = require('./parsers/parserUtils');
+var parsers = require('./parsers');
+var parserUtils = require('./parserUtils');
 var State = require('./State');
+var seq = require('../sequencer');
 
 var _ = require('lodash');
 
@@ -149,9 +150,16 @@ function sendEvents(result) {
     return acc;
   },[]).sort(function(a,b){
     return a.tick > b.tick ? 1 : -1;
-  })
+  });
+
+  events = events.map(e=> {
+    e.channel = 1;
+    return e;
+  });
 
   console.log(events);
+  seq.start(events);
+  
 
 }
 

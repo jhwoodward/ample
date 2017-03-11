@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var utils = require('./parserUtils');
+var utils = require('../parserUtils');
 
 function VelocityParser() {
   this.type = 'velocity';

@@ -1,6 +1,6 @@
-var parserUtils = require('./parserUtils');
-var pitchUtils = require('./pitchUtils');
-var event = require('./event');
+var parserUtils = require('../parserUtils');
+var pitchUtils = require('../pitchUtils');
+var eventType = require('../constants').eventType;
 var _ = require('lodash');
 
 function NoteParser() {
@@ -51,11 +51,11 @@ NoteParser.prototype = {
 
     var on = state.note.on !== undefined ? state.note.on : state.phrase.on;
     var tick = state.time.tick + on;
-
+    state.note.onTick = tick;
     state.events.push({
       tick,
-      type: event.noteon,
-      pitch: state.pitch.value,
+      type: eventType.noteon,
+      pitch: state.pitch,
       velocity: state.note.velocity || state.phrase.velocity,
       info: info
     });
@@ -63,7 +63,7 @@ NoteParser.prototype = {
     if (state.note.pitchbend !== undefined) {
       state.events.push({
         tick: tick-1,
-        type: event.pitchbend,
+        type: eventType.pitchbend,
         value: state.note.pitchbend,
         info: state.note.articulationInfo
       });
@@ -73,7 +73,7 @@ NoteParser.prototype = {
       for (var key in state.note.controller) {
         state.events.push({
           tick: tick-1,
-          type: event.controller,
+          type: eventType.controller,
           controller: key,
           value: state.note.controller[key],
           info: state.note.articulationInfo
@@ -84,22 +84,25 @@ NoteParser.prototype = {
     if (state.note.keyswitch) {
       state.events.push({
         tick: tick-1,
-        type: event.keyswitch,
-        pitch: this.parsed.pitch.value,
+        type: eventType.keyswitch,
+        pitch: this.parsed.pitch,
         info: state.note.articulationInfo
       });
     }
 
   },
   before: function(prev, state) {
-    if (prev.noteon) {
-      var off = prev.note.off !== undefined ? prev.phrase.off : prev.phrase.off;
-      var info = prev.note.off !== undefined ? prev.phrase.name : prev.phrase.name;
+    if (prev.note.onTick) {
+      var offset = prev.note.off !== undefined ? prev.phrase.off : prev.phrase.off;
+      var offTick = state.time.tick + offset;
+      var annotation = prev.note.off !== undefined ? prev.note.name : prev.phrase.name;
       state.events.push({
-        tick: state.time.tick + off,
-        type: 'noteoff',
-        pitch: prev.pitch.value,
-        info
+        tick: offTick,
+        type: eventType.noteoff,
+        pitch: prev.pitch,
+        duration: offTick - prev.note.onTick,
+        annotation,
+        offset
       });
     }
 
@@ -107,7 +110,7 @@ NoteParser.prototype = {
     if (prev.note.pitchbend !== undefined && state.note.pitchbend === undefined) {
       state.events.push({
         tick: state.time.tick + on - 1,
-        type: event.pitchbend,
+        type: eventType.pitchbend,
         value: state.phrase.pitchbend,
         info: state.phrase.name
       });
@@ -118,7 +121,7 @@ NoteParser.prototype = {
         if (!state.note.controller || !state.note.controller[key]) {
           state.events.push({
             tick: state.time.tick + on - 1,
-            type: event.controller,
+            type: eventType.controller,
             controller: key,
             value: state.phrase.controller[key] || 0,
             info: state.phrase.name

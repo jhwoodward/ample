@@ -1,11 +1,12 @@
 var utils = require('../parserUtils');
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function TransposeParser() {
-  this.type = 'transpose';
+  this.type = 'Transpose';
   this.test = /^-?[\d]{1,3}@/;
 }
-TransposeParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
@@ -14,4 +15,5 @@ TransposeParser.prototype = {
   }
 }
 
+TransposeParser.prototype = _.extend({}, parser, prototype);
 module.exports = TransposeParser;

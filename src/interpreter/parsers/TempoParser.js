@@ -1,12 +1,13 @@
 var utils = require('../parserUtils');
 var eventType = require('../constants').eventType;
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function TempoParser() {
   this.type = 'Tempo';
   this.test = /^[\d]{1,3}=T/;
 }
-TempoParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
@@ -20,5 +21,5 @@ TempoParser.prototype = {
   }
 
 }
-
+TempoParser.prototype = _.extend({}, parser, prototype);
 module.exports = TempoParser;

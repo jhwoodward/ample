@@ -1,11 +1,12 @@
 var utils = require('../parserUtils');
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function OnParser() {
   this.type = 'On';
   this.test = /^-?[\d]{1,2}==?ON/;
 }
-OnParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
@@ -17,5 +18,5 @@ OnParser.prototype = {
     }
   }
 }
-
+OnParser.prototype = _.extend({}, parser, prototype);
 module.exports = OnParser;

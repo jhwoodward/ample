@@ -11,30 +11,6 @@ var api = {
       return { value };
     }
   },
-  parseArtic: s => {
-    var xArray;
-    var artic;
-    var re = /[>'~_]/g;
-    var out = [];
-    while (xArray = re.exec(s)) {
-      artic = xArray[0];
-      switch (artic) {
-        case '>':
-        out.push('accent');
-        break;
-        case '~':
-        out.push('portamento');
-        break;
-        case '\'':
-        out.push('staccato');
-        break;
-        case '_':
-        out.push('legato');
-        break;
-      }
-    }
-    return out;
-  },
   parsePitch: s => {
     var char = /[a-gA-Gx-zX-Z]/.exec(s)[0];
     var octJump = s.match(/!/g);
@@ -65,7 +41,7 @@ var api = {
       return false;
     }
     return {
-      octave: parseInt(result[0].replace(':', ''), 10) + 4
+      octave: parseInt(result[0].replace(':', ''), 10) + 5
     };
   },
   parseNote: s => {

@@ -2,12 +2,13 @@ var utils = require('../parserUtils');
 var pitchUtils = require('../pitchUtils');
 var _ = require('lodash');
 var eventType = require('../constants').eventType;
+var parser = require('./_parser');
 
 function KeyswitchParser() {
   this.type = 'Keyswitch';
   this.test = /^\[\-?[0-4]:[+-]?[A-G]\]/;
 }
-KeyswitchParser.prototype = {
+var prototype = {
   parse: function (s) {
     var note = /[+-]?[A-G]/.exec(s)[0];
     var out = Object.assign(utils.parseNote(note), utils.parseOctave(s));
@@ -25,5 +26,5 @@ KeyswitchParser.prototype = {
     })
   }
 }
-
+KeyswitchParser.prototype = _.extend({}, parser, prototype);
 module.exports = KeyswitchParser;

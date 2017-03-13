@@ -1,12 +1,13 @@
 var _ = require('lodash');
 var utils = require('../parserUtils');
 var eventType = require('../constants').eventType;
+var parser = require('./_parser');
 
 function PitchbendParser() {
-  this.type = 'pitchbend';
+  this.type = 'Pitchbend';
   this.test = /^[\d]{1,4}==?P/;
 }
-PitchbendParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
@@ -22,5 +23,5 @@ PitchbendParser.prototype = {
     });
   }
 }
-
+PitchbendParser.prototype = _.extend({}, parser, prototype);
 module.exports = PitchbendParser;

@@ -14,7 +14,7 @@ var sStart = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = S T A R T 
 var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.red;
 var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
 
-var logMode = 'info';// 'pianoroll';
+var logMode = 'pianoroll';//info';// 'pianoroll';
 
 function allNotesOff() {
 
@@ -103,8 +103,8 @@ function onTick() {
   }
 
   indexed[tick].forEach(function (event) {
-    if (event.type === 'noteon') {
-      noteState[event.channel][event.pitch.value] = true;
+    if (event.type === eventType.noteon) {
+      noteState[event.channel][event.pitch.value] = event.keyswitch ? 'keyswitch' :true;
     }
 
     if (logMode === 'info') {
@@ -195,8 +195,7 @@ function logInfo(event) {
 
   switch (event.type) {
     case eventType.noteon:
-      data.push(event.pitch.string);
-      data.push(`p${event.pitch.value}`);
+      data.push(event.pitch.string + ' (' + event.pitch.value + ')');
       if (event.keyswitch) {
         name = 'keyswitch';
         color = colors.red;
@@ -204,16 +203,18 @@ function logInfo(event) {
         color = colors.yellow;
         data.push(`v${event.velocity}`);
       }
+      data.push(event.offset);
+      data.push(event.annotation);
       break;
     case eventType.noteoff:
       if (event.keyswitch) {
         name = 'ks off';
       }
       color = colors.grey;
-      data.push(event.pitch.string);
-      data.push(`p${event.pitch.value}`);
-      data.push(`dur${event.duration}`);
-      data.push(`(${event.offset} ${event.annotation})`);
+      data.push(event.pitch.string + ' (' + event.pitch.value + ')');
+      data.push(`d${event.duration}`);
+      data.push(event.offset);
+      data.push(event.annotation);
       break;
     case eventType.pitchbend:
       color = colors.red;
@@ -230,6 +231,7 @@ function logInfo(event) {
       break;
   }
 
+  log += colors.gray(pad(5, event.tick.toString())) + ' ';
   if (lastBeat !== beat) {
     log += colors.white(pad(5, beat.toString())) + '  ';
   } else {
@@ -245,8 +247,14 @@ function logInfo(event) {
   }
 
   log += color(pad(name, 10)) + '  ';
-  log += color(pad(data.join('  '), 15));
-  if (event.info) log += colors.gray(event.info) + '  ';
+  data.forEach(d => {
+    if (d !== undefined) {
+          log += color(pad(15,d));
+    }
+
+  })
+  
+ // if (event.info) log += colors.gray(event.info) + '  ';
   console.log(log);
 }
 

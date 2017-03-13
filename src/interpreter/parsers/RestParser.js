@@ -1,31 +1,39 @@
 var _ = require('lodash');
 var eventType = require('../constants').eventType;
+var parser = require('./_parser');
 
 function RestParser() {
-  this.type = 'rest';
+  this.type = 'Rest';
   this.test = /^\^/;
 }
-RestParser.prototype = {
+var prototype = {
   parse: function (s) {
-    return {rest: true};
+    return true;
   },
   mutateState: function (state) {
-    var offset = state.note.off !== undefined ? state.note.off : state.phrase.off;
-    var offTick = state.time.tick + offset;
-    var annotation = state.note.off !== undefined ? state.note.name : state.phrase.name;
-    state.events.push({
-      tick: offTick,
-      type: eventType.noteoff,
-      pitch: state.pitch,
-      duration: offTick - state.note.onTick,
-      annotation,
-      offset
-    });
-    delete state.note.onTick;
+    state.on = {};
+    state.off = { tick: state.time.tick, offset: 0 };
   },
-  after: function(state) {
-    state.time.tick += state.time.step;
+  enter: function(state, prev) {
+    if (prev.on.tick) {
+      var offset = prev.note.off !== undefined ? prev.note.off : prev.phrase.off;
+      if (offset > 0) offset = 0;
+      state.events.push({
+        tick: state.time.tick,
+        type: eventType.noteoff,
+        pitch: state.pitch,
+        duration: state.time.tick - prev.on.tick,
+        annotation: 'Rest',
+        offset: offset
+      });
+    }
+
+  },
+  leave: function (state, next) {
+    next.time.tick += next.time.step;
   }
 }
+
+RestParser.prototype = _.extend({}, parser, prototype);
 
 module.exports = RestParser;

@@ -1,11 +1,12 @@
 var _ = require('lodash');
 var utils = require('../parserUtils');
+var parser = require('./_parser');
 
 function VelocityParser() {
-  this.type = 'velocity';
+  this.type = 'Velocity';
   this.test = /^[\d]{1,3}==?V/;
 }
-VelocityParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
@@ -17,5 +18,5 @@ VelocityParser.prototype = {
     }
   }
 }
-
+VelocityParser.prototype = _.extend({}, parser, prototype);
 module.exports = VelocityParser;

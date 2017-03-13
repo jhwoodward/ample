@@ -1,10 +1,12 @@
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function AnnotationParser() {
   this.type = 'Annotation';
   this.test = /^{\w+}/;
 }
-AnnotationParser.prototype = {
+
+var prototype = {
   parse: function (s) {
     return {
       id: /\w+/.exec(s)[0]
@@ -18,4 +20,5 @@ AnnotationParser.prototype = {
   }
 }
 
+AnnotationParser.prototype = _.extend({}, parser, prototype);
 module.exports = AnnotationParser;

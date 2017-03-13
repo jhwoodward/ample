@@ -1,17 +1,20 @@
 var _ = require('lodash');
-
+var parser = require('./_parser');
+var utils = require('../parserUtils');
 function KeyParser() {
   this.type = 'Key';
   this.test = /^K\((?:[+-][A-G])+\)K/;
 }
-KeyParser.prototype = {
+var prototype = {
   parse: function (s) {
-    return { key: utils.getNotes(s) };
+    return utils.parseNotes(s);
   },
   mutateState: function (state) {
-    state.key.flats = this.parsed.key.filter(n => n.flat);
-    state.key.sharps = this.parsed.key.filter(n => n.sharp);
+    state.key = {
+      flats: this.parsed.filter(n => n.flat),
+      sharps: this.parsed.filter(n => n.sharp)
+    };
   }
 }
-
+KeyParser.prototype = _.extend({}, parser, prototype);
 module.exports = KeyParser;

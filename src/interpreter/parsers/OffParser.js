@@ -1,11 +1,12 @@
 var utils = require('../parserUtils');
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function OffParser() {
   this.type = 'On';
   this.test = /^-?[\d]{1,2}==?OFF/;
 }
-OffParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseValue(s);
   },
@@ -17,5 +18,7 @@ OffParser.prototype = {
     }
   }
 }
+
+OffParser.prototype = _.extend({}, parser, prototype);
 
 module.exports = OffParser;

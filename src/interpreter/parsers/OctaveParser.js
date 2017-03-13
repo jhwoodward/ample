@@ -1,12 +1,13 @@
 var utils = require('../parserUtils');
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function OctaveParser() {
-  this.type = 'octave';
+  this.type = 'Octave';
   this.test = /^\-?[0-4]:/;
 }
 
-OctaveParser.prototype = {
+var prototype = {
   parse: function (s) {
     return utils.parseOctave(s);
   },
@@ -15,5 +16,7 @@ OctaveParser.prototype = {
     state.pitch.char = undefined;
   }
 }
+
+OctaveParser.prototype = _.extend({}, parser, prototype);
 
 module.exports = OctaveParser;

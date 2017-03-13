@@ -1,38 +1,41 @@
 var parserUtils = require('../parserUtils');
 var pitchUtils = require('../pitchUtils');
 var eventType = require('../constants').eventType;
+var macroType = require('../constants').macroType;
 var _ = require('lodash');
+var parser = require('./_parser');
+var pitchParser = require('./_pitchParser');
 
-function NoteParser() {
-  this.type = 'note';
+function NoteParser(macros) {
+  if (macros) {
+    this.articulations = macros.reduce(function (acc, item) {
+      if (item.type === macroType.articulation) { 
+        acc[item.key] = item.parsed; 
+      }
+      return acc;
+    }, {});
+  }
+
+
+  this.type = 'Note';
   this.test = /^[>'~_]?\!*\+?\-?\=?[a-gA-G]/;
 }
 
-NoteParser.prototype = {
-  getPitch: pitchUtils.getPitch,
-  setOctave: pitchUtils.setOctave,
+var prototype = {
   parse: function (s) {
     var out = {
       pitch: parserUtils.strip(parserUtils.parseNote(s)),
-      articulations: parserUtils.parseArtic(s)
+      articulations: this.parseArticulation(s)
     };
 
     return out;
   },
-  mutateState: function (state, annotations) {
-    state.noteon = true;
-    state.note = {};
+  mutateState: function (state) {
 
-    var articulationInfo = [];
-    for (var key in annotations) {
-      if (this.parsed.articulations.indexOf(key) > -1) {
-        _.merge(state.note, annotations[key]);
-        articulationInfo.push(key);
-      }
-    }
-    if (articulationInfo.length) {
-      state.note.articulationInfo = articulationInfo.join(' - ');
-    }
+    state.note.articulations = this.parsed.articulations.map(a => a.key);
+    this.parsed.articulations.forEach(a => {
+      _.merge(state.note, a.parsed);
+    });
 
     this.setOctave(state);
     var pitch = this.getPitch(state);
@@ -41,28 +44,57 @@ NoteParser.prototype = {
     } else {
       state.pitch.value = pitch;
     }
-    state.pitch = _.merge(state.pitch,this.parsed.pitch);
+    state.pitch = _.merge(state.pitch, this.parsed.pitch);
     state.pitch.string += state.pitch.octave;
 
-    var info = state.pitch.string;
-    if (state.note.articulationInfo) {
-      info += ` (${state.note.articulationInfo})`
+  },
+  enter: function (state, prev) {
+
+    var note = _.extend({}, state.phrase, state.note);
+    var prevNote = _.extend({}, prev.phrase, prev.note);
+
+    //prev note off
+    if (prev.on.tick) {
+      var offOffset = prevNote.off;
+      var offAnnotation = prev.note.off !== undefined ? prev.note.name : prev.phrase.name
+      //prevent positive offsets at the end of a phrase
+      if (offOffset > 0 && (note.off <= 0)) {
+        offOffset = 0;
+        offAnnotation = state.phrase.name;
+      }
+      var offTick = state.time.tick + offOffset;
+      state.events.push({
+        tick: offTick,
+        type: eventType.noteoff,
+        pitch: prev.pitch,
+        duration: offTick - prev.on.tick,
+        annotation: offAnnotation,
+        offset: offOffset
+      });
     }
 
-    var on = state.note.on !== undefined ? state.note.on : state.phrase.on;
-    var tick = state.time.tick + on;
-    state.note.onTick = tick;
+    var onOffset = note.on;
+    //prevent negative offsets at the beginning of a phrase
+    if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
+      onOffset = 0;
+    }
+    var onTick = state.time.tick + onOffset;
+
+    //noteon event
+    state.on = { tick: onTick, offset: onOffset };
     state.events.push({
-      tick,
+      tick: onTick,
       type: eventType.noteon,
       pitch: state.pitch,
-      velocity: state.note.velocity || state.phrase.velocity,
-      info: info
+      velocity: note.velocity,
+      annotation: state.phrase.name,
+      articulation: state.note.articulations.join(', '),
+      offset: onOffset
     });
 
     if (state.note.pitchbend !== undefined) {
       state.events.push({
-        tick: tick-1,
+        tick: onTick - 1,
         type: eventType.pitchbend,
         value: state.note.pitchbend,
         info: state.note.articulationInfo
@@ -72,7 +104,7 @@ NoteParser.prototype = {
     if (state.note.controller) {
       for (var key in state.note.controller) {
         state.events.push({
-          tick: tick-1,
+          tick: onTick - 1,
           type: eventType.controller,
           controller: key,
           value: state.note.controller[key],
@@ -83,33 +115,17 @@ NoteParser.prototype = {
 
     if (state.note.keyswitch) {
       state.events.push({
-        tick: tick-1,
+        tick: onTick - 1,
         type: eventType.keyswitch,
         pitch: this.parsed.pitch,
         info: state.note.articulationInfo
       });
     }
 
-  },
-  before: function(prev, state) {
-    if (prev.note.onTick) {
-      var offset = prev.note.off !== undefined ? prev.phrase.off : prev.phrase.off;
-      var offTick = state.time.tick + offset;
-      var annotation = prev.note.off !== undefined ? prev.note.name : prev.phrase.name;
-      state.events.push({
-        tick: offTick,
-        type: eventType.noteoff,
-        pitch: prev.pitch,
-        duration: offTick - prev.note.onTick,
-        annotation,
-        offset
-      });
-    }
-
-    var on = state.note.on !== undefined ? state.note.on : state.phrase.on;
+    //reset articulations to phrase
     if (prev.note.pitchbend !== undefined && state.note.pitchbend === undefined) {
       state.events.push({
-        tick: state.time.tick + on - 1,
+        tick: onTick - 1,
         type: eventType.pitchbend,
         value: state.phrase.pitchbend,
         info: state.phrase.name
@@ -120,7 +136,7 @@ NoteParser.prototype = {
       for (var key in prev.note.controller) {
         if (!state.note.controller || !state.note.controller[key]) {
           state.events.push({
-            tick: state.time.tick + on - 1,
+            tick: onTick - 1,
             type: eventType.controller,
             controller: key,
             value: state.phrase.controller[key] || 0,
@@ -131,9 +147,12 @@ NoteParser.prototype = {
     }
 
   },
-  after: function(next) {
-     next.time.tick += next.time.step;
+  leave: function (state, next) {
+    //reset note articulations
+    next.note = {};
+    next.time.tick += next.time.step;
   }
 }
 
+NoteParser.prototype = _.extend({}, parser, pitchParser, prototype);
 module.exports = NoteParser;

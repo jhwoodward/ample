@@ -1,18 +1,19 @@
 var _ = require('lodash');
+var parser = require('./_parser');
 
 function SustainParser() {
-  this.type = 'sustain';
+  this.type = 'Sustain';
   this.test = /^\//;
 }
-SustainParser.prototype = {
+var prototype = {
   parse: function (s) {
-    return {sustain: true};
+    return true;
   },
   mutateState: function (state) {
   },
-  after: function(state) {
-     state.time.tick += state.time.step;
+  leave: function(state, next) {
+     next.time.tick += next.time.step;
   },
 }
-
+SustainParser.prototype = _.extend({}, parser, prototype);
 module.exports = SustainParser;

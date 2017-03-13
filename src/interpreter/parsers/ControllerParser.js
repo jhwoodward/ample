@@ -1,12 +1,13 @@
 var utils = require('../parserUtils');
+var parser = require('./_parser');
 var eventType = require('../constants').eventType;
 var _ = require('lodash');
 
 function ControllerParser() {
-  this.type = 'controller';
+  this.type = 'Controller';
   this.test = /^[\d]{1,3}==?C[\d]{1,3}/;
 }
-ControllerParser.prototype = {
+var prototype = {
   parse: function (s) {
     var out = {
       controller: parseInt(/C[\d]{1,3}/.exec(s)[0].replace('C', ''), 10)
@@ -26,12 +27,14 @@ ControllerParser.prototype = {
       state.note.controller[this.parsed.controller] = this.parsed.value;
     }
     state.events.push({
-      tick: state.time.tick-1,
+      tick: state.time.tick,
       type: eventType.controller,
       controller: this.parsed.controller,
       value: this.parsed.value
     })
   }
-}
+};
+
+ControllerParser.prototype = _.extend({}, parser, prototype);
 
 module.exports = ControllerParser;

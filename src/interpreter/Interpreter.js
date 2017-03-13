@@ -2,39 +2,32 @@ var parsers = require('./parsers');
 var parserUtils = require('./parserUtils');
 var State = require('./State');
 var seq = require('../sequencer');
+var macroType = require('./constants').macroType;
 
 var _ = require('lodash');
 
 
-function Interpreter(macros, annotations) {
-  this.macros = {};
-  this.annotations = {
-    default: {
-      name: 'default',
-      pitchbend: 8192,
-      velocity: 90,
-      controller: {},
-      keyswitch: undefined,
-      on: 0,
-      off: -5
+function Interpreter(macros) {
+  this.macros = macros;
+
+  this.macros.forEach(macro => {
+    switch (macro.type) {
+      case macroType.substitution:
+        macro.parsed = this.parse(macro.value);
+        break;
+      case macroType.annotation:
+        macro.parsed = parserUtils.strip(this.interpret(macro.value).finalState.phrase);
+        delete macro.parsed.pitch;
+        if (key === 'default') {
+          this.defaultPhrase = macro.parsed;
+        }
+        break;
+      case macroType.articulation:
+        macro.parsed = parserUtils.strip(this.interpret(macro.value).finalState.phrase);
+        delete macro.parsed.pitch;
     }
-  };
+  });
 
-  for (var key in macros) {
-    this.macros[key] = this.parse(macros[key]);
-  }
-  if (annotations.default) {
-    this.annotations.default = _.merge(this.annotations.default,parserUtils.strip(this.interpret(annotations.default).finalState.note));
-  }
-
-  for (var key in annotations) {
-    if (key !== 'default') {
-      this.annotations[key] = parserUtils.strip(this.interpret(annotations[key]).finalState.phrase);
-      this.annotations[key].name = key;
-      delete this.annotations[key].pitch;
-    }
-
-  }
 }
 
 /*
@@ -62,7 +55,7 @@ Interpreter.prototype.parse = function (part) {
 Interpreter.prototype.findMatch = function (part) {
   var result, parser;
   for (var i = 0; i < parsers.length; i++) {
-    parser = new parsers[i]();
+    parser = new parsers[i](this.macros);
     result = parser.match(part);
     if (result) {
       break;
@@ -73,14 +66,13 @@ Interpreter.prototype.findMatch = function (part) {
 }
 
 Interpreter.prototype.process = function (parsers) {
-  var prev;
 
-  parsers.forEach(function(parser) {
+  parsers.forEach(function (parser, i) {
 
     var state = this.state.clone();
 
-    if (prev && prev.after) {
-      prev.after(state);
+    if (i > 0 && parsers[i - 1].leave) {
+      parsers[i - 1].leave(this.state, state);
     }
     /*
     if (parser.type === 'Macro' && this.macros[parser.parsed.id]) {
@@ -92,20 +84,20 @@ Interpreter.prototype.process = function (parsers) {
     } else {
      
     }*/
-    parser.mutateState(state, this.annotations);
-    if (parser.before) {
-      parser.before(this.state, state);
+    parser.mutateState(state);
+
+    if (parser.enter) {
+      parser.enter(state, this.state);
     }
     this.state = state;
     this.states.push(this.state);
-    prev = parser;
   }.bind(this));
 }
 
-Interpreter.prototype.interpret = function (part, defaultExpression) {
+Interpreter.prototype.interpret = function (part) {
   this.states = [];
   this.events = [];
-  this.state = new State(this.annotations.default);
+  this.state = new State(this.defaultPhrase);
   this.state.context = ['root'];
   this.process(this.parse(part));
   return {
@@ -115,7 +107,7 @@ Interpreter.prototype.interpret = function (part, defaultExpression) {
 }
 
 
-var macros = {
+var substitutions = {
   part1: 'abcdefg {part2}',
   part2: 'aaa {part1} b'
 };
@@ -135,8 +127,47 @@ var annotations = {
   portamento: '0=P'
 };
 
+var articulations = {
+  '>': annotations.accent,
+  '~': annotations.portamento,
+  '_': annotations.legato,
+  '\'': annotations.staccato
+}
 
-var interpreter = new Interpreter(macros, annotations);
+
+function buildMacros(substitutions, annotations, articulations) {
+  var macros = [];
+
+  for (var key in annotations) {
+    var macro = {
+      type: macroType.annotation,
+      key: key,
+      value: annotations[key]
+    }
+    macros.push(macro);
+  }
+  for (var key in articulations) {
+    var macro = {
+      type: macroType.articulation,
+      key: key,
+      value: articulations[key]
+    }
+    macros.push(macro);
+  }
+  for (var key in substitutions) {
+    var macro = {
+      type: macroType.substitution,
+      key: key,
+      value: substitutions[key]
+    }
+    macros.push(macro);
+  }
+
+  return macros;
+
+}
+
+var interpreter = new Interpreter(buildMacros(substitutions, annotations, articulations));
 
 var result = interpreter.interpret('120=T {legato} abc {part1} S(-A+BCD)S 3@ 50==C1 [-3:+A] a~-b//^!!!c 48, {staccato} -2:defg');
 
@@ -145,21 +176,21 @@ sendEvents(result);
 function sendEvents(result) {
 
   var events = [];
-  var events = result.states.reduce(function(acc, item){
+  var events = result.states.reduce(function (acc, item) {
     acc = acc.concat(item.events);
     return acc;
-  },[]).sort(function(a,b){
+  }, []).sort(function (a, b) {
     return a.tick > b.tick ? 1 : -1;
   });
 
-  events = events.map(e=> {
-    e.channel = 1;
+  events = events.map(e => {
+    e.channel = 0;
     return e;
   });
 
   console.log(events);
   seq.start(events);
-  
+
 
 }
 

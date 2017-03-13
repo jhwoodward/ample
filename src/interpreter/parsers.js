@@ -19,15 +19,4 @@ var parsers = [
   require('./parsers/VelocityParser')
 ];
 
-parsers.forEach(parser => {
-  parser.prototype.match = function match(s) {
-    var result = this.test.exec(s);
-    if (result) {
-      this.string = result[0];
-      this.parsed = this.parse(this.string);
-    }
-    return !!result;
-  }
-});
-
 module.exports = parsers;

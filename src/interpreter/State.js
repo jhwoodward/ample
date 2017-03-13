@@ -1,19 +1,33 @@
 var _ = require('lodash');
 
 function State(init) {
-
+  init = _.merge({
+    name: 'default',
+    pitchbend: 8192,
+    velocity: 90,
+    controller: {},
+    keyswitch: undefined,
+    on: 0,
+    off: -5
+  }, init);
+  
   var state = {
+    events: [],
+    on: {},
     key: {
       flats: [],
       sharps: []
     },
     scale: [],
     pitch: {
-      octave: 4,
+      octave: 5,
       relativeStep: 1,
       transpose: 0
     },
-    note: {},
+    note: {
+      controller: {},
+      articulations: []
+    },
     phrase: init
     ,
     time: {
@@ -28,7 +42,7 @@ function State(init) {
 
 }
 
-State.prototype.clone = function() {
+State.prototype.clone = function () {
   var clone = _.merge({}, this);
   clone.events = [];
   return clone;

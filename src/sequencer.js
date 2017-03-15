@@ -5,6 +5,8 @@ var eventType = require('./interpreter/constants').eventType;
 var pad = require('pad');
 var NanoTimer = require('nanotimer');
 var timer = new NanoTimer();
+var utils = require('./interpreter/utils');
+var Interpreter = require('./interpreter/Interpreter');
 
 var stopped = false;
 var paused = false;
@@ -14,7 +16,7 @@ var sStart = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = S T A R T 
 var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.red;
 var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
 
-var logMode = 'pianoroll';//info';// 'pianoroll';
+var logMode = 'pianoroll';//'info';// 'pianoroll';
 
 function allNotesOff() {
 
@@ -53,7 +55,7 @@ function allNotesOff() {
 }
 
 function onKeyPress(ch, key) {
-  
+
   if (!stopped) {
     if (key && key.name === 'escape') {
       api.stop();
@@ -63,22 +65,22 @@ function onKeyPress(ch, key) {
     }
   }
 
-/*
-  if (key && key.name === 'f1') {
-    console.log('Log information'.green);
-    logMode = 'info';
-  }
-  if (key && key.name === 'f2') {
-    console.log('Log piano roll'.green);
-    logMode = 'pianoroll';
-  }
-*/
+  /*
+    if (key && key.name === 'f1') {
+      console.log('Log information'.green);
+      logMode = 'info';
+    }
+    if (key && key.name === 'f2') {
+      console.log('Log piano roll'.green);
+      logMode = 'pianoroll';
+    }
+  */
 
 }
 
 var indexed = {};
 
-var noteState ;
+var noteState;
 function resetNoteState() {
   noteState = {};
   for (var i = 0; i < 16; i++) {
@@ -104,7 +106,7 @@ function onTick() {
 
   indexed[tick].forEach(function (event) {
     if (event.type === eventType.noteon) {
-      noteState[event.channel][event.pitch.value] = event.keyswitch ? 'keyswitch' :true;
+      noteState[event.channel][event.pitch.value] = event.keyswitch ? 'keyswitch' : true;
     }
 
     if (logMode === 'info') {
@@ -117,9 +119,9 @@ function onTick() {
         if (newInterval !== interval) {
           interval = newInterval;
           timer.clearInterval();
-          timer.setInterval(onTick,'', interval + 'u');
+          timer.setInterval(onTick, '', interval + 'u');
         }
-      break;
+        break;
       case eventType.controller:
         if (!event.sent) {
           output.send(eventType.controller, {
@@ -129,16 +131,16 @@ function onTick() {
           });
           event.sent = true;
         }
-      break;
+        break;
       case eventType.pitchbend:
-       if (!event.sent) {
+        if (!event.sent) {
           output.send(eventType.pitchbend, {
             value: event.value,
             channel: event.channel
           });
           event.sent = true;
         }
-      break;
+        break;
       case eventType.noteon:
         if (!event.sent) {
           output.send(eventType.noteon, {
@@ -148,7 +150,7 @@ function onTick() {
           });
           event.sent = true;
         }
-      break;
+        break;
       case eventType.noteoff:
         if (!event.sent) {
           output.send(eventType.noteoff, {
@@ -157,10 +159,10 @@ function onTick() {
           });
           event.sent = true;
         }
-      break;
+        break;
       default:
         throw 'Unknown event type: ' + event.type
-      break
+        break
     }
 
     if (event.type === eventType.noteoff) {
@@ -205,6 +207,7 @@ function logInfo(event) {
       }
       data.push(event.offset);
       data.push(event.annotation);
+      data.push(event.articulation);
       break;
     case eventType.noteoff:
       if (event.keyswitch) {
@@ -215,6 +218,7 @@ function logInfo(event) {
       data.push(`d${event.duration}`);
       data.push(event.offset);
       data.push(event.annotation);
+      data.push(event.articulation);
       break;
     case eventType.pitchbend:
       color = colors.red;
@@ -249,12 +253,12 @@ function logInfo(event) {
   log += color(pad(name, 10)) + '  ';
   data.forEach(d => {
     if (d !== undefined) {
-          log += color(pad(15,d));
+      log += color(pad(15, d));
     }
 
   })
-  
- // if (event.info) log += colors.gray(event.info) + '  ';
+
+  // if (event.info) log += colors.gray(event.info) + '  ';
   console.log(log);
 }
 
@@ -336,19 +340,23 @@ var api = {
       allNotesOff();
       console.log(sPaused);
     } else {
-      timer.setInterval(onTick,'', interval + 'u');
+      timer.setInterval(onTick, '', interval + 'u');
     }
 
   },
-  setLogMode: function(mode) {
+  setLogMode: function (mode) {
     if (mode === 'info' || mode === 'pianoroll') {
-          logMode = mode;
+      logMode = mode;
     } else {
       console.log('Invalid log mode: ${mode} (can be either info or pianoroll)'.red);
     }
 
   },
   start: function (events, startBeat, endBeat) {
+
+    events = events.sort(function (a, b) {
+      return a.tick > b.tick ? 1 : -1;
+    });
 
     resetNoteState();
     clearInterval(timeout);
@@ -367,13 +375,7 @@ var api = {
     paused = false;
 
     tick = startTick;
-    maxTick = events.reduce(function (acc, event) {
-      if (event.tick > acc) {
-        return event.tick;
-      } else {
-        return acc;
-      }
-    }, 0);
+    maxTick = events[events.length-1].tick;
 
     indexed = {};
     for (var i = 0; i <= maxTick; i++) {
@@ -382,8 +384,25 @@ var api = {
       });
     }
 
-    timer.setInterval(onTick,'', interval + 'u');
+    timer.setInterval(onTick, '', interval + 'u');
 
+  },
+  load: function (players) {
+    var allEvents = [];
+    for (var key in players) {
+      var player = players[key];
+      delete player.annotations.name;
+      var macros = utils.buildMacros(player.substitutions, player.annotations, player.articulations);
+      var interpreter = new Interpreter(macros);
+      var result = interpreter.interpret(player.part);
+      var events = utils.eventsFromStates(result.states);
+      events.forEach(e => {
+        e.channel = player.channel
+      });
+      allEvents = allEvents.concat(events);
+    }
+
+    api.start(allEvents);
   }
 };
 module.exports = api;

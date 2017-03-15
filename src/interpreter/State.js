@@ -1,17 +1,24 @@
 var _ = require('lodash');
 
 function State(init) {
-  init = _.merge({
-    name: 'default',
-    pitchbend: 8192,
-    velocity: 90,
-    controller: {},
-    keyswitch: undefined,
-    on: 0,
-    off: -5
-  }, init);
-  
+
+  if (!init) {
+    init = {
+      phrase: {
+        name: 'default',
+        pitchbend: 8192,
+        velocity: 90,
+        controller: {},
+        keyswitch: undefined,
+        on: 0,
+        off: -5
+      },
+      events: []
+    };
+  }
+
   var state = {
+    modifiers: [],
     events: [],
     on: {},
     key: {
@@ -28,8 +35,8 @@ function State(init) {
       controller: {},
       articulations: []
     },
-    phrase: init
-    ,
+    phrase: init.phrase,
+    events: init.events,
     time: {
       beat: 0,
       tempo: 120,

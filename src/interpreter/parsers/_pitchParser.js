@@ -1,7 +1,7 @@
 var pitchUtils = require('../pitchUtils');
 
 module.exports = {
-  parseArticulation: function(s) {
+  parseArticulation: function (s) {
     if (!this.articulations) {
       return [];
     }
@@ -21,53 +21,62 @@ module.exports = {
     }
     return out;
   },
-  setOctave: function (state) {
-    var pitch = state.pitch;
-    if (pitch.char) { 
-      var nextPitch = this.getPitch(state);
-      var wouldBeSameOrHigher = nextPitch >= pitch.raw;
-      var wouldBeSameOrLower = nextPitch <= pitch.raw;
-      var wouldBeHigher = nextPitch > pitch.raw;
-      var wouldBeLower = nextPitch < pitch.raw;
+  adjustOctaveForPitchTransition: function (state, prev) {
+    if (!prev.pitch.char) {
+      return;
+    }
 
-      if (this.parsed.up) {
-        if (this.parsed.octJump) {
-          if (wouldSameBeHigher) {
-            pitch.octave -= this.parsed.octJump;
-          }
-        } else {
-          var octaveUp = pitch.char === this.parsed.char.toUpperCase();
-          if (wouldBeHigher || (octaveUp && pitch.sharp)) {
-            pitch.octave -= 1;
-          }
-        }
-      }
-      if (this.parsed.down) {
-        if (this.parsed.octJump) {
-          if (wouldBeSameOrLower) {
-            pitch.octave += this.parsed.octJump;
-          }
-        } else {
-          var octaveDown = pitch.char === this.parsed.char.toLowerCase();
-          if (wouldBeLower || octaveDown && pitch.flat) {
-            pitch.octave += 1;
-          }
-        }
-      }
+    var parsedPitch = this.parsed.pitch;
+    var oct = parsedPitch.octJump || 0;
 
-    } else {
-      if (this.parsed.down) {
-        pitch.octave--;
+    if (prev.pitch.char === parsedPitch.char && parsedPitch.up === prev.pitch.up ) {
+      return;
+    }
+
+    var octaveUp = prev.pitch.char === parsedPitch.char && prev.pitch.down && parsedPitch.up;
+    var octaveDown = prev.pitch.char === parsedPitch.char && prev.pitch.up && parsedPitch.down;
+    if (octaveUp || octaveDown) {
+      if (octaveUp) {
+        state.pitch.octave += oct + 1;
+      }
+      if (octaveDown) {
+        state.pitch.octave -= oct + 1;
+      }
+      return;
+    }
+
+    var pitch = this.getPitch(state);
+    var wouldBeHigher = pitch > prev.pitch.raw;
+    var wouldBeLower = pitch < prev.pitch.raw;
+    var shouldBeHigher = parsedPitch.up;
+    var shouldBeLower = parsedPitch.down;
+
+    if (shouldBeHigher) {
+      if (wouldBeHigher) {
+        state.pitch.octave += oct;
+      } else if (wouldBeLower) {
+        state.pitch.octave += oct + 1;
       }
     }
 
+    if (shouldBeLower) {
+      if (wouldBeLower) {
+        state.pitch.octave -= oct;
+      } else if (wouldBeHigher) {
+        state.pitch.octave -= oct + 1;
+      }
+    }
+
+
+
   },
+  // the midi pitch value for the parsed note in the state's octave
   getPitch: function (state) {
-    var pitch = this.parsed.pitch;
-    var value = pitchUtils.midiPitchFromNote(pitch.char, state.pitch.octave);
+    var char = this.parsed.pitch.char;
+    var value = pitchUtils.midiPitchFromNote(char, state.pitch.octave);
     if (!this.parsed.natural) {
-      var isFlat = pitch.flat || state.key.flats.indexOf(pitch.char.toUpperCase()) > -1;
-      var isSharp = pitch.sharp || state.key.sharps.indexOf(pitch.char.toUpperCase()) > -1;
+      var isFlat = this.parsed.pitch.flat || state.key.flats.indexOf(char.toUpperCase()) > -1;
+      var isSharp = this.parsed.pitch.sharp || state.key.sharps.indexOf(char.toUpperCase()) > -1;
       if (isFlat) {
         value--;
       }

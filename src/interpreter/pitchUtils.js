@@ -1,50 +1,37 @@
-
+var notePitches = {c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
 var api = {
   midiPitchFromNote: function (note, octave, accidental) {
     note = note.toLowerCase();
-    //var midi_letter_pitches = { a: 21, b: 23, c: 12, d: 14, e: 16, f: 17, g: 19 };
-    var midi_letter_pitches = {c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
-    var out = (12 * octave) + midi_letter_pitches[note];
+    var out = (12 * octave) + notePitches[note];
     if (accidental) out += accidental;
     return out;
   },
-  fitToScale: function (pitch, scale) {
-    var scalePitches = [];
-    scale.forEach(function (note) {
-      for (var oct = 0; oct <= 10; oct++) {
-        scalePitches.push(api.midiPitchFromNote(note.char, oct) + note.accidental);
+  midiPitchToString: function(pitch, preferSharps) {
+    var octave = Math.floor(pitch/12);
+    var note = pitch - (12 * octave);
+    var char, upper, lower, acc;
+    for (var key in notePitches) {
+      if (notePitches[key] === note) {
+        char = key;
+        break;
       }
-    });
-    scalePitches.sort(function (a, b) {
-      return a < b ? -1 : 1;
-    });
-
-    var fit;
-    if (scalePitches.indexOf(pitch) > -1) {
-      fit = pitch;
-    } else {
-      scalePitches.forEach(function (p, i) {
-        if (p > pitch && !fit) {
-          var upper = p;
-          var lower = scalePitches[i - 1];
-          var distToUpper = upper - pitch;
-          var distToLower = pitch - lower;
-          if (distToUpper < distToLower) {
-            fit = upper;
-          }
-          if (distToUpper > distToLower) {
-            fit = lower;
-          }
-          //equidistant so random choice
-          if (Math.floor(Math.random() * 2) == 1) {
-            fit = upper;
-          } else {
-            fit = lower;
-          }
-        }
-      });
+      if (note - notePitches[key] === -1 ) {
+        upper = key;
+      }
+      if (note - notePitches[key] === 1) {
+        lower = key;
+      }
     }
-    return fit;
+    if (char) {
+      return char.toUpperCase() + octave.toString();
+    }
+    if (preferSharps) {
+      return lower.toUpperCase() + '#' + octave.toString();
+    }
+    if (upper) {
+      return upper.toUpperCase() + 'b' + octave.toString();
+    }
+
   }
 };
 

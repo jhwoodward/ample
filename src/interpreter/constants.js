@@ -10,5 +10,8 @@ module.exports = {
     annotation: 'annotation',
     articulation: 'articulation',
     substitution: 'substitution'
+  },
+  modifierType: {
+    pitch: 'pitch'
   }
 };

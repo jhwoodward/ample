@@ -82,11 +82,12 @@ var api = {
       });
     }
 
-    return ensemble.instruments.map(mapInstrumentToChannelAndPart);
+    return ensemble.instruments.map(mapInstrumentToChannelAndPart).reduce(function(acc,item){
+      acc[item.part] = item;
+      return acc;
+    },{});
     var instruments = {};
     function mapInstrumentToChannelAndPart(instrument, i) {
-
-
       return {
         name: `${instrument.name} (${performer[i].name})`,
         part: instrumentPartNames ? partNames[i] : 'part' + i,
@@ -96,14 +97,14 @@ var api = {
     }
   },
   addPlayer: function(players, performer, part, channel) {
-    players = players || [];
+    players = players || {};
     var player = {
       name: performer.name,
       part: part || 'part' + (players.length+1),
       channel: channel-1 || players.length,
       annotations: performer
     };
-    players.push(player);
+    players[part] = player;
     return players;
   },
   addRudiments(rules) {
@@ -112,23 +113,7 @@ var api = {
   },
   
 
-		/**
-		 * Convert a symbolic note name (e.g. "c4") to a numeric MIDI pitch (e.g.
-		 * 60, middle C).
-		 *
-		 * @param {string} n - The symbolic note name to parse.
-		 * @returns {number} The MIDI pitch that corresponds to the symbolic note
-		 * name.
-		 */
-		midiPitchFromNote: function(n) {
-      var midi_letter_pitches = { a:21, b:23, c:12, d:14, e:16, f:17, g:19 };
-			var matches = /([a-g])(#+|b+)?([0-9]+)$/i.exec(n);
-      if (!matches) return 0;
-			var note = matches[1].toLowerCase();
-      var accidental = matches[2] || '';
-      var octave = parseInt(matches[3], 10);
-			return (12 * octave) + midi_letter_pitches[note] + (accidental.substr(0,1)=='#'?1:-1) * accidental.length;
-		},
+
 };
 
 module.exports = api;

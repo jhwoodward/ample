@@ -1,5 +1,5 @@
 var parsers = [
-  require('./parsers/AnnotationParser'),
+  require('./parsers/MacroParser'),
   require('./parsers/KeyswitchParser'),
   require('./parsers/KeyParser'),
   require('./parsers/ControllerParser'),

@@ -11,17 +11,18 @@ function KeyswitchParser() {
 var prototype = {
   parse: function (s) {
     var note = /[+-]?[A-G]/.exec(s)[0];
-    var out = Object.assign(utils.parseNote(note), utils.parseOctave(s));
-    out.pitch = pitchUtils.midiPitchFromNote(out.char, out.octave, out.accidental);
-    out.string += out.octave.toString();
-    return out;
+    var pitch = utils.parseNote(note);
+    pitch.octave = utils.parseOctave(s).octave;
+    pitch.value = pitchUtils.midiPitchFromNote(pitch.char, pitch.octave, pitch.accidental);
+    pitch.string += pitch.octave.toString();
+    return pitch;
   },
   mutateState: function (state) {
     state.phrase.keyswitch = this.parsed;
     state.events.push({
       tick: state.time.tick,
       type: eventType.noteon,
-      pitch: {value: this.parsed.pitch, string: this.parsed.string },
+      pitch: this.parsed,
       keyswitch: true
     })
   }

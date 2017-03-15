@@ -2,6 +2,7 @@ var parserUtils = require('../parserUtils');
 var pitchUtils = require('../pitchUtils');
 var eventType = require('../constants').eventType;
 var macroType = require('../constants').macroType;
+var modifierType = require('../constants').modifierType;
 var _ = require('lodash');
 var parser = require('./_parser');
 var pitchParser = require('./_pitchParser');
@@ -33,22 +34,21 @@ var prototype = {
   mutateState: function (state) {
 
     state.note.articulations = this.parsed.articulations.map(a => a.key);
-    this.parsed.articulations.forEach(a => {
-      _.merge(state.note, a.parsed);
-    });
-
-    this.setOctave(state);
-    var pitch = this.getPitch(state);
-    if (state.scale && state.scale.length) {
-      state.pitch.value = pitchUtils.fitToScale(pitch, state.scale);
-    } else {
-      state.pitch.value = pitch;
-    }
-    state.pitch = _.merge(state.pitch, this.parsed.pitch);
-    state.pitch.string += state.pitch.octave;
+    this.parsed.articulations.forEach(a => _.merge(state.note, a.parsed));
 
   },
   enter: function (state, prev) {
+
+    //pitch depends on prev state so have to calculate this in enter
+    this.adjustOctaveForPitchTransition(state, prev);
+    state.pitch.raw = this.getPitch(state);
+
+    state.pitch.value = state.pitch.raw;
+    state.modifiers.filter(m => m.type === modifierType.pitch).map(m => m.fn(state));
+
+    //parsed pitch values are required to correctly calculate pitch based on previous character
+    state.pitch = _.merge(state.pitch, this.parsed.pitch);
+    state.pitch.string = pitchUtils.midiPitchToString(state.pitch.value);
 
     var note = _.extend({}, state.phrase, state.note);
     var prevNote = _.extend({}, prev.phrase, prev.note);
@@ -116,8 +116,9 @@ var prototype = {
     if (state.note.keyswitch) {
       state.events.push({
         tick: onTick - 1,
-        type: eventType.keyswitch,
-        pitch: this.parsed.pitch,
+        type: eventType.noteon,
+        keyswitch: true,
+        pitch: {value: state.note.keyswitch.value, string: state.note.keyswitch.string},
         info: state.note.articulationInfo
       });
     }

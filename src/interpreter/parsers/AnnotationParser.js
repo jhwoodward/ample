@@ -2,8 +2,8 @@ var _ = require('lodash');
 var parser = require('./_parser');
 var macroType = require('../constants').macroType;
 
-function MacroParser(macros) {
-  this.type = 'Macro';
+function AnnotationParser(macros) {
+  this.type = 'Annotation';
   this.test = /^{\w+}/;
 
   if (macros) {
@@ -19,17 +19,16 @@ function MacroParser(macros) {
 
 var prototype = {
   parse: function (s) {
-    return {
-      id: /\w+/.exec(s)[0]
-    };
+    var key = /\w+/.exec(s)[0];
+    if (this.annotations[key]) {
+      return key;
+    }
   },
   mutateState: function (state) {
-    if (this.annotations[this.parsed.id]) {
-      state.phrase = _.merge({}, this.annotations[this.parsed.id]);
-      state.phrase.name = this.parsed.id;
-    }
+    state.phrase = _.merge({}, this.annotations[this.parsed]);
+    state.phrase.name = this.parsed;
   }
 }
 
-MacroParser.prototype = _.extend({}, parser, prototype);
-module.exports = MacroParser;
+AnnotationParser.prototype = _.extend({}, parser, prototype);
+module.exports = AnnotationParser;

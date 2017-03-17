@@ -5,6 +5,6 @@ module.exports = {
       this.string = result[0];
       this.parsed = this.parse(this.string);
     }
-    return !!result;
+    return !!result && !!this.parsed;
   }
 };

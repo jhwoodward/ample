@@ -81,37 +81,42 @@ Interpreter.prototype.findMatch = function (part) {
 
 Interpreter.prototype.process = function (parsers) {
 
-  parsers.forEach(function (parser, i) {
+  for (var i = 0; i < parsers.length; i ++) {
+    var parser = parsers[i];
 
-    var state = this.state.clone();
-
-    if (i > 0 && parsers[i - 1].leave) {
-      parsers[i - 1].leave(this.state, state);
+    var state = this.next || this.getNextState();
+    parser.mutateState(state, this);
+    
+    if (parser.continue) {
+      continue;
     }
-    /*
-    if (parser.type === 'Macro' && this.macros[parser.parsed.id]) {
-      if (this.state.context.length < 10) {
-        this.state.context.push(parser.parsed.id);
-        this.process(this.macros[parser.parsed.id]);
-        this.state.context.pop();
-      }
-    } else {
-     
-    }*/
-    parser.mutateState(state);
-
+    
     if (parser.enter) {
-      parser.enter(state, this.state);
+      parser.enter(state, this.getTopState());
     }
-    this.state = state;
-    this.states.push(this.state);
-  }.bind(this));
+
+    this.states.push(state);
+
+    this.next = this.getNextState();
+    if (parser.leave) {
+      parser.leave(state, this.next);
+    }
+
+  }
+
+}
+
+Interpreter.prototype.getTopState = function() {
+  return this.states[this.states.length - 1];
+}
+
+Interpreter.prototype.getNextState = function() {
+  return this.getTopState().clone();
 }
 
 Interpreter.prototype.interpret = function (part) {
   this.state = new State(this.initState);
   this.states = [this.state];
-  this.state.context = ['root'];
   this.process(this.parse(part));
   return {
     states: this.states,

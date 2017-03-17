@@ -91,6 +91,7 @@ var prototype = {
       articulation: state.note.articulations.join(', '),
       offset: onOffset
     });
+    console.log('on: ' + onTick + ' note: ' + state.pitch.string);
 
     if (state.note.pitchbend !== undefined) {
       state.events.push({

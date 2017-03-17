@@ -16,7 +16,7 @@ var sStart = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = S T A R T 
 var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.red;
 var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
 
-var logMode = 'pianoroll';//'info';// 'pianoroll';
+var logMode = 'info';// 'pianoroll';
 
 function allNotesOff() {
 

@@ -19,12 +19,20 @@ var prototype = {
   },
   mutateState: function (state) {
     state.phrase.keyswitch = this.parsed;
+    var duration =1;
     state.events.push({
       tick: state.time.tick,
       type: eventType.noteon,
       pitch: this.parsed,
       keyswitch: true
-    })
+    });
+    state.events.push({
+      tick: state.time.tick + duration,
+      type: eventType.noteoff,
+      pitch: this.parsed,
+      keyswitch: true,
+      duration
+    });
   }
 }
 KeyswitchParser.prototype = _.extend({}, parser, prototype);

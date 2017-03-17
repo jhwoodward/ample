@@ -9,7 +9,7 @@ function AnnotationParser(macros) {
   if (macros) {
     this.annotations = macros.reduce(function (acc, item) {
       if (item.type === macroType.annotation) { 
-        acc[item.key] = item.parsed; 
+        acc[item.key] = item; 
       }
       return acc;
     }, {});
@@ -21,12 +21,28 @@ var prototype = {
   parse: function (s) {
     var key = /\w+/.exec(s)[0];
     if (this.annotations[key]) {
-      return key;
+      return {
+        key,
+        annotation: this.annotations[key]
+      }
     }
   },
   mutateState: function (state) {
-    state.phrase = _.merge({}, this.annotations[this.parsed]);
-    state.phrase.name = this.parsed;
+
+    if (this.parsed.annotation.events) {
+      this.parsed.annotation.events.forEach(e => {
+        if (e.type === 'noteoff') {
+          e.tick = state.time.tick -1
+        } else {
+          e.tick = state.time.tick -2;
+        }
+       
+      });
+      state.events = state.events.concat(this.parsed.annotation.events);
+    } 
+
+    state.phrase = _.merge({}, this.parsed.annotation.phrase || this.parsed.annotation);
+    state.phrase.name = this.parsed.key;
   }
 }
 

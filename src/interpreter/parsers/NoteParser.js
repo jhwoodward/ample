@@ -75,7 +75,7 @@ var prototype = {
 
     var onOffset = note.on;
     //prevent negative offsets at the beginning of a phrase
-    if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
+    if (onOffset < 0 && (!prev.on.tick || prev.phrase.on >= 0)) {
       onOffset = 0;
     }
     var onTick = state.time.tick + onOffset;
@@ -118,6 +118,13 @@ var prototype = {
       state.events.push({
         tick: onTick - 1,
         type: eventType.noteon,
+        keyswitch: true,
+        pitch: {value: state.note.keyswitch.value, string: state.note.keyswitch.string},
+        info: state.note.articulationInfo
+      });
+      state.events.push({
+        tick: onTick,
+        type: eventType.noteoff,
         keyswitch: true,
         pitch: {value: state.note.keyswitch.value, string: state.note.keyswitch.string},
         info: state.note.articulationInfo

@@ -18,6 +18,7 @@ var prototype = {
       state.note.pitchbend = this.parsed.value;
     }
     state.events.push({
+      tick: state.time.tick,
       type: eventType.pitchbend,
       value: this.parsed.value
     });

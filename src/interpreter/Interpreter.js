@@ -18,26 +18,27 @@ function Interpreter(macros) {
   }
 
   var interpretedMacro;
+  var startTick =new State().time.tick;
   this.macros.forEach(macro => {
     switch (macro.type) {
       case macroType.substitution:
         macro.parsed = this.parse(macro.value);
         break;
       case macroType.annotation:
-        var interpretedMacro = this.interpret(macro.value);
-        macro.parsed = parserUtils.strip(interpretedMacro.finalState.phrase);
-        delete macro.parsed.pitch;
+        this.interpret(macro.value);
+        macro.phrase = parserUtils.strip(this.getTopState().phrase);
+        macro.events = utils.eventsFromStates(this.states);
         if (macro.key === 'default') {
-          var initEvents = utils.eventsFromStates(interpretedMacro.states);
-          initEvents.map(e => e.tick = 0);
+          macro.events.map(e => e.tick -= startTick);
           this.initState = {
             phrase: macro.parsed,
-            events: initEvents
+            events: macro.events
           };
         } 
         break;
       case macroType.articulation:
-        macro.parsed = parserUtils.strip(this.interpret(macro.value).finalState.phrase);
+        this.interpret(macro.value);
+        macro.parsed = parserUtils.strip(this.getTopState().phrase);
         delete macro.parsed.pitch;
     }
   });
@@ -115,12 +116,10 @@ Interpreter.prototype.getNextState = function() {
 }
 
 Interpreter.prototype.interpret = function (part) {
-  this.state = new State(this.initState);
-  this.states = [this.state];
+  this.states = [new State(this.initState)];
   this.process(this.parse(part));
   return {
-    states: this.states,
-    finalState: this.state
+    states: this.states
   };
 }
 

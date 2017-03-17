@@ -24,11 +24,9 @@ var prototype = {
     }
   },
   mutateState: function (state, interpreter) {
-    console.log(this.parsed + ' - start - ' + interpreter.next.time.tick)
     var part = this.substitutions[this.parsed];
     var parsed = interpreter.parse(part.value);
     interpreter.process(parsed);
-    console.log(this.parsed + ' - end - ' + interpreter.next.time.tick)
   },
   continue: true
 }

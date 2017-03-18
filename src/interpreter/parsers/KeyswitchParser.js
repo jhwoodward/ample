@@ -19,7 +19,7 @@ var prototype = {
   },
   mutateState: function (state) {
     state.phrase.keyswitch = this.parsed;
-    var duration =1;
+    var duration = 1;
     state.events.push({
       tick: state.time.tick,
       type: eventType.noteon,

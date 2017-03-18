@@ -16,16 +16,37 @@ var prototype = {
   },
   enter: function(state, prev) {
     if (prev.on.tick) {
-      var offset = prev.note.off !== undefined ? prev.note.off : prev.phrase.off;
+      var offset = state.note.off || state.phrase.off;
       if (offset > 0) offset = 0;
+      var offTick = state.time.tick + offset;
       state.events.push({
-        tick: state.time.tick,
+        tick: offTick,
         type: eventType.noteoff,
-        pitch: state.pitch,
-        duration: state.time.tick - prev.on.tick,
-        annotation: 'Rest',
+        pitch: prev.pitch,
+        duration: offTick - prev.on.tick,
+        annotation: 'Rest (' + state.phrase.name +')',
         offset: offset
       });
+
+      var events = state.phrase.events.reduce((acc, e) => {
+        var out = _.merge({}, e);
+        out.annotation = state.phrase.name + ' (rest)';
+        if (e.keyswitch) {
+          if (e.type==='noteon') {
+             out.tick = offTick -2;
+          } else if (e.type==='noteoff') {
+             out.tick = offTick -1;
+          }
+        } else {
+          out.tick = offTick -1;
+        }
+        acc.push(out);
+        return acc;
+      },[]);
+
+      state.events = state.events.concat(events);
+
+
     }
 
   },

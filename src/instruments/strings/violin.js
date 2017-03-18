@@ -23,7 +23,7 @@ var performers = {
     default: '[-3:C] 85=C1 8192=P 0=ON -5=OFF',
     staccato: '[-3:+D]',
     detached: '[-3:C] 8192=P 0=ON -5=OFF',
-    legato: '[-3:C] 8192=P -7=ON 5=OFF',
+    legato: '[-3:C] 8192=P -12=ON 1=OFF',
     legatoslow: '[-3:C] 8192=P -7=ON 5=OFF',
     legatononvib: '[-3:+C] -7=ON 5=OFF',
     spiccato: '[-3:D]',
@@ -31,7 +31,7 @@ var performers = {
     pizzicato: '[-3:E] 50=V',
     pizz: '[-3:E]',
     accent: '120=V',
-    portamento: '0=P'
+    portamento: '0=P  -12=ON 1=OFF'
   },
   friedlander: {
     name: 'friedlander',

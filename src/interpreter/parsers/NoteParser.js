@@ -52,12 +52,13 @@ var prototype = {
       });
 
     } else {
-      state.note.events = state.phrase.events.map(e => {
+      state.note.events = state.phrase.events.reduce((acc, e) => {
         var out = _.merge({}, e);
-        out.articulation = '|';
+        out.articulation = state.phrase.name;
         delete out.annotation;
-        return out;
-      });
+        acc.push(out);
+        return acc;
+      },[]);
     }
 
 
@@ -100,9 +101,9 @@ var prototype = {
     }
 
     var onOffset = note.on;
-    //prevent negative offsets at the beginning of a phrase
-    if (onOffset < 0 && (!prev.on.tick || prev.phrase.on >= 0)) {
-      onOffset = 0;
+    //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
+    if (onOffset < 0 && (!prev.on.tick || prev.note.on >= 0)) {
+   //   onOffset = 0;
     }
     var onTick = state.time.tick + onOffset;
 
@@ -119,10 +120,14 @@ var prototype = {
     });
 
     state.note.events.forEach(e => {
-      if (e.type === "noteoff") {
-        e.tick = onTick - 1;
+      if (e.keyswitch) {
+        if (e.type === 'noteon') {
+          e.tick = onTick - 2;
+        } else if (e.type === 'noteoff') {
+          e.tick = onTick - 1;
+        }
       } else {
-        e.tick = onTick - 2;
+        e.tick = onTick - 1;
       }
       state.events.push(e);
     });

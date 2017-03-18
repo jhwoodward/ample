@@ -145,7 +145,7 @@ function onTick() {
         if (!event.sent) {
           output.send(eventType.noteon, {
             note: event.pitch.value,
-            velocity: event.velocity,
+            velocity: event.velocity || 80,
             channel: event.channel
           });
           event.sent = true;
@@ -199,7 +199,7 @@ function logInfo(event) {
     case eventType.noteon:
       data.push(event.pitch.string + ' (' + event.pitch.value + ')');
       if (event.keyswitch) {
-        name = 'keyswitch';
+        name = 'noteon ks';
         color = colors.red;
       } else {
         color = colors.yellow;
@@ -209,7 +209,7 @@ function logInfo(event) {
       break;
     case eventType.noteoff:
       if (event.keyswitch) {
-        name = 'ks off';
+        name = 'noteoff ks';
       }
       color = colors.grey;
       data.push(event.pitch.string + ' (' + event.pitch.value + ')');

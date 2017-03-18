@@ -8,40 +8,60 @@ var _ = require('lodash');
 function Interpreter(macros) {
   this.macros = macros || [];
 
-  var initPhrase =  '8192=P 85=C1';
-  if (!this.macros.filter(m=>m.type===macroType.annotation && m.key==='default').length) {
-    this.macros.push({
-      type: macroType.annotation,
-      key: 'default',
-      value: initPhrase
-    });
-  }
 
-  var interpretedMacro;
-  var startTick =new State().time.tick;
+
+  var initState;
+  var startTick = new State().time.tick;
   this.macros.forEach(macro => {
     switch (macro.type) {
       case macroType.substitution:
-        macro.parsed = this.parse(macro.value);
+      //  macro.parsed = this.parse(macro.value);
         break;
       case macroType.annotation:
         this.interpret(macro.value);
-        macro.phrase = parserUtils.strip(this.getTopState().phrase);
+        macro.state = parserUtils.strip(this.getTopState().phrase);
         macro.events = utils.eventsFromStates(this.states);
+        macro.events.forEach(m => {
+          m.annotation = macro.key;
+        });
         if (macro.key === 'default') {
-          macro.events.map(e => e.tick -= startTick);
-          this.initState = {
-            phrase: macro.parsed,
-            events: macro.events
+          initState = {
+            phrase: macro.state,
+            events: macro.events.map(e => { e.tick -= startTick; return e; })
           };
-        } 
+          initState.phrase.events = macro.events;
+        }
+
         break;
       case macroType.articulation:
         this.interpret(macro.value);
-        macro.parsed = parserUtils.strip(this.getTopState().phrase);
-        delete macro.parsed.pitch;
+        macro.state = parserUtils.strip(this.getTopState().phrase);
+        macro.events = utils.eventsFromStates(this.states);
+        macro.events.forEach(m => {
+          m.annotation = macro.key;
+        });
     }
   });
+
+  if (initState) {
+     this.initState = initState;
+  } else {
+    var initPhrase = '8192=P 85=C1';
+    this.interpret(initPhrase);
+    var defaultMacro = {
+      type: macroType.annotation,
+      key: 'default',
+      value: initPhrase,
+      state: parserUtils.strip(this.getTopState().phrase),
+      events: utils.eventsFromStates(this.states)
+    };
+    this.initState = {
+      phrase: defaultMacro.state,
+      events: defaultMacro.events.map(e => { e.tick -= startTick; return e; })
+    }
+    initState.phrase.events = defaultMacro.events;
+    this.macros.push(defaultMacro);
+  }
 
 }
 
@@ -82,16 +102,16 @@ Interpreter.prototype.findMatch = function (part) {
 
 Interpreter.prototype.process = function (parsers) {
 
-  for (var i = 0; i < parsers.length; i ++) {
+  for (var i = 0; i < parsers.length; i++) {
     var parser = parsers[i];
 
     var state = this.next || this.getNextState();
     parser.mutateState(state, this);
-    
+
     if (parser.continue) {
       continue;
     }
-    
+
     if (parser.enter) {
       parser.enter(state, this.getTopState());
     }
@@ -107,16 +127,17 @@ Interpreter.prototype.process = function (parsers) {
 
 }
 
-Interpreter.prototype.getTopState = function() {
+Interpreter.prototype.getTopState = function () {
   return this.states[this.states.length - 1];
 }
 
-Interpreter.prototype.getNextState = function() {
+Interpreter.prototype.getNextState = function () {
   return this.getTopState().clone();
 }
 
 Interpreter.prototype.interpret = function (part) {
   this.states = [new State(this.initState)];
+  this.next = undefined;
   this.process(this.parse(part));
   return {
     states: this.states

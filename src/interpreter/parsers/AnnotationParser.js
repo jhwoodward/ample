@@ -36,12 +36,14 @@ var prototype = {
         } else {
           e.tick = state.time.tick -2;
         }
+        e.annotation = this.parsed.key;
        
       });
       state.events = state.events.concat(this.parsed.annotation.events);
     } 
 
-    state.phrase = _.merge({}, this.parsed.annotation.phrase || this.parsed.annotation);
+    state.phrase = _.merge({}, this.parsed.annotation.state || this.parsed.annotation);
+    state.phrase.events = this.parsed.annotation.events;
     state.phrase.name = this.parsed.key;
   }
 }

@@ -206,8 +206,6 @@ function logInfo(event) {
         data.push(`v${event.velocity}`);
       }
       data.push(event.offset);
-      data.push(event.annotation);
-      data.push(event.articulation);
       break;
     case eventType.noteoff:
       if (event.keyswitch) {
@@ -217,8 +215,7 @@ function logInfo(event) {
       data.push(event.pitch.string + ' (' + event.pitch.value + ')');
       data.push(`d${event.duration}`);
       data.push(event.offset);
-      data.push(event.annotation);
-      data.push(event.articulation);
+
       break;
     case eventType.pitchbend:
       color = colors.red;
@@ -226,7 +223,7 @@ function logInfo(event) {
       break;
     case eventType.controller:
       color = colors.red;
-      data.push(`cc${event.controller}`);
+      name = `cc ${event.controller}`;
       data.push(`${event.value}`);
       break;
     case eventType.tempo:
@@ -234,6 +231,14 @@ function logInfo(event) {
       data.push(event.tempo);
       break;
   }
+
+  if (event.annotation) {
+    data.push(event.annotation);
+  }
+  if (event.articulation) {
+    data.push(event.articulation);
+  }
+
 
   log += colors.gray(pad(5, event.tick.toString())) + ' ';
   if (lastBeat !== beat) {
@@ -354,6 +359,14 @@ var api = {
   },
   start: function (events, startBeat, endBeat) {
 
+    var errors = events.filter(e => {
+      return e.tick===undefined || isNaN(e.tick);
+    });
+
+    if (errors.length) {
+       throw ('Missing tick', errors);
+    }
+
     events = events.sort(function (a, b) {
       return a.tick > b.tick ? 1 : -1;
     });
@@ -375,7 +388,7 @@ var api = {
     paused = false;
 
     tick = startTick;
-    maxTick = events[events.length-1].tick;
+    maxTick = events[events.length - 1].tick;
 
     indexed = {};
     for (var i = 0; i <= maxTick; i++) {

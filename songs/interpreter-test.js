@@ -17,7 +17,7 @@ players.violin1.substitutions = {
 
 
 
-players.violin1.part = `48,1: {legato} (cDEd^)*3 (1:8,cDEFGfed)*8 ^`;
+players.violin1.part = `48,1:  (>c_DE_d)*3 (1:24,c~DE_FG_fe_d)*8 ^`;
 players.violin2.part = '';
 players.viola.part = '';
 players.cello.part = '';

@@ -13,10 +13,7 @@ module.exports = {
     while (xArray = re.exec(s)) {
       artic = xArray[0];
       if (this.articulations[artic]) {
-        out.push({
-          key: artic,
-          parsed: this.articulations[artic]
-        });
+        out.push(this.articulations[artic]);
       }
     }
     return out;

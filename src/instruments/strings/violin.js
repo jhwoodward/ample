@@ -55,7 +55,7 @@ var performers = {
     spiccato: '[-1:A]',
     pizzicato: '[-1:+A]',
     accent: '120=V',
-    portamento: '127=C14'
+    portamento: '127=C14 -10=ON 1=OFF'
   },
   sacconi: performers.sacconi,
   cinestrings: performers.cinestrings

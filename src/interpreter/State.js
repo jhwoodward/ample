@@ -11,7 +11,8 @@ function State(init) {
         controller: {},
         keyswitch: undefined,
         on: 0,
-        off: -5
+        off: -5,
+        events:[]
       },
       events: []
     };
@@ -32,7 +33,6 @@ function State(init) {
       transpose: 0
     },
     note: {
-      controller: {},
       articulations: []
     },
     phrase: init.phrase,
@@ -50,7 +50,7 @@ function State(init) {
 }
 
 State.prototype.clone = function () {
-  var clone = _.merge({}, this);
+  var clone = _.cloneDeep(this);
   clone.events = [];
   return clone;
 }

@@ -5,7 +5,7 @@ var parser = require('./_parser');
 
 function PitchbendParser() {
   this.type = 'Pitchbend';
-  this.test = /^[\d]{1,4}==?P/;
+  this.test = /^[\d]{1,5}==?P/;
 }
 var prototype = {
   parse: function (s) {

@@ -45,6 +45,12 @@ var ensemble = {
         instruments.strings.viola.performers.triobroz,
         instruments.strings.cello.performers.triobroz
       ],
+      friedfischtriobroz: [
+        instruments.strings.violin.performers.friedlander,
+        instruments.strings.violin.performers.triobroz,
+        instruments.strings.viola.performers.fischer,
+        instruments.strings.cello.performers.triobroz
+      ],
       cinestrings: [
         instruments.strings.violin.performers.cinestrings,
         instruments.strings.violin.performers.cinestrings,

@@ -4,18 +4,18 @@ module.exports = {
     /*
       dynamics:
     */
-    default: '[-3:C] 110=C1 8192=P 0=ON -5=OFF',
+    default: '[-3:C] 90=C1 8192=P 0=ON -5=OFF',
     staccato: '[-3:+D]',
     detached: '[-3:C] 8192=P 0=ON -5=OFF',
     legatoslow: '[-3:C] 8192=P -12=ON 1=OFF 70=C17 50=C18',
     legatoquick: '[-3:C] 8192=P -3=ON 1=OFF 127=C17 0=C18',
-    legato: '[-3:C] 8192=P -10=ON 1=OFF',
+    legato: '[-3:C] 90=C1  8192=P -10=ON 1=OFF',
     'legato-nonvib': '[-3:+C] -7=ON 5=OFF',
     spiccato: '[-3:D]  0=ON -5=OFF',
     spic: '[-3:D] 0=ON -5=OFF',
     pizzicato: '[-3:E] 50=V',
     pizz: '[-3:E]',
-    accent: '120=V',
+    accent: '120=C1 16383=P',
     portamento: '0=P  -10=ON 1=OFF'
   },
   sacconi: {

@@ -15,7 +15,7 @@
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceRoot}/test/parsers/NoteParser-pitch.test"
+        "${workspaceRoot}/test/parsers/MarkerParser.test"
       ],
       "internalConsoleOptions": "openOnSessionStart"
     },

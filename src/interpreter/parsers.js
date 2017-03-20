@@ -1,7 +1,10 @@
 var parsers = [
   require('./parsers/ScaleParser'),
   require('./parsers/KeyParser'),
+  require('./parsers/NthTimeParser'),
   require('./parsers/LoopParser'),
+  require('./parsers/MarkerReadParser'),
+  require('./parsers/MarkerParser'),
   require('./parsers/SubstitutionParser'),
   require('./parsers/AnnotationParser'),
   require('./parsers/KeyswitchParser'),

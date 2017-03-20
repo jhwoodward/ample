@@ -40,6 +40,7 @@ var prototype = {
       });
 
       state.note.events = this.parsed.articulations.reduce((acc, a) => {
+        if (!a.events) return acc;
         a.events.forEach(ae => {
           acc.push(_.merge({}, ae));
         });

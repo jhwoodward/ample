@@ -360,11 +360,11 @@ var api = {
   start: function (events, startBeat, endBeat) {
 
     var errors = events.filter(e => {
-      return e.tick===undefined || isNaN(e.tick);
+      return e.tick === undefined || isNaN(e.tick);
     });
 
     if (errors.length) {
-       throw ('Missing tick', errors);
+      throw ('Missing tick', errors);
     }
 
     events = events.sort(function (a, b) {
@@ -406,12 +406,15 @@ var api = {
       var player = players[key];
       delete player.annotations.name;
       var macros = utils.buildMacros(player.substitutions, player.annotations, player.articulations);
-      var interpreter = new Interpreter(macros);
-      var result = interpreter.interpret(player.part);
-      var events = utils.eventsFromStates(result.states);
-      events.forEach(e => {
-        e.channel = player.channel
-      });
+      var interpreter = new Interpreter(macros), events = [];
+      if (typeof player.part === 'string') {
+        events = utils.eventsFromStates(interpreter.interpret(player.part, player.master).states);
+      } else { //array of part objects
+        player.part.forEach(p => {
+          events = events.concat(utils.eventsFromStates(interpreter.interpret(p, player.master).states));
+        });
+      }
+      events.forEach(e => { e.channel = player.channel });
       allEvents = allEvents.concat(events);
     }
 

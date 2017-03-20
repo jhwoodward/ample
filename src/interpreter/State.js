@@ -1,7 +1,8 @@
 var _ = require('lodash');
 
-function State(init) {
+function State(init, master) {
 
+  this.master = master;
   if (!init) {
     init = {
       phrase: {
@@ -12,7 +13,7 @@ function State(init) {
         keyswitch: undefined,
         on: 0,
         off: -5,
-        events:[]
+        events: []
       },
       events: []
     };
@@ -35,17 +36,16 @@ function State(init) {
     note: {
       articulations: []
     },
-    phrase: init.phrase,
-    events: init.events,
+    phrase: {},
+    events: [],
     time: {
-      beat: 0,
       tempo: 120,
       tick: 48, //start at beat 1 (also enables keyswitch events to kick in prior to first beat)
       step: 48
     }
   };
 
-  _.extend(this, state);
+  _.merge(this, state, init);
 
 }
 
@@ -53,6 +53,18 @@ State.prototype.clone = function () {
   var clone = _.cloneDeep(this);
   clone.events = [];
   return clone;
+}
+
+State.prototype.mutateFromMaster = function () {
+  if (!this.master || !this.master.length) return;
+
+  //extend this with any states where tick <= this.time.tick
+  this.master.forEach(function(s) {
+    if (s.tick <= this.time.tick && !s.applied) {
+      _.merge(this, s.state);
+      s.applied = true;
+    }
+  }.bind(this));
 }
 
 module.exports = State;

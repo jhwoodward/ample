@@ -2,7 +2,7 @@ var _ = require('lodash');
 
 var api = {
    parseValue: s => {
-    const value = parseInt(/-?[\d]{1,4}/.exec(s)[0], 10);
+    const value = parseInt(/-?[\d]{1,5}/.exec(s)[0], 10);
     const phrase = s.indexOf('==') === -1;
     // now using ==V inline 
     if (phrase) {

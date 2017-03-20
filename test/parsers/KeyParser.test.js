@@ -7,7 +7,7 @@ var State = require('../../src/interpreter/State');
   describe('KeyParser', function() {
     it('should parse', function() {
       var parser = new KeyParser();
-      var test = 'K(-B-E-A)K';
+      var test = 'K(Eb)K';
       var found = parser.match(test);
       expect(found).toExist();
       expect(parser.string).toEqual(test);
@@ -16,7 +16,7 @@ var State = require('../../src/interpreter/State');
     });
     it ('should change key to E flat', function() {
       var parser = new KeyParser();
-      var test = 'K(-B-E-A)K';
+      var test = 'K(Eb)K';
       parser.match(test);
       var state = new State().clone();
       expect(state.key).toEqual({
@@ -28,9 +28,9 @@ var State = require('../../src/interpreter/State');
       expect(state.key.flats.map(n => n.char)).toEqual(['B','E','A']);
       expect(state.key.sharps.length).toEqual(0);
     });
-    it ('should change key to D sharp', function() {
+    it ('should change key to D major', function() {
       var parser = new KeyParser();
-      var test = 'K(+F+C)K';
+      var test = 'K(D)K';
       parser.match(test);
       var state = new State().clone();
       expect(state.key).toEqual({

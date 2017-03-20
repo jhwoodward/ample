@@ -4,6 +4,7 @@ var _ = require('lodash');
 var eventType = require('../constants').eventType;
 var parser = require('./_parser');
 
+
 function KeyswitchParser() {
   this.type = 'Keyswitch';
   this.test = /^\[\-?[0-4]:[+-]?[A-G]\]/;

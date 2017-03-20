@@ -59,7 +59,7 @@ function Interpreter(macros) {
       phrase: defaultMacro.state,
       events: defaultMacro.events.map(e => { e.tick -= startTick; return e; })
     }
-    initState.phrase.events = defaultMacro.events;
+    this.initState.phrase.events = defaultMacro.events;
     this.macros.push(defaultMacro);
   }
 
@@ -106,6 +106,9 @@ Interpreter.prototype.process = function (parsers) {
     var parser = parsers[i];
 
     var state = this.next || this.getNextState();
+
+    state.mutateFromMaster();
+
     parser.mutateState(state, this);
 
     if (parser.continue) {
@@ -122,9 +125,7 @@ Interpreter.prototype.process = function (parsers) {
     if (parser.leave) {
       parser.leave(state, this.next);
     }
-
   }
-
 }
 
 Interpreter.prototype.getTopState = function () {
@@ -135,8 +136,43 @@ Interpreter.prototype.getNextState = function () {
   return this.getTopState().clone();
 }
 
-Interpreter.prototype.interpret = function (part) {
-  this.states = [new State(this.initState)];
+Interpreter.prototype.interpret = function (part, master) {
+
+  var markers, master;
+  if (master) {
+    var state = new State();
+    state.isMaster = true; //to set markers instead of read them
+    this.states = [state];
+    this.next = undefined;
+    this.process(this.parse(master));
+    master = this.states.sort((a, b) => {
+      return a.time.tick > b.time.tick ? 1 : -1;
+    }).map(s => {
+      return { 
+        tick: s.time.tick, 
+        state: {key: s.key, scale: s.scale, time: { tempo: s.time.tempo } } 
+      };
+    });
+    markers = this.states.reduce((acc, s) => {
+      if (s.marker) {
+        acc[s.marker] = acc[s.marker] || [];
+        acc[s.marker].push(s.time.tick);
+      }
+      return acc;
+    },{});
+
+    state = new State(this.initState, master);
+    state.markers = markers;
+  } else {
+    state = new State(this.initState);
+  }
+
+  if (part.from) {
+    this.initState.time = { tick: markers[part.from] };
+    part = part.part;
+  }
+
+  this.states = [state];
   this.next = undefined;
   this.process(this.parse(part));
   return {

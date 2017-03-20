@@ -30,7 +30,7 @@ var performers = {
     spic: '[-3:D]',
     pizzicato: '[-3:E] 50=V',
     pizz: '[-3:E]',
-    accent: '120=V',
+    accent: '16000=P',
     portamento: '0=P  -12=ON 1=OFF'
   },
   friedlander: {
@@ -47,13 +47,13 @@ var performers = {
     staccato / spiccato: ks -1:A
     sustain (must be on for legato): ks -1:G
     */
-    default: '[-1:F] 80=V 100=C1 0=C14 0=C15  -10=ON 1=OFF  ',
-    legatoslow: '[-1:G] 127=C15 -13=ON 1=OFF 0=C17',
-    legato: '[-1:G] 127=C15 -10=ON 1=OFF 80=C17',
-    detached: '[-1:G]  0=C15 0=ON  -7=OFF',
-    staccato: '[-1:A]',
-    spiccato: '[-1:A]',
-    pizzicato: '[-1:+A]',
+    default: '[-2:F] [-2:G] 80=V 100=C1 0=C14 0=C15  0=ON -5=OFF  ',
+    legatoslow: '[-2:G] [-2:F] 127=C15 -13=ON 1=OFF 0=C17',
+    legato: '[-2:G] [-2:F] 127=C15 -10=ON 1=OFF 80=C17',
+    detached: '[-2:G]  0=C15 0=ON  -7=OFF',
+    staccato: '[-2:A]',
+    spiccato: '[-2:A]',
+    pizzicato: '[-2:+A]',
     accent: '120=V',
     portamento: '127=C14 -10=ON 1=OFF'
   },

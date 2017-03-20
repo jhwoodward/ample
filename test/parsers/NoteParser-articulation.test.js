@@ -14,7 +14,7 @@ describe('NoteParser', function () {
       key: '>',
       type: macroType.articulation,
       value: '130=V',
-      parsed: {
+      state: {
         velocity: 130
       }
     };

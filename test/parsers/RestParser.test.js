@@ -39,10 +39,10 @@ var State = require('../../src/interpreter/State');
       parser.enter(state, prev);
       expect(state.events.length).toEqual(1);
       expect(state.events[0].type).toEqual(eventType.noteoff);
-      expect(state.events[0].annotation).toEqual('Rest');
+      expect(state.events[0].annotation).toEqual('Rest (default)');
       expect(state.events[0].offset).toEqual(-5); //default detach
       expect(state.events[0].pitch.value).toEqual(60);
-      expect(state.events[0].duration).toEqual(48);
+      expect(state.events[0].duration).toEqual(48 - 5);
     })
 
     it ('should increment tick on leave', function() {
@@ -50,5 +50,9 @@ var State = require('../../src/interpreter/State');
       var next = state.clone();
       parser.leave(state, next);
       expect(next.time.tick).toEqual(state.time.tick + state.time.step);
+    });
+
+    it('should revert expression to state.phrase', function() {
+      throw(new Error('not implemented'));
     });
   });

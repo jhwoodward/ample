@@ -21,16 +21,23 @@ var performers = {
     pizzicato: ks -1:+A
     staccato / spiccato: ks -1:A
     sustain (must be on for legato): ks -1:G
+    bow position c16
+    vibrato speed = C17
+    slur transition while held down = c#1
+    con sordino F1 off = F#1
     */
-    default: '[-2:C] [-2:+A] 80=V 100=C1 0=C14 0=C15  0=ON  -7=OFF ',
-    legatoslow: '[-2:C] [-2:+A] 127=C15 -13=ON 1=OFF 0=C17',
-    legato: '[-2:C] [-2:+A]  0=C14 127=C15 -10=ON 1=OFF 80=C17',
+    default: '[-2:C] [-2:+A] 80=V 90=C1 0=C14 0=C15 60=C16 30=C17  0=ON  -7=OFF ',
+    slow: '-13=ON 1=OFF',
+    fast: '-3=ON 1=OFF',
+    legato: '[-2:C]  0=C14 127=C15 -7=ON 1=OFF ',
     detached: '[-2:C] 0=C14 0=C15 0=ON  -7=OFF',
-    staccato: '[-2:D]',
-    spiccato: '[-2:D]',
+    staccato: '[-2:D] 50=V',
+    spiccato: '[-2:D] 110=V',
     pizzicato: '[-2:+D]',
-    accent: '120=V',
-    portamento: '127=C14 20=V -10=ON 1=OFF'
+    accent: '120=C1',
+    portamento: '127=C14 20=V -10=ON 1=OFF',
+    tremolo: '[-2:E]',
+    consordino: '',
   },
   sacconi: performers.sacconi,
   cinestrings: performers.cinestrings

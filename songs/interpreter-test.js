@@ -7,56 +7,41 @@ var instruments = require("../src/instruments/instruments");
 
 var performer = ensemble.stringQuartet.performers.friedfischtriobroz;
 var players = utils.playersFromEnsemble(ensemble.stringQuartet, performer, true);
-//utils.addPlayer(players, instruments.piano, 'piano1',5);
-///utils.addPlayer(players, instruments.piano, 'piano2',5);
-
-players.violin1.substitutions = {
-  part1: '48,0:cEGe (part2)',
-  part2: '12,0:FACa'
-};
-
-
 
 //bug moving from b-b
 //bug moving from cc
 
-//players.violin1.part =`24,1:  (24,c_D_E_F_G 1(part2) 2(part1) 3(24,e) 4(12,A_g_A_g//^/) )*4  ^`;
-
-var master = `150=T 192, ( $A / /  $B / / $C / / )*4 `;
+var master = `120=T 192, ( $A / /  $B / / $C / / )*4 $D `;
 players.violin1.master = master;
 players.violin2.master = master;
 players.viola.master = master;
 players.cello.master = master;
 
-/*
-players.violin1.part = [
-  {
-    from: 'A',
-    part: '1:24,cDEd'
-  },
-  {
-    from: 'B',
-    part: '2:48,cbag'
-  }
-
-  ];
-  */
 players.violin1.part = `
-  $A( (1:24,c_E_Gfe~dcb)*2 ^ )
-  $B( (1:48,cbag)*2 ^ ) 
+  $A1( {pizzicato} (1:24,^c^12,cc^c12,cc)*2 )
+  $A2( {default} (1:24, >c_E_'G'fe_dc_b~C'E'G'fe_dc_b)*1 ^ )
+  $B( (1:48,c_ba_g Cba~g)*1 ^ ) 
+  $D( 1:48, Fe///////^ )
+
   `;
 players.violin2.part = `
-  $B( (1:48,edcD)*2 ^ )
+  $A1( {pizzicato} (0:24,^b^b^b)*2 )
+  $B1( {default} (1:48,e_d c_D E_d c_D)*1 ^ )
+  $B2( {default} (1:48,e d c D_E_d c D)*1 ^ )
+  $B3( {default} (1:48,e_d c_D E_d c_D)*1 ^ )
+  $B4( {default} (1:48,e d c_D E_d c~D)*1 ^ )
+  $D( 0:48, b~C///////^ )
 `;
 
-
-
-players.viola.part = '';//`48,1: -7@ (>c_DE_d)*3 (1:24,c~DE_FG_fe_d)*2 ^`;
+players.viola.part = `
+  $A3( (0:24,c_E_'G'fe_dc_b)*2 ^ )
+  $D( 0:48, g~-B/a~g~e///^ )
+`
 players.cello.part = `
+  $A1( {pizzicato} (-1:24,c^c^c^c^)*2 )
+  $A4( {default} (-1:24,>c_E'G'f >e_d c_b C E'G'f'e d c_b)*1 ^ )
   $C( {pizzicato} -1:24, (cGcGcGcG)*2 )
+  $D( {default} -1:48, gc/////~g/c^ )
 `;
-
-//`48,-2:  (-1:48,G_f_e//^dc 16,g_A~B_C_D~E/^//)*2 {spiccato} dcGe {legato} >b_+a///^ `;
-//players.piano1.part = '12,cDEFGfedc^';
 
 seq.load(players);

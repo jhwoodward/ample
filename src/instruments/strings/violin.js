@@ -21,16 +21,15 @@ var performers = {
   triobroz: {
     name: 'triobroz',
     default: '[-3:C] 85=C1 8192=P 0=ON -5=OFF',
-    staccato: '[-3:+D]',
     detached: '[-3:C] 8192=P 0=ON -5=OFF',
+    staccato: '[-3:+D]',
+
     legato: '[-3:C] 8192=P -12=ON 1=OFF',
-    legatoslow: '[-3:C] 8192=P -7=ON 5=OFF',
-    legatononvib: '[-3:+C] -7=ON 5=OFF',
+    slow: '-12=ON 1=OFF',
+    fast: '-3=ON 1=OFF',
     spiccato: '[-3:D]',
-    spic: '[-3:D]',
     pizzicato: '[-3:E] 50=V',
-    pizz: '[-3:E]',
-    accent: '16000=P',
+    accent: '[-3:C] 120=C1 16383=P ',
     portamento: '0=P  -12=ON 1=OFF'
   },
   friedlander: {

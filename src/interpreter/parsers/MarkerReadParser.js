@@ -5,7 +5,6 @@ var macroType = require('../constants').macroType;
 
 function MarkerReadParser(macros) {
   this.type = 'MarkerRead';
-  this.test = /^\$\w+/;
 
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
@@ -20,13 +19,16 @@ function MarkerReadParser(macros) {
 
 var prototype = {
   match: function match(s) {
-    var start = /^\$\w+\(/;
-    var nameTest = start.exec(s);
-    if (!nameTest) return false;
-    var name = nameTest[0].replace('(', '').replace('$','');
+    var startTest = /^\$[a-zA-Z]+(\d+)?\(/.exec(s);
+    if (!startTest) return false;
+
+    var markerNameTest = /[a-zA-Z]+/.exec(startTest[0]);
+    var name = markerNameTest[0];
+    var n = /\d+/.exec(startTest[0]);
+    n = n ? parseInt(n[0]) : undefined;
 
     var nest = 1;
-    var c = nameTest[0].length;
+    var c = startTest[0].length;
     var bracketed;
     while (nest > 0 && c < s.length) {
       var char = s.substring(c, c + 1);
@@ -40,12 +42,10 @@ var prototype = {
     }
 
     if (nest === 0) {
-      bracketed = s.substring(nameTest[0].length, c - 1);
+      bracketed = s.substring(startTest[0].length, c - 1);
     }
 
-    var parsed = {
-      name
-    };
+    var parsed = { name, n };
 
     var part = bracketed.trim();
     if (this.substitutions[part]) {
@@ -55,7 +55,7 @@ var prototype = {
       parsed.part = part;
     }
 
-    this.string = nameTest[0] + bracketed + ')';
+    this.string = startTest[0] + bracketed + ')';
     this.parsed = parsed;
 
     return true;
@@ -65,12 +65,19 @@ var prototype = {
 
       var origTick = state.time.tick;
 
-      var parsed = interpreter.parse(this.parsed.part);
-      
-      state.markers[this.parsed.name].forEach(tick => {
-        interpreter.next = interpreter.getNextState();
-        interpreter.next.time.tick = tick;
-        interpreter.process(parsed);
+      var part = interpreter.parse(this.parsed.part);
+
+      state.markers[this.parsed.name].forEach((tick,i) => {
+        if (!this.parsed.n) {
+          interpreter.next = interpreter.getNextState();
+          interpreter.next.time.tick = tick;
+          interpreter.process(part);
+        } else if (i === this.parsed.n-1) {
+          interpreter.next = interpreter.getNextState();
+          interpreter.next.time.tick = tick;
+          interpreter.process(part);
+        }
+ 
       });
 
       state.time.tick = origTick;

@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var eventType = require('./constants').eventType;
 
 function State(init, master) {
 
@@ -59,9 +60,18 @@ State.prototype.mutateFromMaster = function () {
   if (!this.master || !this.master.length) return;
 
   //extend this with any states where tick <= this.time.tick
-  this.master.forEach(function(s) {
+  this.master.forEach(function (s) {
     if (s.tick <= this.time.tick && !s.applied) {
+      if (s.state.time && this.time.tempo !== s.state.time.tempo) {
+        this.events.push({
+          tick: this.time.tick,
+          type: eventType.tempo,
+          value: s.state.time.tempo
+        }
+        );
+      }
       _.merge(this, s.state);
+
       s.applied = true;
     }
   }.bind(this));

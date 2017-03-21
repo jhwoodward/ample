@@ -18,6 +18,7 @@ var State = require('../../src/interpreter/State');
       var test = '$beginning';
       parser.match(test);
       var state = new State().clone();
+      state.isMaster = true;
       expect(state.marker).toNotExist(); //default
       parser.mutateState(state);
       expect(state.marker).toEqual('beginning');

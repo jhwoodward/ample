@@ -28,11 +28,11 @@ function State(init, master) {
       flats: [],
       sharps: []
     },
-    scale: [],
     pitch: {
       octave: 5,
       relativeStep: 1,
       transpose: 0
+      //constraint: [] = array of pitch values
     },
     note: {
       articulations: []
@@ -72,9 +72,14 @@ State.prototype.mutateFromMaster = function () {
       }
       _.merge(this, s.state);
 
+      modifiers = this.modifiers.filter(m => {
+        return m.name === 'F#m';
+      });
+
       s.applied = true;
     }
   }.bind(this));
+
 }
 
 module.exports = State;

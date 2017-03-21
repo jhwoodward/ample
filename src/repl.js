@@ -1,7 +1,8 @@
 var repl = require('repl');
 var utils = require('./utils');
 var loop = utils.loop;
-var make = require('./interpreter/make');
+var Sequencer = require('./Sequencer');
+var seq = new Sequencer();
 var fs = require('fs');
 var cp = require('child_process');
 var _ = require('lodash');
@@ -9,7 +10,7 @@ var argv = require('yargs').argv;
 
 var config = {};
 
-var players, rules, conductor, iterations;
+var players;
 
 if (argv.load) {
   load(argv.load);
@@ -75,14 +76,21 @@ function run(cmd, callback) {
         }
       });
     }
-    filteredPlayers = players.filter(function (player, i) {
-      return playerIds.indexOf(player.part) > -1 || playerIds.indexOf(i) > -1;
-    });
+
+    var filteredPlayers = {};
+    var cnt = 1;
+    for (var key in players) {
+      if (playerIds.indexOf(cnt) > -1 || playerIds.indexOf(key) > -1) {
+        filteredPlayers[key] = players[key];
+      }
+      cnt +=1;
+    }
   } else {
     filteredPlayers = players;
   }
 
-  make({ name: 'repl', players: filteredPlayers }, rules, conductor, iterations).play(args.from, args.to);
+  seq.load(filteredPlayers);
+  seq.start(args.from, args.to);
   callback('\n');
 }
 
@@ -110,11 +118,7 @@ function load(cmd, callback) {
   var out;
   try {
     watch(filename);
-    var loaded = require('../repl/' + filename);
-    players = loaded.players;
-    rules = loaded.rules;
-    conductor = loaded.conductor;
-    iterations = loaded.iterations;
+    players = require('../songs/' + filename);
     out = `Loaded ${filename} & watching...`.green;
 
   } catch (e) {
@@ -129,7 +133,7 @@ function load(cmd, callback) {
 }
 
 function watch(filename) {
-  filename = `./repl/${filename}.js`;
+  filename = `./songs/${filename}.js`;
   fs.watchFile(filename, (curr, prev) => {
     reload();
   });
@@ -137,7 +141,7 @@ function watch(filename) {
 
 function unwatch(filename) {
   if (filename) {
-    filename = `./repl/${filename}.js`;
+    filename = `./songs/${filename}.js`;
     fs.unwatchFile(filename);
   }
 
@@ -147,24 +151,17 @@ function reload(callback) {
   if (!filename) { callback('No file loaded'.red); }
   var out;
   try {
-    delete require.cache[require.resolve('../repl/' + filename)]
-    var loaded = require('../repl/' + filename);
-    players = loaded.players;
-    rules = loaded.rules;
-    conductor = loaded.conductor;
-    iterations = loaded.iterations;
+    delete require.cache[require.resolve('../songs/' + filename)]
+    players = require('../songs/' + filename);
     out = `Reloaded ${filename}.`.green;
   } catch (e) {
     out = `${e} (${filename})`.red;
   }
-
   if (callback) {
     callback(out);
   } else {
     console.log(out);
   }
-
-
 }
 
 function save(cmd, callback) {
@@ -172,7 +169,7 @@ function save(cmd, callback) {
   if (!filename) {
     console.error('No filename');
   } else {
-    if (fs.existsSync('./repl/' + filename + '.js')) {
+    if (fs.existsSync('./songs/' + filename + '.js')) {
       filename += '_' + new Date().getTime();
     }
     var sReq = `var make = require('../src/ample').make;\nvar utils = require('../src/utils');\nvar loop = utils.loop;\n\n`;
@@ -181,9 +178,9 @@ function save(cmd, callback) {
     var sPlayers = `var players = ${JSON.stringify(players, null, 2).replace(/\"/g, '\'')};\n\n`;
     var sMake = `make({ name: '${filename}', players: players }, rules, conductor).play();\n`;
     if (config && Object.keys(config).length > 0) {
-      fs.writeFile('./repl/' + filename + '.config.json', JSON.stringify(config, null, 2));
+      fs.writeFile('./songs/' + filename + '.config.json', JSON.stringify(config, null, 2));
     }
-    fs.writeFile('./repl/' + filename + '.js', sReq + sRules + sConductor + sPlayers + sMake, function () {
+    fs.writeFile('./songs/' + filename + '.js', sReq + sRules + sConductor + sPlayers + sMake, function () {
       callback('Saved'.green);
     });
 

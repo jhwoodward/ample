@@ -110,6 +110,7 @@ Interpreter.prototype.process = function (parsers) {
     state.mutateFromMaster();
 
     parser.mutateState(state, this);
+    state.mutater = parser.type + ' (' + parser.string + ')';
 
     if (parser.continue) {
       continue;
@@ -145,14 +146,26 @@ Interpreter.prototype.interpret = function (part, master) {
     this.states = [state];
     this.next = undefined;
     this.process(this.parse(master));
-    master = this.states.sort((a, b) => {
-      return a.time.tick > b.time.tick ? 1 : -1;
-    }).map(s => {
-      return { 
-        tick: s.time.tick, 
-        state: {key: s.key, scale: s.scale, time: { tempo: s.time.tempo } } 
+
+    //take only the final state for each tick;
+    master = this.states.reduce((acc, s) => {
+      var tick = s.time.tick;
+      if (acc.filter(m => { return m.tick === tick}).length) return acc;
+      var tickStates = this.states.filter(x => { return x.time.tick === tick; });
+      var lastTickState = tickStates[tickStates.length-1];
+      var m = { 
+        tick: tick, 
+        state: {
+          key: lastTickState.key, 
+          pitch: { constraint: lastTickState.pitch.constraint },
+          modifiers: lastTickState.modifiers,
+          mutater: lastTickState.mutater,
+          time: { tempo: lastTickState.time.tempo } } 
       };
-    });
+      acc.push(m);
+      return acc;
+    },[]);
+
     markers = this.states.reduce((acc, s) => {
       if (s.marker) {
         acc[s.marker] = acc[s.marker] || [];

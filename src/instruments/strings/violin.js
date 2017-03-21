@@ -23,12 +23,13 @@ var performers = {
     default: '[-3:C] 85=C1 8192=P 0=ON -5=OFF',
     detached: '[-3:C] 8192=P 0=ON -5=OFF',
     staccato: '[-3:+D]',
-
+    p: '50=C1',
+    f: '120=C1 120=V',
     legato: '[-3:C] 8192=P -12=ON 1=OFF',
     slow: '-12=ON 1=OFF',
     fast: '-3=ON 1=OFF',
     spiccato: '[-3:D]',
-    pizzicato: '[-3:E] 50=V',
+    pizzicato: '[-3:E] 50=C1',
     accent: '[-3:C] 120=C1 16383=P ',
     portamento: '0=P  -12=ON 1=OFF'
   },
@@ -47,14 +48,16 @@ var performers = {
     sustain (must be on for legato): ks -1:G
     */
     default: '[-2:F] [-2:G] 80=V 100=C1 0=C14 0=C15  0=ON -5=OFF  ',
-    legatoslow: '[-2:G] [-2:F] 127=C15 -13=ON 1=OFF 0=C17',
-    legato: '[-2:G] [-2:F] 127=C15 -10=ON 1=OFF 80=C17',
     detached: '[-2:G]  0=C15 0=ON  -7=OFF',
+    p: '50=C1 50=V',
+    f: '120=C1 120=V',
+    slow: '-13=ON 1=OFF',
+    legato: '[-2:G] [-2:F] 127=C15 -10=ON 1=OFF 80=C17',
     staccato: '[-2:A]',
     spiccato: '[-2:A]',
     pizzicato: '[-2:+A]',
     accent: '120=V',
-    portamento: '127=C14 -10=ON 1=OFF'
+    portamento: '127=C14 -7=ON 1=OFF'
   },
   sacconi: performers.sacconi,
   cinestrings: performers.cinestrings

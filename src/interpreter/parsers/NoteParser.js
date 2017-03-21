@@ -73,7 +73,12 @@ var prototype = {
     state.pitch.raw = this.getPitch(state);
 
     state.pitch.value = state.pitch.raw;
-    state.modifiers.filter(m => m.type === modifierType.pitch).map(m => m.fn(state));
+
+    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).map(m => { 
+      m.fn(state);
+      return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
+    }).join(', ');
+   
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
@@ -117,7 +122,8 @@ var prototype = {
       velocity: note.velocity,
       annotation: state.phrase.name,
       articulation: state.note.articulationInfo,
-      offset: onOffset
+      offset: onOffset,
+      modifiers
     });
 
     state.note.events.forEach(e => {

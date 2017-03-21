@@ -15,7 +15,7 @@
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceRoot}/test/parsers/MarkerParser.test"
+        "${workspaceRoot}/test/parsers/ChordParser.test"
       ],
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -38,7 +38,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceRoot}/songs/interpreter-test.js",
+      "program": "${workspaceRoot}/songs/32bar.1.js",
       "cwd": "${workspaceRoot}"
     },
     {

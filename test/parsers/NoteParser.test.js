@@ -30,7 +30,7 @@ describe('NoteParser', function () {
     var state = prev.clone();
     expect(state.pitch.value).toNotExist();
     expect(state.pitch.octave).toEqual(5);//default
-    expect(state.scale.length).toEqual(0);
+    expect(state.pitch.constraint).toNotExist();
     expect(state.key.flats.length).toEqual(0);
     expect(state.key.sharps.length).toEqual(0);
     parser.mutateState(state);

@@ -12,60 +12,21 @@ function ScaleParser() {
 
 var prototype = {
   parse: function (s) {
-    return parserUtils.parseNotes(s);
+    var notes = parserUtils.parseNotes(s);
+    return pitchUtils.allPitches(notes);
   },
   mutateState: function (state) {
-    state.scale = this.parsed;
+    state.pitch.constraint = this.parsed;
 
     var modifier = {
       id: this.type,
       type: modifierType.pitch,
-      fn: fitPitchToScale
+      fn: function constrainPitch(state) {
+        state.pitch.value = pitchUtils.constrain(state.pitch.value, state.pitch.constraint);
+      }
     };
 
     utils.addModifier(state, modifier, !!this.parsed.length);
-
-    function fitPitchToScale(state) {
-      var scale = state.scale;
-      var pitch = state.pitch.value;
-      var scalePitches = [];
-      scale.forEach(function (note) {
-        for (var oct = 0; oct <= 10; oct++) {
-          scalePitches.push(pitchUtils.midiPitchFromNote(note.char, oct) + note.accidental);
-        }
-      });
-      scalePitches.sort(function (a, b) {
-        return a < b ? -1 : 1;
-      });
-
-      var fit;
-      if (scalePitches.indexOf(pitch) > -1) {
-        fit = pitch;
-      } else {
-        scalePitches.forEach(function (p, i) {
-          if (p > pitch && !fit) {
-            var upper = p;
-            var lower = scalePitches[i - 1];
-            var distToUpper = upper - pitch;
-            var distToLower = pitch - lower;
-            if (distToUpper < distToLower) {
-              fit = upper;
-            } else if (distToUpper > distToLower) {
-              fit = lower;
-            } else {
-              //equidistant so random choice
-              if (Math.floor(Math.random() * 2) == 1) {
-                fit = upper;
-              } else {
-                fit = lower;
-              }
-            }
-
-          }
-        });
-      }
-      state.pitch.value = fit;
-    }
   }
 }
 

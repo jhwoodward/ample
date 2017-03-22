@@ -8,7 +8,7 @@ var utils = require('../utils');
 
 function ChordParser() {
   this.type = 'Chord';
-  this.test = /^[A-G](#|b)?(maj|min|6|7|9|maj7|m6|min6|m7|min7|sus2|sus4)/;
+  this.test = /^[A-G](#|b)?(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/;
 }
 
 
@@ -17,7 +17,7 @@ var prototype = {
     var parsed = {
       root: /^[A-G]/.exec(s)[0],
       accidental: /(#|b)/.exec(s) ? /(#|b)/.exec(s)[0]: undefined,
-      type: /(maj|min|6|7|9|maj7|m6|min6|m7|min7|sus2|sus4)/.exec(s)[0]
+      type: /(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/.exec(s)[0]
     };
        //work off C and transpose accordingly
     var noteString;
@@ -37,16 +37,17 @@ var prototype = {
       case '9':
         noteString = 'CEG-BD';
         break;
-      case 'maj7':
+      case 'mj7':
         noteString = 'CEGB';
         break;
       case 'm7':
-      case 'min7':
         noteString = 'C-EG-B';
         break;
       case 'm6':
-      case 'min6':
         noteString = 'C-EGA';
+        break;
+      case 'dim7':
+        noteString = 'C-E-GA';
         break;
       case 'sus4':
         noteString = 'CFG';

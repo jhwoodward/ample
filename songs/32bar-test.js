@@ -67,7 +67,7 @@ players.viola.substitutions = substitutions;
 players.cello.master = master;
 players.cello.substitutions = substitutions;
 
-var seq = new Sequencer();
-seq.load(players);
-seq.start();
-//module.exports = players;
+//var seq = new Sequencer();
+//seq.load(players);
+//seq.start();
+module.exports = players;

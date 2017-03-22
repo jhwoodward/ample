@@ -38,7 +38,7 @@
       "type": "node",
       "request": "launch",
       "name": "Launch Program",
-      "program": "${workspaceRoot}/songs/32bar.1.js",
+      "program": "${workspaceRoot}/songs/igotrhythm.js",
       "cwd": "${workspaceRoot}"
     },
     {

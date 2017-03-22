@@ -64,6 +64,7 @@ function run(cmd, callback) {
   var args = getArgs(cmd);
   var filteredPlayers;
   var playerIds;
+
   if (args.parts) {
     if (!isNaN(args.parts)) {
       playerIds = [args.parts -1];
@@ -78,7 +79,7 @@ function run(cmd, callback) {
     }
 
     var filteredPlayers = {};
-    var cnt = 1;
+    var cnt = 0;
     for (var key in players) {
       if (playerIds.indexOf(cnt) > -1 || playerIds.indexOf(key) > -1) {
         filteredPlayers[key] = players[key];
@@ -88,9 +89,16 @@ function run(cmd, callback) {
   } else {
     filteredPlayers = players;
   }
-
-  seq.load(filteredPlayers);
-  seq.start(args.from, args.to);
+  if (seq.players !== filteredPlayers) {
+     seq.load(filteredPlayers);
+  }
+ 
+  var options = {
+    from: args.from,
+    to: args.to,
+    marker: args.marker
+  };
+  seq.start(options);
   callback('\n');
 }
 

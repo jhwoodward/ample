@@ -42,7 +42,7 @@ var prototype = {
       state.note.events = this.parsed.articulations.reduce((acc, a) => {
         if (!a.events) return acc;
         a.events.forEach(ae => {
-          acc.push(_.merge({}, ae));
+          acc.push(_.extend({}, ae));
         });
         return acc;
       }, []);
@@ -54,16 +54,13 @@ var prototype = {
 
     } else {
       state.note.events = state.phrase.events.reduce((acc, e) => {
-        var out = _.merge({}, e);
+        var out = _.extend({}, e);
         out.articulation = state.phrase.name;
         delete out.annotation;
         acc.push(out);
         return acc;
-      },[]);
+      }, []);
     }
-
-
-
 
   },
   enter: function (state, prev) {
@@ -74,11 +71,11 @@ var prototype = {
 
     state.pitch.value = state.pitch.raw;
 
-    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).map(m => { 
+    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).map(m => {
       m.fn(state);
       return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
     }).join(', ');
-   
+
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
@@ -86,14 +83,20 @@ var prototype = {
 
     var note = _.extend({}, state.phrase, state.note);
 
+    var isRepeatedNote = prev.pitch.value === state.pitch.value;
+
+
     //prev note off
     if (prev.on.tick) {
       var offOffset = state.note.off;
       var offAnnotation = offOffset !== undefined ? prev.note.name : prev.phrase.name
       //prevent positive offsets at the end of a phrase
-      if (!offOffset || offOffset > 0 && (note.off <= 0)) {
+      if (isRepeatedNote || !offOffset || offOffset > 0 && (note.off <= 0)) {
         offOffset = -5;
         offAnnotation = state.phrase.name;
+      }
+      if (isRepeatedNote) {
+        offAnnotation += ' (repeat note)';
       }
       var offTick = state.time.tick + offOffset;
       state.events.push({
@@ -109,8 +112,12 @@ var prototype = {
     var onOffset = note.on;
     //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
     if (onOffset < 0 && (!prev.on.tick || prev.note.on >= 0)) {
-   //   onOffset = 0;
+      //   onOffset = 0;
     }
+    if (isRepeatedNote) {
+      onOffset = 0;
+    }
+
     var onTick = state.time.tick + onOffset;
 
     //noteon event
@@ -128,9 +135,9 @@ var prototype = {
 
     state.note.events.forEach(e => {
       if (e.keyswitch) {
-        if (e.type === 'noteon') {
+        if (e.type === eventType.noteon) {
           e.tick = onTick - 2;
-        } else if (e.type === 'noteoff') {
+        } else if (e.type === eventType.noteoff) {
           e.tick = onTick - 1;
         }
       } else {

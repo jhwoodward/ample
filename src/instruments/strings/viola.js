@@ -11,6 +11,7 @@ var performers = {
   fischer: {
     name: 'fischer',
     /*
+    dynamics c11
     true legato (as opposed to polyphonic): keyswitch -1:F 
     polyphonic: -1: +F
     bowed / fingered legato: C15 < 64 = bowed, C15 > 64 = fingered 
@@ -26,16 +27,16 @@ var performers = {
     slur transition while held down = c#1
     con sordino F1 off = F#1
     */
-    default: '[-2:C] [-2:+A] 80=V 90=C1 0=C14 0=C15 60=C16 30=C17  0=ON  -7=OFF ',
+    default: '[-2:C] [-2:+A] 80=V 90=C11 90=C1 0=C14 0=C15 60=C16 54=C17  0=ON  -7=OFF ',
     slow: '-13=ON 1=OFF',
     fast: '-3=ON 1=OFF',
-    legato: '[-2:C]  0=C14 127=C15 -7=ON 1=OFF ',
+    legato: '[-2:C]  0=C14 127=C15 -12=ON 1=OFF ',
     detached: '[-2:C] 0=C14 0=C15 0=ON  -7=OFF',
     staccato: '[-2:D] 50=V',
-    spiccato: '[-2:D] 110=V',
+    spiccato: '[-2:D] 70=V',
     pizzicato: '[-2:+D]',
-    accent: '120=C1',
-    portamento: '127=C14 20=V -10=ON 1=OFF',
+    accent: '120=C11 100=V',
+    portamento: '127=C14 20=V -10=ON 1=OFF [-2:C]',
     tremolo: '[-2:E]',
     consordino: '',
   },

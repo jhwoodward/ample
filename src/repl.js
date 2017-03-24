@@ -1,7 +1,7 @@
 var repl = require('repl');
 var utils = require('./utils');
 var loop = utils.loop;
-var Sequencer = require('./Sequencer');
+var Sequencer = require('./sequencer/Sequencer');
 var seq = new Sequencer();
 var fs = require('fs');
 var cp = require('child_process');
@@ -51,23 +51,31 @@ function getArgs(cmd) {
   var args = bits.filter(function (bit) { return bit.indexOf('--') === 0; });
   var out = {};
   args.forEach(function (arg) {
-    var kv = arg.split('=');
-    if (!isNaN(kv[1])) {
-      kv[1] = parseInt(kv[1], 10);
+    if (arg.indexOf('=') === -1) {
+      out[arg.replace('--', '').replace('\n','')] = true;
+    } else {
+      var kv = arg.split('=');
+      var val;
+      if (!isNaN(kv[1])) {
+        val = parseInt(kv[1], 10);
+      } else {
+        val = kv[1].replace('\n','')
+      }
+      out[kv[0].replace('--', '').replace('\n','')] = val;
     }
-    out[kv[0].replace('--', '')] = kv[1];
   });
   return out;
 }
 
 function run(cmd, callback) {
   var args = getArgs(cmd);
+  console.log(args);
   var filteredPlayers;
   var playerIds;
 
   if (args.parts) {
     if (!isNaN(args.parts)) {
-      playerIds = [args.parts -1];
+      playerIds = [args.parts - 1];
     } else {
       playerIds = args.parts.split(',').map(function (i) {
         if (!isNaN(i)) {
@@ -84,20 +92,22 @@ function run(cmd, callback) {
       if (playerIds.indexOf(cnt) > -1 || playerIds.indexOf(key) > -1) {
         filteredPlayers[key] = players[key];
       }
-      cnt +=1;
+      cnt += 1;
     }
   } else {
     filteredPlayers = players;
   }
   if (seq.players !== filteredPlayers) {
-     seq.load(filteredPlayers);
+    seq.load(filteredPlayers);
   }
- 
+
   var options = {
     from: args.from,
     to: args.to,
-    marker: args.marker
+    marker: args.marker,
+    loop: args.loop
   };
+
   seq.start(options);
   callback('\n');
 }

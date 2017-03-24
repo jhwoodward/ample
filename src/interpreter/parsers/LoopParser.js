@@ -66,12 +66,9 @@ var prototype = {
     return true;
   },
   mutateState: function (state, interpreter) {
+    var parsed = interpreter.parse(this.parsed.part);
     for (var i = 0; i < this.parsed.count; i++) {
-
-    //  console.log(this.parsed.key + ' - ' + (i +1) + ' - start - ' + interpreter.next.time.tick)
-      var parsed = interpreter.parse(this.parsed.part);
       interpreter.process(parsed);
-    //  console.log(this.parsed.key + ' - ' + (i +1) + ' - end - ' + interpreter.next.time.tick)
     }
   },
   continue: true

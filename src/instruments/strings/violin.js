@@ -47,12 +47,12 @@ var performers = {
     staccato / spiccato: ks -1:A
     sustain (must be on for legato): ks -1:G
     */
-    default: '[-2:F] [-2:G] 80=V 100=C1 0=C14 0=C15  0=ON -5=OFF  ',
+    default: '[-1:F] [-2:G] 80=V 100=C1 0=C14 0=C15  0=ON -5=OFF  ',
     detached: '[-2:G]  0=C15 0=ON  -7=OFF',
     p: '50=C1 50=V',
     f: '120=C1 120=V',
     slow: '-13=ON 1=OFF',
-    legato: '[-2:G] [-2:F] 127=C15 -10=ON 1=OFF 80=C17',
+    legato: '[-2:G] [-1:F] 127=C15 -10=ON 1=OFF 80=C17',
     staccato: '[-2:A]',
     spiccato: '[-2:A]',
     pizzicato: '[-2:+A]',

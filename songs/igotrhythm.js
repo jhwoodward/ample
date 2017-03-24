@@ -1,4 +1,4 @@
-var Sequencer = require('../src/Sequencer');
+var Sequencer = require('../src/sequencer/Sequencer');
 var utils = require('../src/utils');
 var ensemble = require("../src/instruments/ensemble");
 var instruments = require("../src/instruments/instruments");
@@ -38,7 +38,7 @@ players.violin1.part = `
 `;
 
 players.violin2.part = `
-  $A1( (48,1: F_b 24, FbbF)*8 ^ )
+  $A1( (48,1: F_b 24, FbbF)*8 ^ ) 
   $A2( (24,1: bagA  48,aC)*8 ^ )
   $B( {spiccato} (24,1: ^cDE )*16  ^ )
   $A3( (48,1: ge 24, eccE)*7 48,1: g  gg//  ^ )
@@ -46,16 +46,16 @@ players.violin2.part = `
 
 players.viola.part = `
 3@
-  $A1( (24,0: dEGd  48,ge)*8 ^ )
-  $A2( (48,0: -bD 24, FAge)*8 ^ )
-  $B( {spiccato} (24,0: ^cDE )*16 ^  )
-  $A3( (24,0: dEGd  48,ge)*7   24,0:d/gA 48,B/ )
+  $A1( (24,0: d_>E_>G_d  48,>g_e)*8 ^ )
+  $A2( (48,0: >-b_D 24, >F_Ag_e)*8 ^ )
+  $B( {spiccato} (24,0: ^cD>E )*16 ^  )
+  $A3( (24,0: {default} >d~E {spiccato}  Gd  48,ge)*7   24,0:d/gA 48,B/ )
 `;
 
 players.cello.part = `
 -31@
   $A1( (24,1: dEGd  48,g^)*8 ^ )
-  $A2( (48,1: -bD 24, FAge)*8 ^ )
+  $A2( (48,1: >-b_D 24, F_Ag_e)*8 ^ )
   $B( {spiccato}(48,1: cGcG)*8 ^ )
   $A3( (24,1: dEGd  48,ge)*7  24,1: d/EF  48,G/ )
 `;
@@ -70,6 +70,6 @@ players.cello.master = master;
 players.cello.substitutions = substitutions;
 
 //var seq = new Sequencer();
-//seq.load(players);
-//seq.start({marker: 'A2'});
+//seq.load([players.violin1]);
+//eq.start();
 module.exports = players;

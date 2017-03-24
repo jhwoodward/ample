@@ -8,8 +8,6 @@ var _ = require('lodash');
 function Interpreter(macros) {
   this.macros = macros || [];
 
-
-
   var initState;
   var startTick = new State().time.tick;
   this.macros.forEach(macro => {
@@ -179,11 +177,12 @@ Interpreter.prototype.interpret = function (part, master) {
   } else {
     state = new State(this.initState);
   }
-
+/*
   if (part.from) {
     this.initState.time = { tick: markers[part.from] };
     part = part.part;
   }
+  */
 
   this.states = [state];
   this.next = undefined;

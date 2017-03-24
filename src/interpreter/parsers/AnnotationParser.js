@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var parser = require('./_parser');
 var macroType = require('../constants').macroType;
+var eventType = require('../constants').eventType;
 
 function AnnotationParser(macros) {
   this.type = 'Annotation';
@@ -31,7 +32,7 @@ var prototype = {
 
     if (this.parsed.annotation.events) {
       this.parsed.annotation.events.forEach(e => {
-        if (e.type === 'noteoff') {
+        if (e.type === eventType.noteoff) {
           e.tick = state.time.tick -1
         } else {
           e.tick = state.time.tick -2;

@@ -3,64 +3,28 @@ var parserUtils = require('./parserUtils');
 var utils = require('./utils');
 var State = require('./State');
 var macroType = require('./constants').macroType;
+var AnnotationParser = require('./parsers/AnnotationParser');
 var _ = require('lodash');
 
 function Interpreter(macros) {
   this.macros = macros || [];
+  this.macros.forEach(macro => { macro.parsed = this.parse(macro.value);});
 
-  var initState;
-  var startTick = new State().time.tick;
-  this.macros.forEach(macro => {
-    switch (macro.type) {
-      case macroType.substitution:
-      //  macro.parsed = this.parse(macro.value);
-        break;
-      case macroType.annotation:
-        this.interpret(macro.value);
-        macro.state = parserUtils.strip(this.getTopState().phrase);
-        macro.events = utils.eventsFromStates(this.states);
-        macro.events.forEach(m => {
-          m.annotation = macro.key;
-        });
-        if (macro.key === 'default') {
-          initState = {
-            phrase: macro.state,
-            events: macro.events.map(e => { e.tick -= startTick; return e; })
-          };
-          initState.phrase.events = macro.events;
-        }
-
-        break;
-      case macroType.articulation:
-        this.interpret(macro.value);
-        macro.state = parserUtils.strip(this.getTopState().phrase);
-        macro.events = utils.eventsFromStates(this.states);
-        macro.events.forEach(m => {
-          m.annotation = macro.key;
-        });
-    }
-  });
-
-  if (initState) {
-     this.initState = initState;
-  } else {
-    var initPhrase = '8192=P 85=C1';
-    this.interpret(initPhrase);
-    var defaultMacro = {
+  var hasDefaultPhrase = this.macros.filter(m => {
+    return m.type === macroType.annotation && m.key === 'default';
+  }).length;
+  if (!hasDefaultPhrase) {
+    var defaultPhrase = '8192=P 85=C1 90=V 0=ON -5=OFF';
+    this.macros.push({
       type: macroType.annotation,
       key: 'default',
-      value: initPhrase,
-      state: parserUtils.strip(this.getTopState().phrase),
-      events: utils.eventsFromStates(this.states)
-    };
-    this.initState = {
-      phrase: defaultMacro.state,
-      events: defaultMacro.events.map(e => { e.tick -= startTick; return e; })
-    }
-    this.initState.phrase.events = defaultMacro.events;
-    this.macros.push(defaultMacro);
+      value: defaultPhrase,
+      parsed: this.parse(defaultPhrase)
+    });
   }
-
+  this.defaultPhrase = this.macros.filter(m => {
+    return m.type === macroType.annotation && m.key === 'default';
+  })[0];
 }
 
 /*
@@ -110,12 +74,13 @@ Interpreter.prototype.process = function (parsers) {
     parser.mutateState(state, this);
     state.mutater = parser.type + ' (' + parser.string + ')';
 
-    if (parser.continue) {
-      continue;
+    if (parser.getEvents) {
+      var events = parser.getEvents(state, this.getTopState());
+      this.events = this.events.concat(events);
     }
 
-    if (parser.enter) {
-      parser.enter(state, this.getTopState());
+    if (parser.continue) {
+      continue;
     }
 
     this.states.push(state);
@@ -143,6 +108,7 @@ Interpreter.prototype.interpret = function (part, master) {
     state.isMaster = true; //to set markers instead of read them
     this.states = [state];
     this.next = undefined;
+    this.events = [];
     this.process(this.parse(master));
 
     //take only the final state for each tick;
@@ -172,23 +138,28 @@ Interpreter.prototype.interpret = function (part, master) {
       return acc;
     },{});
 
-    state = new State(this.initState, master);
+    state = new State(master);
     state.markers = markers;
   } else {
-    state = new State(this.initState);
+    state = new State();
   }
-/*
-  if (part.from) {
-    this.initState.time = { tick: markers[part.from] };
-    part = part.part;
-  }
-  */
 
-  this.states = [state];
+  var next = state.clone();
+
+  var defaultPhraseParser = new AnnotationParser();
+  defaultPhraseParser.parsed = this.defaultPhrase;
+  defaultPhraseParser.mutateState(next);
+  var initEvents = defaultPhraseParser.getEvents(next, state);
+  initEvents.forEach(e => {
+    e.tick = 10 + (e.offset || 0);
+  });
+  this.events = initEvents;
+  this.states = [state, next];
   this.next = undefined;
   this.process(this.parse(part));
   return {
-    states: this.states
+    states: this.states,
+    events: this.events
   };
 }
 

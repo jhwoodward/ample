@@ -2,7 +2,7 @@ var pitchUtils = require('../pitchUtils');
 var eventType = require('../constants').eventType;
 var _ = require('lodash');
 var parser = require('./_parser');
-var pitchParser = require('./_pitchParser');
+var noteParser = require('./_noteParser');
 
 function RelativeNoteParser() {
   this.type = 'RelativeNote';
@@ -54,5 +54,5 @@ var prototype = {
   }
 }
 
-RelativeNoteParser.prototype = _.extend({}, parser, pitchParser, prototype);
+RelativeNoteParser.prototype = _.extend({}, parser, noteParser, prototype);
 module.exports = RelativeNoteParser;

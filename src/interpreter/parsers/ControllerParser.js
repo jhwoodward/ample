@@ -15,23 +15,18 @@ var prototype = {
     return Object.assign(out, utils.parseValue(s));
   },
   mutateState: function (state) {
-    if (this.parsed.phrase) {
-      if (!state.phrase.controller) {
-        state.phrase.controller = {};
-      }
-      state.phrase.controller[this.parsed.controller] = this.parsed.value;
-    } else {
-      if (!state.note.controller) {
-        state.note.controller = {};
-      }
-      state.note.controller[this.parsed.controller] = this.parsed.value;
+    state.controller[this.parsed.controller] = this.parsed.value;
+  },
+  getEvents: function (state, prev) {
+    if (prev.controller[this.parsed.controller] === this.parsed.value) {
+      return [];
     }
-    state.events.push({
+    return [{
       tick: state.time.tick,
       type: eventType.controller,
       controller: this.parsed.controller,
       value: this.parsed.value
-    })
+    }];
   }
 };
 

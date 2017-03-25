@@ -12,16 +12,15 @@ var prototype = {
     return utils.parseValue(s);
   },
   mutateState: function (state) {
-    if (this.parsed.phrase) {
-      state.phrase.pitchbend = this.parsed.value;
-    } else {
-      state.note.pitchbend = this.parsed.value;
-    }
-    state.events.push({
+    state.pitchbend = this.parsed.value;
+  },
+  getEvents: function(state, prev) {
+    if (prev.pitchbend === this.parsed.value) return [];
+    return [{
       tick: state.time.tick,
       type: eventType.pitchbend,
       value: this.parsed.value
-    });
+    }];
   }
 }
 PitchbendParser.prototype = _.extend({}, parser, prototype);

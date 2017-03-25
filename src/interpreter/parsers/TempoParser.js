@@ -13,11 +13,17 @@ var prototype = {
   },
   mutateState: function (state) {
     state.time.tempo = this.parsed.value;
-    state.events.push({
-      tick: state.time.tick,
-      type: eventType.tempo,
-      value: this.parsed.value
-    });
+  },
+  getEvents: function (state) {
+    if (state.time.tempo !== this.parsed.value) {
+      return [{
+        tick: state.time.tick,
+        type: eventType.tempo,
+        value: this.parsed.value
+      }];
+    } else {
+      return [];
+    }
   }
 
 }

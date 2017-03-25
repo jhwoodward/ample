@@ -11,11 +11,7 @@ var prototype = {
     return utils.parseValue(s);
   },
   mutateState: function (state) {
-    if (this.parsed.phrase) {
-      state.phrase.velocity = this.parsed.value;
-    } else {
-      state.note.velocity = this.parsed.value;
-    }
+    state.velocity = this.parsed.value;
   }
 }
 VelocityParser.prototype = _.extend({}, parser, prototype);

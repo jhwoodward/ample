@@ -11,11 +11,8 @@ var prototype = {
     return utils.parseValue(s);
   },
   mutateState: function (state) {
-    if (this.parsed.phrase) {
-      state.phrase.on = this.parsed.value;
-    } else {
-      state.note.on = this.parsed.value;
-    }
+    state.on = state.on || {};
+    state.on.offset = this.parsed.value;
   }
 }
 OnParser.prototype = _.extend({}, parser, prototype);

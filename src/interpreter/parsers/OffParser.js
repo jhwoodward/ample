@@ -3,7 +3,7 @@ var _ = require('lodash');
 var parser = require('./_parser');
 
 function OffParser() {
-  this.type = 'On';
+  this.type = 'Off';
   this.test = /^-?[\d]{1,2}==?OFF/;
 }
 var prototype = {
@@ -11,11 +11,8 @@ var prototype = {
     return utils.parseValue(s);
   },
   mutateState: function (state) {
-    if (this.parsed.phrase) {
-      state.phrase.off = this.parsed.value;
-    } else {
-      state.note.off = this.parsed.value;
-    }
+    state.off = state.off || {};
+    state.off.offset = this.parsed.value;
   }
 }
 

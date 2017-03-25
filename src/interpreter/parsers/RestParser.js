@@ -14,40 +14,24 @@ var prototype = {
     state.on = {};
     state.off = { tick: state.time.tick, offset: 0 };
   },
-  enter: function(state, prev) {
+  getEvents: function (state, prev) {
+    var events = [];
     if (prev.on.tick) {
-      var offset = state.note.off || state.phrase.off;
+      var offset = state.off.offset;
       if (offset > 0) offset = 0;
       var offTick = state.time.tick + offset;
-      state.events.push({
+      events.push({
         tick: offTick,
         type: eventType.noteoff,
         pitch: prev.pitch,
         duration: offTick - prev.on.tick,
-        annotation: 'Rest (' + state.phrase.name +')',
+        annotation: 'Rest (' + state.phrase.name + ')',
         offset: offset
       });
 
-      var events = state.phrase.events.reduce((acc, e) => {
-        var out = _.merge({}, e);
-        out.annotation = state.phrase.name + ' (rest)';
-        if (e.keyswitch) {
-          if (e.type==='noteon') {
-             out.tick = offTick -2;
-          } else if (e.type==='noteoff') {
-             out.tick = offTick -1;
-          }
-        } else {
-          out.tick = offTick -1;
-        }
-        acc.push(out);
-        return acc;
-      },[]);
-
-      state.events = state.events.concat(events);
-
-
     }
+    events = events.concat(state.phrase.getEvents(state, prev));
+    return events;
 
   },
   leave: function (state, next) {

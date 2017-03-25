@@ -4,9 +4,6 @@ var instruments = require("../src/instruments/instruments");
 var performer = ensemble.stringQuartet.performers.friedfischtriobroz;
 var players = utils.playersFromEnsemble(ensemble.stringQuartet, performer, true);
 
-//bug moving from b-b
-//bug moving from cc
-
 var master = `120=T 192, ( $A / /  $B / / $C / / )*4 $D `;
 
 players.violin1.part = `

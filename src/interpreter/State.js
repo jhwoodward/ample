@@ -1,29 +1,10 @@
 var _ = require('lodash');
 var eventType = require('./constants').eventType;
 
-function State(init, master) {
-
+function State(master) {
   this.master = master;
-  if (!init) {
-    init = {
-      phrase: {
-        name: 'default',
-        pitchbend: 8192,
-        velocity: 90,
-        controller: {},
-        keyswitch: undefined,
-        on: 0,
-        off: -5,
-        events: []
-      },
-      events: []
-    };
-  }
-
   var state = {
     modifiers: [],
-    events: [],
-    on: {},
     key: {
       flats: [],
       sharps: []
@@ -34,11 +15,13 @@ function State(init, master) {
       transpose: 0
       //constraint: [] = array of pitch values
     },
-    note: {
-      articulations: []
-    },
-    phrase: {},
-    events: [],
+    on: {},
+    off: {},
+    phrase: {}, //instance of AnnotationParser
+    controller: {},
+    pitchbend: undefined,
+    velocity: undefined,
+    keyswitch: [],
     time: {
       tempo: 120,
       tick: 48, //start at beat 1 (also enables keyswitch events to kick in prior to first beat)
@@ -46,13 +29,12 @@ function State(init, master) {
     }
   };
 
-  _.merge(this, state, init);
-
+  _.merge(this, state);
 }
 
 State.prototype.clone = function () {
   var clone = _.cloneDeep(this);
-  clone.events = [];
+  clone.mutater = undefined;
   return clone;
 }
 
@@ -62,19 +44,15 @@ State.prototype.mutateFromMaster = function () {
   //extend this with any states where tick <= this.time.tick
   this.master.forEach(function (s) {
     if (s.tick <= this.time.tick && !s.applied) {
+
       if (s.state.time && this.time.tempo !== s.state.time.tempo) {
         this.events.push({
           tick: this.time.tick,
           type: eventType.tempo,
           value: s.state.time.tempo
-        }
-        );
+        });
       }
       _.merge(this, s.state);
-
-      modifiers = this.modifiers.filter(m => {
-        return m.name === 'F#m';
-      });
 
       s.applied = true;
     }

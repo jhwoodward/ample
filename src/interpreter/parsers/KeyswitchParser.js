@@ -19,22 +19,36 @@ var prototype = {
     return pitch;
   },
   mutateState: function (state) {
-    state.phrase.keyswitch = this.parsed;
+    state.keyswitch.push(this.parsed);
+  },
+  getEvents: function (state, prev) {
+    if (prev.keyswitch.length) {
+       var lastKeyswitch = prev.keyswitch[prev.keyswitch.length-1];
+       if (lastKeyswitch.value === this.parsed.value) {
+         return [];
+       }
+    }
+
     var duration = 1;
-    state.events.push({
-      tick: state.time.tick,
-      type: eventType.noteon,
-      pitch: this.parsed,
-      keyswitch: true
-    });
-    state.events.push({
-      tick: state.time.tick + duration,
-      type: eventType.noteoff,
-      pitch: this.parsed,
-      keyswitch: true,
-      duration
-    });
+    return [
+      {
+        offset: -duration-1,
+        tick: state.time.tick-duration-1,
+        type: eventType.noteon,
+        pitch: this.parsed,
+        keyswitch: true
+      },
+      {
+        offset: -duration,
+        tick: state.time.tick-duration,
+        type: eventType.noteoff,
+        pitch: this.parsed,
+        keyswitch: true,
+        duration
+    }];
   }
+
+
 }
 KeyswitchParser.prototype = _.extend({}, parser, prototype);
 module.exports = KeyswitchParser;

@@ -20,9 +20,9 @@ describe('ControllerParser', function () {
     var test = '120=C1';
     parser.match(test);
     var state = new State().clone();
-    expect(state.phrase.controller[1]).toNotExist();
+    expect(state.controller[1]).toNotExist();
     parser.mutateState(state);
-    expect(state.phrase.controller[1]).toEqual(120);
+    expect(state.controller[1]).toEqual(120);
   });
   it('should generate event', function () {
     var parser = new ControllerParser();

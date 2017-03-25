@@ -24,7 +24,7 @@ describe('NoteParser pitch', function () {
       var result = interpeter.interpret(test);
       var notes = getNotes(result.states);
       var expectedNotes = ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6', 'D6', 'Eb6'];
-      expect(expectedNotes).toEqual(notes);
+      expect(notes).toEqual(expectedNotes);  
     });
 
     describe('When previous note is lower case but the same character', function() {
@@ -34,7 +34,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['C5', 'C6'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
 
 
@@ -47,7 +47,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['Bb5', 'B6'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
 
@@ -60,7 +60,7 @@ describe('NoteParser pitch', function () {
       var result = interpeter.interpret(test);
       var notes = getNotes(result.states);
       var expectedNotes = ['G5', 'F5', 'E5', 'D5', 'C5', 'B4', 'A4', 'G4'];
-      expect(expectedNotes).toEqual(notes);
+      expect(notes).toEqual(expectedNotes);  
     });
 
     describe('When previous character is the same and also lower case', function() {
@@ -71,17 +71,25 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['C5','C5','C5'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
+
+        test = 'ccDEFedcccb';
+        interpeter = new Interpreter();
+        result = interpeter.interpret(test);
+        notes = getNotes(result.states);
+        expectedNotes = ['C5', 'C5', 'D5', 'E5', 'F5', 'E5', 'D5', 'C5', 'C5', 'C5', 'B4'];
+        expect(notes).toEqual(expectedNotes);  
       });
+
 
       describe('With accidental', function() {
         it('should move down a semitone', function () {
-          var test = 'c-c';
+          var test = 'cDEFedc-c';
           var interpeter = new Interpreter();
           var result = interpeter.interpret(test);
           var notes = getNotes(result.states);
-          var expectedNotes = ['C5','B4'];
-          expect(expectedNotes).toEqual(notes);
+          var expectedNotes = ['C5', 'D5', 'E5', 'F5', 'E5', 'D5', 'C5', 'B4'];
+          expect(notes).toEqual(expectedNotes);  
         });
 
         it('should move up a semitone', function () {
@@ -90,7 +98,7 @@ describe('NoteParser pitch', function () {
           var result = interpeter.interpret(test);
           var notes = getNotes(result.states);
           var expectedNotes = ['C5','Db5'];
-          expect(expectedNotes).toEqual(notes);
+          expect(notes).toEqual(expectedNotes);  
         });
 
       });
@@ -100,6 +108,8 @@ describe('NoteParser pitch', function () {
     });
 
 
+
+
     describe('When previous note is upper case but the same character', function() {
       it('should drop one octave', function() {
         var test = 'Cc';
@@ -107,7 +117,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['C5', 'C4'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
 
@@ -118,7 +128,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['Bb5', 'B4'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
   });
@@ -131,7 +141,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['C5', 'D5', 'E5', 'F6', 'G6', 'A6', 'B6', 'C7', 'D7', 'Eb9'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
 
@@ -142,7 +152,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['G5', 'F5', 'E4', 'D4', 'C4', 'B1', 'A1', 'G0'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
 
@@ -153,7 +163,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['C5', 'C2'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
 
@@ -164,7 +174,7 @@ describe('NoteParser pitch', function () {
         var result = interpeter.interpret(test);
         var notes = getNotes(result.states);
         var expectedNotes = ['C5', 'C8'];
-        expect(expectedNotes).toEqual(notes);
+        expect(notes).toEqual(expectedNotes);  
       });
     });
   });

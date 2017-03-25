@@ -1,5 +1,5 @@
 var pitchUtils = require('../pitchUtils');
-
+var ArticulationParser = require('./ArticulationParser');
 module.exports = {
   parseArticulation: function (s) {
     if (!this.articulations) {
@@ -10,10 +10,12 @@ module.exports = {
     //TODO: build dynamically from articulation keys
     var re = /[>'~_]/g;
     var out = [];
+    var parser;
     while (xArray = re.exec(s)) {
       artic = xArray[0];
       if (this.articulations[artic]) {
-        out.push(this.articulations[artic]);
+        parser = new ArticulationParser(this.articulations[artic]);
+        out.push(parser);
       }
     }
     return out;
@@ -26,7 +28,7 @@ module.exports = {
     var parsedPitch = this.parsed.pitch;
     var oct = parsedPitch.octJump || 0;
 
-    if (prev.pitch.char === parsedPitch.char && parsedPitch.up === prev.pitch.up ) {
+    if (prev.pitch.char === parsedPitch.char && parsedPitch.up === prev.pitch.up) {
       return;
     }
 

@@ -38,11 +38,11 @@ Sequencer.prototype = {
       var player = players[key];
       console.log('interpeting ' + player.name);
       delete player.annotations.name;
-      var macros = utils.buildMacros(player.substitutions, player.annotations, player.articulations);
+      var macros = utils.combineMacros(player);
       var interpreter = new Interpreter(macros), events = [];
-      var states = interpreter.interpret(player.part, player.master).states;
-      this.markers = states[0].markers;
-      events = utils.eventsFromStates(states);
+      var result = interpreter.interpret(player.part, player.master);
+      this.markers = result.states[0].markers;
+      events = result.events;
       events.forEach(e => { e.channel = player.channel });
       allEvents = allEvents.concat(events);
     }

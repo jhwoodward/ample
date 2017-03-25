@@ -9,8 +9,8 @@ function AnnotationParser(macros) {
 
   if (macros) {
     this.annotations = macros.reduce(function (acc, item) {
-      if (item.type === macroType.annotation) { 
-        acc[item.key] = item; 
+      if (item.type === macroType.annotation) {
+        acc[item.key] = item;
       }
       return acc;
     }, {});
@@ -21,31 +21,26 @@ function AnnotationParser(macros) {
 var prototype = {
   parse: function (s) {
     var key = /\w+/.exec(s)[0];
-    if (this.annotations[key]) {
-      return {
-        key,
-        annotation: this.annotations[key]
-      }
+    if (this.annotations && this.annotations[key]) {
+      return this.annotations[key];
     }
   },
   mutateState: function (state) {
-
-    if (this.parsed.annotation.events) {
-      this.parsed.annotation.events.forEach(e => {
-        if (e.type === eventType.noteoff) {
-          e.tick = state.time.tick -1
-        } else {
-          e.tick = state.time.tick -2;
-        }
-        e.annotation = this.parsed.key;
-       
-      });
-      state.events = state.events.concat(this.parsed.annotation.events);
-    } 
-
-    state.phrase = _.merge({}, this.parsed.annotation.state || this.parsed.annotation);
-    state.phrase.events = this.parsed.annotation.events;
-    state.phrase.name = this.parsed.key;
+    if (this.parsed.parsed) {
+       this.parsed = this.parsed.parsed;
+       this.key = this.parsed.key;
+    }
+    state.phrase = this;
+    this.parsed.forEach(parser => {
+      parser.mutateState(state);
+    });
+  },
+  getEvents: function(state, prev) {
+    return this.parsed.reduce(function(acc, parser) {
+      if (!parser.getEvents) return acc;
+      acc = acc.concat(parser.getEvents(state, prev));
+      return acc;
+    },[]);
   }
 }
 

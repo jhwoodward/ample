@@ -19,9 +19,9 @@ var State = require('../../src/interpreter/State');
       var test = '[-2:+D]';
       parser.match(test);
       var state = new State().clone();
-      expect(state.phrase.keyswitch).toNotExist();
+      expect(state..keyswitch).toEqual([]);
       parser.mutateState(state);
-      expect(state.phrase.keyswitch.value).toEqual(39);
+      expect(state..keyswitch[0].value).toEqual(39);
 
     });
     it ('should generate event', function() {
@@ -37,7 +37,7 @@ var State = require('../../src/interpreter/State');
       expect(state.events[0].pitch.value).toEqual(39);
       expect(state.events[0].pitch.string).toEqual('D#3');
       expect(state.events[0].keyswitch).toExist();
-      expect(state.events[1].tick).toEqual(state.time.tick+1);
+      expect(state.events[1].tick).toEqual(state.time.tick + 1);
       expect(state.events[1].type).toEqual(eventType.noteoff);
       expect(state.events[1].pitch.value).toEqual(39);
       expect(state.events[1].pitch.string).toEqual('D#3');

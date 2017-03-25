@@ -2,6 +2,9 @@ var macroType = require('./constants').macroType;
 var parserUtils = require('./parserUtils');
 
 var api = {
+  combineMacros: function(player) {
+    return api.buildMacros(player.substitutions, player.annotations, player.articulations);
+  },
   buildMacros: function (substitutions, annotations, articulations) {
     var macros = [];
 

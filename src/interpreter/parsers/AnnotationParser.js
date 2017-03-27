@@ -14,8 +14,9 @@ function AnnotationParser(macros) {
       }
       return acc;
     }, {});
+  } else {
+    this.annotations = [];
   }
-
 }
 
 var prototype = {
@@ -26,19 +27,15 @@ var prototype = {
     }
   },
   mutateState: function (state) {
-    if (this.parsed.parsed) {
-       this.parsed = this.parsed.parsed;
-       this.key = this.parsed.key;
-    }
     state.phrase = this;
-    this.parsed.forEach(parser => {
+    this.parsed.parsed.forEach(parser => {
       parser.mutateState(state);
     });
   },
-  getEvents: function(state, prev) {
-    return this.parsed.reduce(function(acc, parser) {
+  getEvents: function(state, prev, events) {
+    return this.parsed.parsed.reduce(function(acc, parser) {
       if (!parser.getEvents) return acc;
-      acc = acc.concat(parser.getEvents(state, prev));
+      acc = acc.concat(parser.getEvents(state, prev, events));
       return acc;
     },[]);
   }

@@ -37,6 +37,7 @@ var performers = {
     name: 'friedlander',
     /*
     true legato (as opposed to polyphonic): keyswitch -1:F 
+    c17 = slur legato
     polyphonic: -1: +F
     bowed / fingered legato: C15 < 64 = bowed, C15 > 64 = fingered 
     portamento: C14 >0 = on, 0=off

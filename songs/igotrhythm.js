@@ -32,7 +32,7 @@ var master = `120=T  $A (chordsA) $A (chordsA) $B (chordsB) $A (chordsAfinal)   
 
 players.violin1.part = `
   $A1( (48,1: D_F 24, -BDD-b)*8 ^ )
-  $A2( (24,1: dEGd  48,ge)*8 ^ )
+  $A2( (24,1: d_E_G_d  48,g_e)*8 ^ )
   $B(  (24,1: {spiccato} eGcEbgDaCEGAbdbC )*4 ^  )
   $A3( (48,1: -bD 24, FAge)*7 48,1: {spiccato} -b  FA// ^ )
 `;
@@ -69,7 +69,7 @@ players.viola.substitutions = substitutions;
 players.cello.master = master;
 players.cello.substitutions = substitutions;
 
-var seq = new Sequencer();
-seq.load([players.violin1]);
-seq.start();
-//module.exports = players;
+//var seq = new Sequencer();
+//seq.load([players.violin1]);
+//seq.start();
+module.exports = players;

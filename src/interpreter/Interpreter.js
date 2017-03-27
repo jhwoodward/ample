@@ -1,67 +1,21 @@
-var parsers = require('./parsers');
-var parserUtils = require('./parserUtils');
+var parse = require('./parse');
 var utils = require('./utils');
+var stateUtils = require('./stateUtils');
 var State = require('./State');
 var macroType = require('./constants').macroType;
-var AnnotationParser = require('./parsers/AnnotationParser');
 var _ = require('lodash');
 
 function Interpreter(macros) {
   this.macros = macros || [];
-  this.macros.forEach(macro => { macro.parsed = this.parse(macro.value);});
-
-  var hasDefaultPhrase = this.macros.filter(m => {
-    return m.type === macroType.annotation && m.key === 'default';
-  }).length;
-  if (!hasDefaultPhrase) {
-    var defaultPhrase = '8192=P 85=C1 90=V 0=ON -5=OFF';
-    this.macros.push({
-      type: macroType.annotation,
-      key: 'default',
-      value: defaultPhrase,
-      parsed: this.parse(defaultPhrase)
-    });
-  }
-  this.defaultPhrase = this.macros.filter(m => {
-    return m.type === macroType.annotation && m.key === 'default';
-  })[0];
+  this.macros.forEach(macro => {
+    macro.parsed = parse(macro.value);
+  });
+  this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
 }
 
-/*
-  Returns an array of parsers who's regex's match the part string
-*/
-Interpreter.prototype.parse = function (part) {
-  var parsers = [], parser;
-  var cursor = 0;
-  while (part.length && parsers.length < 9999999) {
-    parser = this.findMatch(part);
-    if (parser) {
-      parsers.push(parser);
-      part = part.substring(parser.string.length, part.length);
-    } else {
-      parsers.push(null);
-      part = part.substring(1, part.length)
-    }
-  }
-  return parsers.filter(a => !!a);
+Interpreter.prototype.parse = function(part) {
+  return parse(part, this.macros);
 }
-
-/*
-  Returns the first parser who's regex matchs the part string
-*/
-Interpreter.prototype.findMatch = function (part) {
-  var result, parser;
-  for (var i = 0; i < parsers.length; i++) {
-    parser = new parsers[i](this.macros);
-    result = parser.match(part);
-    if (result) {
-      break;
-    }
-  }
-  if (!result) return undefined;
-  return parser;
-}
-
 Interpreter.prototype.process = function (parsers) {
 
   for (var i = 0; i < parsers.length; i++) {
@@ -70,12 +24,11 @@ Interpreter.prototype.process = function (parsers) {
     var state = this.next || this.getNextState();
 
     state.mutateFromMaster();
-
     parser.mutateState(state, this);
     state.mutater = parser.type + ' (' + parser.string + ')';
 
     if (parser.getEvents) {
-      var events = parser.getEvents(state, this.getTopState());
+      var events = parser.getEvents(state, this.getTopState(), this.events);
       this.events = this.events.concat(events);
     }
 
@@ -86,8 +39,8 @@ Interpreter.prototype.process = function (parsers) {
     this.states.push(state);
 
     this.next = this.getNextState();
-    if (parser.leave) {
-      parser.leave(state, this.next);
+    if (parser.next) {
+      parser.next(this.next);
     }
   }
 }
@@ -109,26 +62,27 @@ Interpreter.prototype.interpret = function (part, master) {
     this.states = [state];
     this.next = undefined;
     this.events = [];
-    this.process(this.parse(master));
+    this.process(parse(master, this.macros));
 
     //take only the final state for each tick;
     master = this.states.reduce((acc, s) => {
       var tick = s.time.tick;
-      if (acc.filter(m => { return m.tick === tick}).length) return acc;
+      if (acc.filter(m => { return m.tick === tick }).length) return acc;
       var tickStates = this.states.filter(x => { return x.time.tick === tick; });
-      var lastTickState = tickStates[tickStates.length-1];
-      var m = { 
-        tick: tick, 
+      var lastTickState = tickStates[tickStates.length - 1];
+      var m = {
+        tick: tick,
         state: {
-          key: lastTickState.key, 
+          key: lastTickState.key,
           pitch: { constraint: lastTickState.pitch.constraint },
           modifiers: lastTickState.modifiers,
           mutater: lastTickState.mutater,
-          time: { tempo: lastTickState.time.tempo } } 
+          time: { tempo: lastTickState.time.tempo }
+        }
       };
       acc.push(m);
       return acc;
-    },[]);
+    }, []);
 
     markers = this.states.reduce((acc, s) => {
       if (s.marker) {
@@ -136,25 +90,16 @@ Interpreter.prototype.interpret = function (part, master) {
         acc[s.marker].push(s.time.tick);
       }
       return acc;
-    },{});
+    }, {});
 
-    state = new State(master);
+    state = new State(this.defaultPhraseParser, master);
     state.markers = markers;
   } else {
-    state = new State();
+    state = new State(this.defaultPhraseParser);
   }
 
-  var next = state.clone();
-
-  var defaultPhraseParser = new AnnotationParser();
-  defaultPhraseParser.parsed = this.defaultPhrase;
-  defaultPhraseParser.mutateState(next);
-  var initEvents = defaultPhraseParser.getEvents(next, state);
-  initEvents.forEach(e => {
-    e.tick = 10 + (e.offset || 0);
-  });
-  this.events = initEvents;
-  this.states = [state, next];
+  this.events = state.initEvents;
+  this.states = [state];
   this.next = undefined;
   this.process(this.parse(part));
   return {

@@ -20,7 +20,7 @@ describe('ControllerParser', function () {
     var test = '120=C1';
     parser.match(test);
     var state = new State().clone();
-    expect(state.controller[1]).toNotExist();
+    expect(state.controller[1]).toEqual(85); //default
     parser.mutateState(state);
     expect(state.controller[1]).toEqual(120);
   });
@@ -29,11 +29,13 @@ describe('ControllerParser', function () {
     var test = '120=C1';
     parser.match(test);
     var state = new State().clone();
-    parser.mutateState(state);
-    expect(state.events.length).toEqual(1);
-    expect(state.events[0].type).toEqual(eventType.controller);
-    expect(state.events[0].tick).toEqual(state.time.tick);
-    expect(state.events[0].controller).toEqual(1);
-    expect(state.events[0].value).toEqual(120);
+    var next = state.clone();
+    parser.mutateState(next);
+    var events = parser.getEvents(next, state);
+    expect(events.length).toEqual(1);
+    expect(events[0].type).toEqual(eventType.controller);
+    expect(events[0].tick).toEqual(state.time.tick);
+    expect(events[0].controller).toEqual(1);
+    expect(events[0].value).toEqual(120);
   });
 });

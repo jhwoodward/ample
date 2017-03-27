@@ -21,12 +21,25 @@ var prototype = {
   mutateState: function (state) {
     state.keyswitch.push(this.parsed);
   },
-  getEvents: function (state, prev) {
+  getEvents: function (state, prev, events) {
     if (prev.keyswitch.length) {
        var lastKeyswitch = prev.keyswitch[prev.keyswitch.length-1];
        if (lastKeyswitch.value === this.parsed.value) {
          return [];
        }
+    }
+
+    if (events && events.length) {
+      var lastKeyswitch;
+      for (var i = events.length - 1; i--; i > 0) {
+        if (events[i].type === eventType.noteon && events[i].keyswitch) {
+          lastKeyswitch = events[i];
+          break;
+        }
+      }
+      if (lastKeyswitch && lastKeyswitch.pitch.value === this.parsed.value) {
+        return [];
+      }
     }
 
     var duration = 1;

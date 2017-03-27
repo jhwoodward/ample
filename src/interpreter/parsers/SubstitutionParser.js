@@ -5,7 +5,7 @@ var macroType = require('../constants').macroType;
 function SubstitutionParser(macros) {
   this.type = 'Substitution';
   this.test = /^\(\w+\)/;
-
+  this.substitutions = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
       if (item.type === macroType.substitution) { 
@@ -25,8 +25,8 @@ var prototype = {
   },
   mutateState: function (state, interpreter) {
     var part = this.substitutions[this.parsed];
-    var parsed = interpreter.parse(part.value);
-    interpreter.process(parsed);
+   // var parsed = interpreter.parse(part.value);
+    interpreter.process(part.parsed);
   },
   continue: true
 }

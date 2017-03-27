@@ -2,7 +2,7 @@ var macroType = require('./constants').macroType;
 var parserUtils = require('./parserUtils');
 
 var api = {
-  combineMacros: function(player) {
+  combineMacros: function (player) {
     return api.buildMacros(player.substitutions, player.annotations, player.articulations);
   },
   buildMacros: function (substitutions, annotations, articulations) {
@@ -53,7 +53,7 @@ var api = {
       return a.tick > b.tick ? 1 : -1;
     });
   },
-  addModifier: function(state, modifier, condition) {
+  addModifier: function (state, modifier, condition) {
     var exists = !!state.modifiers.filter(m => m.id === modifier.id).length;
 
     if (exists) {

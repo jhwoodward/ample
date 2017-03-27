@@ -8,7 +8,7 @@ function LoopParser(macros) {
   //this.test = /^\(\w+\)\*[\d]{1,3}/;
 
  // this.test = /\(([^()]|(?R))*\)/;
-
+ this.substitutions = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
       if (item.type === macroType.substitution) {

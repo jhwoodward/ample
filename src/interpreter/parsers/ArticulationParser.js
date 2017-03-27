@@ -15,10 +15,10 @@ var prototype = {
       parser.mutateState(state);
     });
   },
-  getEvents: function(state, prev) {
+  getEvents: function(state, prev, events) {
     return this.parsed.reduce(function(acc, parser) {
       if (!parser.getEvents) return acc;
-      acc = acc.concat(parser.getEvents(state, prev));
+      acc = acc.concat(parser.getEvents(state, prev, events));
       return acc;
     },[]);
   }

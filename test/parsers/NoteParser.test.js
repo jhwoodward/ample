@@ -34,7 +34,6 @@ describe('NoteParser', function () {
     expect(state.key.flats.length).toEqual(0);
     expect(state.key.sharps.length).toEqual(0);
     parser.mutateState(state);
-    parser.enter(state, prev);
     expect(state.pitch.string).toEqual('Eb5');
     expect(state.pitch.value).toEqual(63);
   });
@@ -43,26 +42,42 @@ describe('NoteParser', function () {
     var prev = new State().clone();
     var state = prev.clone();
     parser.mutateState(state);
-    expect(state.events.length).toEqual(0);
-    parser.enter(state, prev);
-    expect(state.events.length).toEqual(1);
+    var events = parser.getEvents(state, prev);
+    expect(events.length).toEqual(1);
   });
 
   it('should set \'on\' state', function () {
     var prev = new State().clone();
     var state = prev.clone();
-    parser.mutateState(state);
     expect(state.on.tick).toNotExist();
     expect(state.on.offset).toNotExist();
-    parser.enter(state, prev);
+    parser.mutateState(state);
     expect(state.on.tick).toEqual(state.time.tick);
     expect(state.on.offset).toEqual(0);
+
+  });
+
+  it('should generate noteoff event', function () {
+    var noteParser = new NoteParser();
+    noteParser.match('C');
+    var prev = new State();
+    noteParser.mutateState(prev);
+    var next = prev.clone();
+    noteParser.next(next);
+    parser.mutateState(next);
+    var events = parser.getEvents(next, prev);
+    expect(events.length).toEqual(2);
+    expect(events[0].type).toEqual(eventType.noteoff);
+    expect(events[0].annotation).toEqual('default');
+    expect(events[0].offset).toEqual(-5); //default detach
+    expect(events[0].pitch.value).toEqual(60);
+    expect(events[0].duration).toEqual(48 - 5);
   });
 
   it('should increment tick on leave', function () {
     var state = new State().clone();
     var next = state.clone();
-    parser.leave(state, next);
+    parser.next(next);
     expect(next.time.tick).toEqual(state.time.tick + state.time.step);
   });
 

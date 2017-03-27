@@ -16,8 +16,8 @@ function eventTypeColor(e) {
       return colors.grey;
       break;
     case eventType.pitchbend:
-     return colors.magenta;
-    break;
+      return colors.magenta;
+      break;
     case eventType.controller:
       return colors.magenta;
       break;
@@ -75,6 +75,9 @@ function Logger() {
         if (e.keyswitch) {
           return e.type + ' ks';
         }
+        if (e.type === eventType.controller) {
+          return e.type + ' ' + e.controller;
+        }
         return e.type;
       }
     },
@@ -85,26 +88,42 @@ function Logger() {
         if (e.pitch) {
           return (e.pitch.string + ' (' + e.pitch.value + ')');
         }
-        if (e.value) {
+        if (e.value !== undefined) {
           return e.value;
         }
       }
     },
     value2: {
-      width: 7,
+      width: 5,
+      color: eventTypeColor,
+      value: function (e) {
+        switch (e.type) {
+          case eventType.noteon:
+            if (!e.keyswitch && e.offset) {
+              return e.offset;
+            }
+            break;
+          case eventType.noteoff:
+            if (!e.keyswitch && e.offset) {
+              return e.offset;
+            }
+            break;
+        }
+      }
+    },
+    value3: {
+      width: 5,
       color: eventTypeColor,
       value: function (e) {
         switch (e.type) {
           case eventType.noteon:
             if (!e.keyswitch) {
-              return `v${e.velocity}`;
+              var v = `v${e.velocity}`;
+              return v;
             }
             break;
           case eventType.noteoff:
             var d = `d${e.duration}`;
-            if (e.offset) {
-              d =  e.offset + ' ' + d;
-            }
             return d
             break;
 
@@ -171,7 +190,7 @@ Logger.prototype.logEvent = function (e) {
       color = c.color.call(this, e, value);
     }
     if (value === undefined) {
-      if (c.align === 'left') { log += '  ';}
+      if (c.align === 'left') { log += '  '; }
       log += pad('', c.width);
       continue;
     }

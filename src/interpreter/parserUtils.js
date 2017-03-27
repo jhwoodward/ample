@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 var api = {
-   parseValue: s => {
+  parseValue: s => {
     const value = parseInt(/-?[\d]{1,5}/.exec(s)[0], 10);
     const phrase = s.indexOf('==') === -1;
     // now using ==V inline 
@@ -25,10 +25,10 @@ var api = {
   strip: obj => {
     var out = {};
     for (var key in obj) {
-      if (obj[key] !== undefined 
-      && obj[key] !== false 
-      && obj[key] !== null 
-      && !(typeof obj[key] === 'object' && _.isEmpty(obj[key]))
+      if (obj[key] !== undefined
+        && obj[key] !== false
+        && obj[key] !== null
+        && !(typeof obj[key] === 'object' && _.isEmpty(obj[key]))
       ) {
         out[key] = obj[key];
       }
@@ -55,18 +55,18 @@ var api = {
       down: char === char.toLowerCase(),
       up: char === char.toUpperCase(),
       octJump: octJump ? octJump.length : false
-    };     
-    out.string= out.char + (out.flat ? 'b':out.sharp ? '#' :'');
+    };
+    out.string = out.char + (out.flat ? 'b' : out.sharp ? '#' : '');
     if (out.sharp) {
-      out.accidental ++;
+      out.accidental++;
     }
     if (out.flat) {
-      out.accidental --;
+      out.accidental--;
     }
     return api.strip(out);
   },
   parseNotes: s => {
-    var xArray; 
+    var xArray;
     var out = [];
     var re = /(?:[+-]?[A-Ga-g])/g;
     var note;

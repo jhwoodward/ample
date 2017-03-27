@@ -49,7 +49,7 @@ var prototype = {
     });
 
   },
-  leave: function (state, next) {
+  next:function (next) {
     next.time.tick += next.time.step;
   }
 }

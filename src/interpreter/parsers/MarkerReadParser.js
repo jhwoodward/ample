@@ -6,6 +6,7 @@ var macroType = require('../constants').macroType;
 function MarkerReadParser(macros) {
   this.type = 'MarkerRead';
 
+  this.substitutions = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
       if (item.type === macroType.substitution) {

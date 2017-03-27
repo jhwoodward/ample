@@ -18,7 +18,7 @@ var prototype = {
       state.marker = this.parsed;
     } 
   },
-  leave: function(state,next) {
+  next:function(next) {
     delete next.marker;
   }
 

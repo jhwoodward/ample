@@ -1,7 +1,8 @@
 var _ = require('lodash');
 var eventType = require('./constants').eventType;
+var stateUtils = require('./stateUtils');
 
-function State(master) {
+function State(defaultPhraseParser, master) {
   this.master = master;
   var state = {
     modifiers: [],
@@ -17,10 +18,10 @@ function State(master) {
     },
     on: {},
     off: {},
-    phrase: {}, //instance of AnnotationParser
+    phrase: defaultPhraseParser || stateUtils.getDefaultPhraseParser(), //instance of AnnotationParser
     controller: {},
     pitchbend: undefined,
-    velocity: undefined,
+    velocity: 85,
     keyswitch: [],
     time: {
       tempo: 120,
@@ -29,8 +30,15 @@ function State(master) {
     }
   };
 
-  _.merge(this, state);
+  var next = _.cloneDeep(state);
+  next.phrase.mutateState(next);
+  this.initEvents = next.phrase.getEvents(next, state);
+  this.initEvents.forEach(e => {
+    e.tick = 10 + (e.offset || 0);
+  });
+  _.merge(this, next);
 }
+
 
 State.prototype.clone = function () {
   var clone = _.cloneDeep(this);

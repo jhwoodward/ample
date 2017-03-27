@@ -30,11 +30,13 @@ var State = require('../../src/interpreter/State');
       var test = '125=T';
       parser.match(test);
       var state = new State().clone();
-      expect(state.events.length).toEqual(0);
+      var next = state.clone();
       parser.mutateState(state);
-      expect(state.events.length).toEqual(1);
-      expect(state.events[0].tick).toEqual(state.time.tick);
-      expect(state.events[0].type).toEqual(eventType.tempo);
-      expect(state.events[0].value).toEqual(125);
+
+      var events = parser.getEvents(next, state);
+      expect(events.length).toEqual(1);
+      expect(events[0].tick).toEqual(state.time.tick);
+      expect(events[0].type).toEqual(eventType.tempo);
+      expect(events[0].value).toEqual(125);
     });
   });

@@ -18,8 +18,8 @@ var State = require('../../src/interpreter/State');
       var test = '0=P';
       parser.match(test);
       var state = new State().clone();
-      expect(state.phrase.pitchbend).toEqual(8192); //defult
+      expect(state.pitchbend).toEqual(8192); //defult
       parser.mutateState(state);
-      expect(state.phrase.pitchbend).toEqual(0);
+      expect(state.pitchbend).toEqual(0);
     });
   });

@@ -11,7 +11,7 @@ var prototype = {
   },
   mutateState: function (state) {
   },
-  leave: function(state, next) {
+  next:function(next) {
      next.time.tick += next.time.step;
   },
 }

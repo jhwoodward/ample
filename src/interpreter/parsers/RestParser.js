@@ -11,8 +11,9 @@ var prototype = {
     return true;
   },
   mutateState: function (state) {
-    state.on = {};
-    state.off = { tick: state.time.tick, offset: 0 };
+    delete state.on.tick;
+    state.off.tick = state.time.tick;
+    state.phrase.mutateState(state);
   },
   getEvents: function (state, prev) {
     var events = [];
@@ -25,7 +26,7 @@ var prototype = {
         type: eventType.noteoff,
         pitch: prev.pitch,
         duration: offTick - prev.on.tick,
-        annotation: 'Rest (' + state.phrase.name + ')',
+        annotation: 'Rest (' + state.phrase.parsed.key + ')',
         offset: offset
       });
 
@@ -34,7 +35,7 @@ var prototype = {
     return events;
 
   },
-  leave: function (state, next) {
+  next: function (next) {
     next.time.tick += next.time.step;
   }
 }

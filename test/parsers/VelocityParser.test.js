@@ -18,8 +18,8 @@ var State = require('../../src/interpreter/State');
       var test = '120=V';
       parser.match(test);
       var state = new State().clone();
-      expect(state.phrase.velocity).toEqual(90); //defult
+      expect(state.velocity).toEqual(90); //defult
       parser.mutateState(state);
-      expect(state.phrase.velocity).toEqual(120);
+      expect(state.velocity).toEqual(120);
     });
   });

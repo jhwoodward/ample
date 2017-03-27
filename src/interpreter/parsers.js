@@ -1,4 +1,4 @@
-var parsers = [
+module.exports = [
   require('./parsers/ScaleParser'),
   require('./parsers/KeyParser'),
   require('./parsers/ChordParser'),
@@ -24,5 +24,3 @@ var parsers = [
   require('./parsers/OffParser'),
   require('./parsers/VelocityParser')
 ];
-
-module.exports = parsers;

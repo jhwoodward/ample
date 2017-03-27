@@ -17,7 +17,6 @@ function NoteParser(macros) {
     }, {});
   }
 
-
   this.type = 'Note';
   this.test = /^[>'~_]?\!*\+?\-?\=?[a-gA-G]/;
 }
@@ -31,19 +30,26 @@ var prototype = {
 
     return out;
   },
-  mutateState: function (state, interpreter) {
-
+  mutateState: function (state) {
+    var prev = _.cloneDeep(state);
     state.phrase.mutateState(state);
 
     this.parsed.articulations.forEach(a => {
       a.mutateState(state);
     });
 
-    var prev = interpreter.getTopState();
-    this.adjustOctaveForPitchTransition(state, prev);
+    state.articulationInfo = this.parsed.articulations.map(a => a.key).join(', ');
+
+    this.adjustOctaveForPitchTransition(state);
     state.pitch.raw = this.getPitch(state);
     state.pitch.value = state.pitch.raw;
-    state.modifiers.filter(m => m.type === modifierType.pitch).forEach(m => { m.fn(state); });
+    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch);
+    modifiers.forEach(m => { 
+      m.fn(state); 
+    });
+    state.modifierInfo = modifiers.map(m => {
+      return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
+    }).join(', ')
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
@@ -62,61 +68,59 @@ var prototype = {
     state.on = { tick: state.time.tick + onOffset, offset: onOffset };
 
   },
-  getEvents: function (state, prev) {
-    var events = [];
-    var isRepeatedNote = prev.pitch.value === state.pitch.value;
+  getEvents: function (state, prev, events) {
+    var out;
+    
+    //expression
+    if (this.parsed.articulations.length) {
+      this.parsed.articulations.forEach(a => {
+        out = a.getEvents(state, prev, events);
+      });
+    } else {
+      out = state.phrase.getEvents(state, prev, events);
+    }
+    out.forEach(e => {
+      e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
+    });
 
     //prev note off
     if (prev.on.tick) {
       var offOffset = state.off.offset || 0;
-   //   var offAnnotation = offOffset !== undefined ? prev.note.name : prev.phrase.name
-      //prevent positive offsets at the end of a phrase
-      if (isRepeatedNote || !offOffset || offOffset > 0 && (state.off.offset <= 0)) {
+      var offAnnotation = state.phrase.parsed.key;
+      var isRepeatedNote = prev.pitch.value === state.pitch.value;
+      //TODO: prevent positive offsets at the end of a phrase
+      if (isRepeatedNote) {
         offOffset = -5;
-    //    offAnnotation = state.phrase.name;
       }
-  //    if (isRepeatedNote) {
-  //      offAnnotation += ' (repeat note)';
-  //    }
-      events.push({
+      
+      if (isRepeatedNote) {
+        offAnnotation += ' (repeat note)';
+      }
+      out.push({
         tick: state.time.tick + offOffset,
         type: eventType.noteoff,
         pitch: prev.pitch,
         duration: state.time.tick + offOffset - prev.on.tick,
-     //   annotation: offAnnotation,
+        annotation: offAnnotation,
         offset: offOffset
       });
     }
 
-
-    events.push({
+    //noteon
+    out.push({
       tick: state.time.tick + (state.on.offset || 0),
       offset: state.on.offset,
       type: eventType.noteon,
       pitch: state.pitch,
       velocity: state.velocity,
-      annotation: state.phrase.key,
-      articulation: this.parsed.articulations.map(a => a.key).join(', '),
-      modifiers: state.modifiers.filter(m => m.type === modifierType.pitch).map(m => {
-        return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
-      }).join(', ')
+      annotation: state.phrase.parsed.key,
+      articulation: state.articulationInfo,
+      modifiers: state.modifierInfo
     });
 
-    if (this.parsed.articulations.length) {
-      this.parsed.articulations.forEach(a => {
-        events = events.concat(a.getEvents(state, prev));
-      });
-    } else {
-      events = events.concat(state.phrase.getEvents(state, prev));
-    }
-
-    events.forEach(e => {
-      e.tick = state.time.tick + (state.on.offset ||0) + (e.offset || 0);
-    });
-
-    return events;
+    return out;
   },
-  leave: function (state, next) {
+  next:function (next) {
     next.time.tick += next.time.step;
   }
 }

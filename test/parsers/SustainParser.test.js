@@ -20,7 +20,7 @@ var State = require('../../src/interpreter/State');
       parser.match(test);
       var state = new State().clone();
       var next = state.clone();
-      parser.leave(state, next);
+      parser.next(next);
       expect(next.time.tick).toEqual(state.time.tick + state.time.step);
     });
   });

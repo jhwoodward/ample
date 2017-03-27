@@ -17,9 +17,10 @@ var State = require('../../src/interpreter/State');
       var parser = new OnParser();
       var test = '-5=ON';
       parser.match(test);
-      var state = new State().clone();
-      expect(state.phrase.on).toEqual(0);
+      var state = new State();
+     
+      expect(state.on.offset).toEqual(0);
       parser.mutateState(state);
-      expect(state.phrase.on).toEqual(-5);
+      expect(state.on.offset).toEqual(-5);
     });
   });

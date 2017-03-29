@@ -31,32 +31,32 @@ var substitutions = {
 var master = `120=T  $A (chordsA) $A (chordsA) $B (chordsB) $A (chordsAfinal)   `;
 
 players.violin1.part = `
-  $A1( (48,1: D_F 24, -BDD-b)*8 ^ )
-  $A2( (24,1: d_E_G_d  48,g_e)*8 ^ )
-  $B(  (24,1: {spiccato} eGcEbgDaCEGAbdbC )*4 ^  )
+  $A1( (48,1: D_F 24, -B_DD_-b)*8  )
+  $A2( (24,1: d_EG_d  48,g_e)*8  )
+  $B(  (24,1: {spiccato} e_Gc_Eb_gDaCEGAbdbC )*4   )
   $A3( (48,1: -bD 24, FAge)*7 48,1: {spiccato} -b  FA// ^ )
 `;
 
 players.violin2.part = `
-  $A1( (48,1: F_b 24, FbbF)*8 ^ ) 
-  $A2( (24,1: bagA  48,aC)*8 ^ )
-  $B( {spiccato} (24,1: ^cDE )*16  ^ )
-  $A3( (48,1: ge 24, eccE)*7 48,1: g  gg//  ^ )
+  $A1( (48,1: F_b 24, F_bb_F)*8  ) 
+  $A2( (24,1: b_ag_A  48,a_C)*8  )
+  $B( {spiccato} (24,1: ^cDE )*16   )
+  $A3( (48,1: ge 24, eccE)*7 48,1: g  gg//   )
 `;
 
 players.viola.part = `
 3@
-  $A1( (24,0: d_>E_>G_d  48,>g_e)*8 ^ )
-  $A2( (48,0: >-b_D 24, >F_Ag_e)*8 ^ )
-  $B( {spiccato} (24,0: ^cD>E )*16 ^  )
+  $A1( (24,0: d_>E_>G_d  48,>g_e)*8  )
+  $A2( (48,0: >-b_D 24, >F_Ag_e)*8  )
+  $B( {spiccato} (24,0: ^cD>E )*16   )
   $A3( (24,0: {default} >d~E {spiccato}  Gd  48,ge)*7   24,0:d/gA 48,B/ )
 `;
 
 players.cello.part = `
 -31@
-  $A1( (24,1: dEGd  48,g^)*8 ^ )
-  $A2( (48,1: >-b_D 24, F_Ag_e)*8 ^ )
-  $B( {spiccato}(48,1: cGcG)*8 ^ )
+  $A1( (24,1: dEGd  48,g^)*8  )
+  $A2( (48,1: >-b_D 24, F_Ag_e)*8  )
+  $B( {spiccato}(48,1: cGcG)*8  )
   $A3( (24,1: dEGd  48,ge)*7  24,1: d/EF  48,G/ )
 `;
 
@@ -72,4 +72,6 @@ players.cello.substitutions = substitutions;
 //var seq = new Sequencer();
 //seq.load([players.violin1]);
 //seq.start();
+// 
+
 module.exports = players;

@@ -20,8 +20,10 @@ describe('LoopParser', function () {
     parser.match(test);
     var interpreter = new Interpreter();
     interpreter.states = [new State()];
-    interpreter.events = [];
+
     parser.mutateState(new State(), interpreter);
+
+    var events = interpreter.getEvents();
 
     var notes = [
       { tick: 48, note: 'C5' },
@@ -37,7 +39,7 @@ describe('LoopParser', function () {
     }
 
     expectedNotes.forEach(n => {
-      var note = interpreter.events.filter(e => {
+      var note = events.filter(e => {
         return e.type === eventType.noteon &&
           e.tick === n.tick &&
           e.pitch.string === n.note;

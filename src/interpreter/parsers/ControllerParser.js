@@ -18,11 +18,11 @@ var prototype = {
     state.controller[this.parsed.controller] = this.parsed.value;
   },
   getEvents: function (state, prev) {
-    if (prev.controller[this.parsed.controller] === this.parsed.value) {
-      return [];
-    }
+
+    var offset = -1;
     return [{
-      tick: state.time.tick,
+      offset,
+      tick: state.time.tick + offset,
       type: eventType.controller,
       controller: this.parsed.controller,
       value: this.parsed.value

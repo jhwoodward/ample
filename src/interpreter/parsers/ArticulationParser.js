@@ -11,16 +11,25 @@ function ArticulationParser(annotation) {
 
 var prototype = {
   mutateState: function (state) {
+    state.articulations.push(this);
     this.parsed.forEach(parser => {
       parser.mutateState(state);
     });
   },
   getEvents: function(state, prev, events) {
-    return this.parsed.reduce(function(acc, parser) {
+    /*
+    if (prev.articulations.filter(a=> a.key === this.key).length) {
+      return [];
+    }*/
+    var out = this.parsed.reduce(function(acc, parser) {
       if (!parser.getEvents) return acc;
       acc = acc.concat(parser.getEvents(state, prev, events));
       return acc;
     },[]);
+    out.forEach(e => {
+      e.articulation = this.key;
+    });
+    return out;
   }
 }
 

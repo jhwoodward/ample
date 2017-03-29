@@ -13,8 +13,8 @@ var prototype = {
     var markerName = s.replace('$','');
     return markerName;
   },
-  mutateState: function (state) {
-    if (state.isMaster) {
+  mutateState: function (state, interpreter) {
+    if (interpreter.isMaster) {
       state.marker = this.parsed;
     } 
   },

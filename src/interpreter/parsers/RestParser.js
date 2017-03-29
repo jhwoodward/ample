@@ -15,13 +15,19 @@ var prototype = {
     state.off.tick = state.time.tick;
     state.phrase.mutateState(state);
   },
-  getEvents: function (state, prev) {
-    var events = [];
+  getEvents: function (state, prev, events) {
+    var out = [];
+
+    out = state.phrase.getEvents(state, prev, events);
+  //  out.forEach(e => {
+  //    e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
+  //  });
+
     if (prev.on.tick) {
       var offset = state.off.offset;
       if (offset > 0) offset = 0;
       var offTick = state.time.tick + offset;
-      events.push({
+      out.push({
         tick: offTick,
         type: eventType.noteoff,
         pitch: prev.pitch,
@@ -31,8 +37,10 @@ var prototype = {
       });
 
     }
-    events = events.concat(state.phrase.getEvents(state, prev));
-    return events;
+
+
+
+    return out;
 
   },
   next: function (next) {

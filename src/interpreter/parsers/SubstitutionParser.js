@@ -26,7 +26,7 @@ var prototype = {
   mutateState: function (state, interpreter) {
     var part = this.substitutions[this.parsed];
    // var parsed = interpreter.parse(part.value);
-    interpreter.process(part.parsed);
+    interpreter.generateState(part.parsed);
   },
   continue: true
 }

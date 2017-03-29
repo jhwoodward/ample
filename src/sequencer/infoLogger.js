@@ -67,13 +67,13 @@ function Logger() {
         return e.channel + 1;
       }
     },
-    name: {
+    type: {
       align: 'left',
       width: 10,
       color: eventTypeColor,
       value: function (e) {
         if (e.keyswitch) {
-          return e.type + ' ks';
+          return 'keyswitch';
         }
         if (e.type === eventType.controller) {
           return e.type + ' ' + e.controller;
@@ -136,10 +136,7 @@ function Logger() {
       width: 20,
       color: eventTypeColor,
       value: function (e) {
-        if (e.articulation !== 'default') {
-          return e.articulation;
-        }
-
+        return e.articulation;
       }
     },
     phrase: {
@@ -179,6 +176,7 @@ Logger.prototype.log = function (tick, events) {
 }
 
 Logger.prototype.logEvent = function (e) {
+  if (e.type === 'noteoff' && e.keyswitch) return;
   var log = '';
   for (var key in this.columns) {
     var c = this.columns[key]

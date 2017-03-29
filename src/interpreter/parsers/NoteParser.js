@@ -49,7 +49,7 @@ var prototype = {
     });
     state.modifierInfo = modifiers.map(m => {
       return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
-    }).join(', ')
+    }).join(', ');
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
@@ -65,19 +65,21 @@ var prototype = {
     if (isRepeatedNote) {
       onOffset = 0;
     }
-    state.on = { tick: state.time.tick + onOffset, offset: onOffset };
+    state.on = { 
+      tick: state.time.tick + onOffset, 
+      offset: onOffset };
 
   },
-  getEvents: function (state, prev, events) {
+  getEvents: function (state, prev) {
     var out;
     
     //expression
     if (this.parsed.articulations.length) {
       this.parsed.articulations.forEach(a => {
-        out = a.getEvents(state, prev, events);
+        out = a.getEvents(state, prev);
       });
     } else {
-      out = state.phrase.getEvents(state, prev, events);
+      out = state.phrase.getEvents(state, prev);
     }
     out.forEach(e => {
       e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);

@@ -5,10 +5,8 @@ var key = require('./_key');
 
 function KeyParser() {
   this.type = 'Key';
- // this.test = /^K\((?:[+-][A-G])+\)K/;
   this.test = /^K\([A-G](b|#)?(min)?\)K/;
 }
-
 
 var prototype = {
   parse: function (s) {
@@ -23,5 +21,6 @@ var prototype = {
     };
   }
 }
+
 KeyParser.prototype = _.extend({}, parser, prototype);
 module.exports = KeyParser;

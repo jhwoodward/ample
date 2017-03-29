@@ -62,23 +62,22 @@ var prototype = {
     return true;
   },
   mutateState: function (state, interpreter) {
-    if (!state.isMaster) {
+    if (!interpreter.isMaster) {
 
       var origTick = state.time.tick;
 
       var part = interpreter.parse(this.parsed.part);
 
-      state.markers[this.parsed.name].forEach((tick,i) => {
+      interpreter.master.marker[this.parsed.name].forEach((tick,i) => {
         if (!this.parsed.n) {
           interpreter.next = interpreter.getNextState();
           interpreter.next.time.tick = tick;
-          interpreter.process(part);
+          interpreter.generateState(part);
         } else if (i === this.parsed.n-1) {
           interpreter.next = interpreter.getNextState();
           interpreter.next.time.tick = tick;
-          interpreter.process(part);
+          interpreter.generateState(part);
         }
- 
       });
 
       state.time.tick = origTick;

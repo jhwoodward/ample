@@ -69,7 +69,7 @@ var prototype = {
 
     if (state.nthTimeTracker[this.string] === this.parsed.n) {
       var parsed = interpreter.parse(this.parsed.part);
-      interpreter.process(parsed);
+      interpreter.generateState(parsed);
     }
 
   },

@@ -2,7 +2,7 @@ var expect = require('expect');
 var eventType = require('../../src/interpreter/constants').eventType;
 var MarkerParser = require('../../src/interpreter/parsers/MarkerParser');
 var State = require('../../src/interpreter/State');
-
+var Interpreter = require('../../src/interpreter/Interpreter');
 
   describe('MarkerParser', function() {
     it('should parse', function() {
@@ -17,10 +17,12 @@ var State = require('../../src/interpreter/State');
       var parser = new MarkerParser();
       var test = '$beginning';
       parser.match(test);
-      var state = new State().clone();
-      state.isMaster = true;
+      var state = new State();
+
       expect(state.marker).toNotExist(); //default
-      parser.mutateState(state);
+      var interpreter = new Interpreter();
+      interpreter.isMaster = true;
+      parser.mutateState(state, interpreter);
       expect(state.marker).toEqual('beginning');
     })
   });

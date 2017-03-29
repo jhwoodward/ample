@@ -28,23 +28,49 @@ function Sequencer() {
   this.onTick = this.onTick.bind(this);
 }
 
+function prepPlayers(players) {
+  for (var key in players) {
+    var player = players[key];
+    delete player.annotations.name;
+    player.macros = utils.combineMacros(player);
+  }
+  return players;
+}
+
 Sequencer.prototype = {
 
   load: function (players) {
     var allEvents = [];
-    this.players = players;
-    for (var key in players) {
+    var interpreter;
+    players = prepPlayers(players);
 
+    //assume same master for each player for now
+    var master = players[0].master;
+    if (master) {
+      master = new Interpreter().interpretMaster(master);
+      this.markers = master.markers;
+    }
+
+    for (var key in players) {
       var player = players[key];
-      console.log('interpeting ' + player.name);
-      delete player.annotations.name;
-      var macros = utils.combineMacros(player);
-      var interpreter = new Interpreter(macros), events = [];
-      var result = interpreter.interpret(player.part, player.master);
-      this.markers = result.states[0].markers;
-      events = result.events;
-      events.forEach(e => { e.channel = player.channel });
-      allEvents = allEvents.concat(events);
+
+      player.interpreted = new Interpreter(player.macros, master).interpret(player.part);
+      player.interpreted.events.forEach(e => { e.channel = player.channel });
+
+      /*
+      var dependencies = [];
+      if (player.constraints) {
+        dependencies = player.constraints.filter(c => { return !!c.player;}).map(c => {
+          return players[c.player];
+        });
+      }
+      dependencies.forEach(dep => {
+        dep.interpreted = new Interpreter(dep.macros, dep.master).interpret(dep.part);
+        dep.interpreted.events.forEach(e => { e.channel = player.channel });
+      });
+      */
+
+      allEvents = allEvents.concat(player.interpreted.events);
     }
 
     var errors = allEvents.filter(e => {
@@ -237,10 +263,10 @@ Sequencer.prototype = {
       switch (e.type) {
         case eventType.tempo:
           var newInterval = Math.round(1000000 / (e.value * 0.8));
-          if (newInterval !== interval) {
+          if (newInterval !== this.interval) {
             this.interval = newInterval;
             this.timer.clearInterval();
-            this.timer.setInterval(onTick, '', interval + 'u');
+            this.timer.setInterval(this.onTick, '', this.interval + 'u');
           }
           break;
         case eventType.controller:

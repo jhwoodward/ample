@@ -16,8 +16,10 @@ var prototype = {
   },
   getEvents: function(state, prev) {
     if (prev.pitchbend === this.parsed.value) return [];
+    var offset = -1;
     return [{
-      tick: state.time.tick,
+      offset,
+      tick: state.time.tick + offset,
       type: eventType.pitchbend,
       value: this.parsed.value
     }];

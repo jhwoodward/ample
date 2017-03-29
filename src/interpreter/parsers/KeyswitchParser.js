@@ -19,45 +19,25 @@ var prototype = {
     return pitch;
   },
   mutateState: function (state) {
-    state.keyswitch.push(this.parsed);
+    state.keyswitch = this.parsed;
   },
-  getEvents: function (state, prev, events) {
-    if (prev.keyswitch.length) {
-       var lastKeyswitch = prev.keyswitch[prev.keyswitch.length-1];
-       if (lastKeyswitch.value === this.parsed.value) {
-         return [];
-       }
-    }
+  getEvents: function (state, prev) {
 
-    if (events && events.length) {
-      var lastKeyswitch;
-      for (var i = events.length - 1; i--; i > 0) {
-        if (events[i].type === eventType.noteon && events[i].keyswitch) {
-          lastKeyswitch = events[i];
-          break;
-        }
-      }
-      if (lastKeyswitch && lastKeyswitch.pitch.value === this.parsed.value) {
-        return [];
-      }
-    }
-
-    var duration = 1;
     return [
       {
-        offset: -duration-1,
-        tick: state.time.tick-duration-1,
+        offset: -1,
+        tick: state.time.tick-1,
         type: eventType.noteon,
         pitch: this.parsed,
         keyswitch: true
       },
       {
-        offset: -duration,
-        tick: state.time.tick-duration,
+        offset: 0,
+        tick: state.time.tick,
         type: eventType.noteoff,
         pitch: this.parsed,
         keyswitch: true,
-        duration
+        duration:1
     }];
   }
 

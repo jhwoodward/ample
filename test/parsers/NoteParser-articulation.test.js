@@ -42,7 +42,7 @@ describe('NoteParser', function () {
     });
 
     it('velocity should revert to phrase value on next note', function () {
-      var prev = new State().clone();
+      var prev = new State();
       var state = prev.clone();
       parser.mutateState(state);
       expect(state.velocity).toEqual(130);
@@ -50,11 +50,12 @@ describe('NoteParser', function () {
       parser.next(next);
       matched = parser.match('F');
       parser.mutateState(next);
-      var events = parser.getEvents(next, next.clone());
-      expect(events.length).toEqual(2);
-      expect(events[0].type).toEqual(eventType.noteoff);
-      expect(events[1].type).toEqual(eventType.noteon);
-      expect(events[1].velocity).toEqual(90);
+      var events = parser.getEvents(next, state);
+      expect(events.length).toEqual(3); //includes a cc1 85 for default annotation
+      expect(events[0].type).toEqual(eventType.controller);
+      expect(events[1].type).toEqual(eventType.noteoff);
+      expect(events[2].type).toEqual(eventType.noteon);
+      expect(events[2].velocity).toEqual(90);
     });
 
   });

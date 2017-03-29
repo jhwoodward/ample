@@ -32,12 +32,18 @@ var prototype = {
       parser.mutateState(state);
     });
   },
+  waitForNote: true,
+  continue:true,
   getEvents: function(state, prev, events) {
-    return this.parsed.parsed.reduce(function(acc, parser) {
+    var out = this.parsed.parsed.reduce(function(acc, parser) {
       if (!parser.getEvents) return acc;
       acc = acc.concat(parser.getEvents(state, prev, events));
       return acc;
     },[]);
+    out.forEach(e => {
+      e.annotation = this.parsed.key;
+     });
+    return out;
   }
 }
 

@@ -43,7 +43,7 @@ describe('NoteParser', function () {
     var state = prev.clone();
     parser.mutateState(state);
     var events = parser.getEvents(state, prev);
-    expect(events.length).toEqual(1);
+    expect(events.length).toEqual(2); //default cc plus noteon
   });
 
   it('should set \'on\' state', function () {
@@ -66,12 +66,13 @@ describe('NoteParser', function () {
     noteParser.next(next);
     parser.mutateState(next);
     var events = parser.getEvents(next, prev);
-    expect(events.length).toEqual(2);
-    expect(events[0].type).toEqual(eventType.noteoff);
-    expect(events[0].annotation).toEqual('default');
-    expect(events[0].offset).toEqual(-5); //default detach
-    expect(events[0].pitch.value).toEqual(60);
-    expect(events[0].duration).toEqual(48 - 5);
+    expect(events.length).toEqual(3);
+    expect(events[0].type).toEqual(eventType.controller);
+    expect(events[1].type).toEqual(eventType.noteoff);
+    expect(events[1].annotation).toEqual('default');
+    expect(events[1].offset).toEqual(-5); //default detach
+    expect(events[1].pitch.value).toEqual(60);
+    expect(events[1].duration).toEqual(48 - 5);
   });
 
   it('should increment tick on leave', function () {

@@ -15,17 +15,15 @@ var Interpreter = require('../../src/interpreter/Interpreter');
     });
     it ('should mutate state', function() {
       var parser = new MarkerReadParser();
-       var test = '$A( 48,0:cDE )';
+      var test = '$A( 48,0:cDE )';
       parser.match(test);
       var state = new State();
       var interpreter = new Interpreter();
-      interpreter.states = [new State()];
-      interpreter.events = [];
-      state.markers = {
+      interpreter.states = [state];
+      interpreter.master.marker = {
         A: [100, 2000, 3000]
       };
-      parser.mutateState(state, interpreter);
-
+      state.mutate(parser, interpreter);
       var expectedNotes = [
         {  tick: 100, note: 'C5' },
         {  tick: 148, note: 'D5' },
@@ -38,8 +36,10 @@ var Interpreter = require('../../src/interpreter/Interpreter');
         {  tick: 3096, note: 'E5' }
       ];
 
+      var events = interpreter.getEvents();
+
       expectedNotes.forEach(n => {
-        var note = interpreter.events.filter(e =>{
+        var note = events.filter(e =>{
           return e.type === eventType.noteon &&
             e.tick === n.tick &&
             e.pitch.string === n.note;

@@ -34,7 +34,7 @@ describe('ControllerParser', function () {
     var events = parser.getEvents(next, state);
     expect(events.length).toEqual(1);
     expect(events[0].type).toEqual(eventType.controller);
-    expect(events[0].tick).toEqual(state.time.tick);
+    expect(events[0].tick).toEqual(state.time.tick-1);
     expect(events[0].controller).toEqual(1);
     expect(events[0].value).toEqual(120);
   });

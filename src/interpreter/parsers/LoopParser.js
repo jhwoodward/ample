@@ -68,7 +68,7 @@ var prototype = {
   mutateState: function (state, interpreter) {
     var parsed = interpreter.parse(this.parsed.part);
     for (var i = 0; i < this.parsed.count; i++) {
-      interpreter.process(parsed);
+      interpreter.generateState(parsed);
     }
   },
   continue: true

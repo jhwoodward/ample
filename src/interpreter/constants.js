@@ -9,7 +9,9 @@ module.exports = {
   macroType: {
     annotation: 'annotation',
     articulation: 'articulation',
-    substitution: 'substitution'
+    substitution: 'substitution',
+    animation: 'animation',
+    constraint: 'constraint'
   },
   modifierType: {
     pitch: 'pitch'

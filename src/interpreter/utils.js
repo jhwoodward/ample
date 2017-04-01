@@ -3,9 +3,21 @@ var parserUtils = require('./parserUtils');
 
 var api = {
   combineMacros: function (player) {
-    return api.buildMacros(player.substitutions, player.annotations, player.articulations, player.constraints);
+    return api.buildMacros(
+      player.substitutions, 
+      player.annotations, 
+      player.articulations, 
+      player.animations, 
+      player.constraints
+    );
   },
-  buildMacros: function (substitutions, annotations, articulations, constraints) {
+  buildMacros: function (
+    substitutions, 
+    annotations, 
+    articulations, 
+    animations, 
+    constraints
+    ) {
     var macros = [];
 
     var articulations = articulations || {
@@ -38,6 +50,15 @@ var api = {
         type: macroType.substitution,
         key: key,
         value: substitutions[key]
+      }
+      macros.push(macro);
+    }
+
+    for (var key in animations) {
+      var macro = {
+        type: macroType.animation,
+        key: key,
+        values: animations[key]
       }
       macros.push(macro);
     }

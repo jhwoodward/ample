@@ -2,6 +2,7 @@ module.exports = [
   require('./parsers/ScaleParser'),
   require('./parsers/KeyParser'),
   require('./parsers/ChordParser'),
+  require('./parsers/AnimationParser'),
   require('./parsers/NthTimeParser'),
   require('./parsers/LoopParser'),
   require('./parsers/MarkerReadParser'),

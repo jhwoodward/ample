@@ -24,6 +24,7 @@ function State(defaultPhraseParser) {
     velocity: 85,
     keyswitch: undefined,
     articulations: [],
+    animation: undefined,
     time: {
       tempo: 120,
       tick: 48, //start at beat 1 (also enables keyswitch events to kick in prior to first beat)
@@ -40,17 +41,21 @@ State.prototype.clone = function () {
   var clone = _.cloneDeep(this);
   clone.mutater = undefined;
   clone.articulations = [];
+  delete clone.animation;
+  delete clone.marker;
   return clone;
 }
 
 State.prototype.mutate = function (parser, interpreter) {
 
-  interpreter.master.states.forEach(function (s) {
-    if (s.tick <= this.time.tick && !s.applied) {
-      _.merge(this, s.state);
-      s.applied = true;
-    }
-  }.bind(this));
+  if (interpreter) {
+    interpreter.master.states.forEach(function (s) {
+      if (s.tick <= this.time.tick && !s.applied) {
+        _.merge(this, s.state);
+        s.applied = true;
+      }
+    }.bind(this));
+  }
 
   this.parser = parser;
   parser.mutateState(this, interpreter);

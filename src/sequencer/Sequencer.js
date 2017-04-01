@@ -23,7 +23,6 @@ function Sequencer() {
   this.timer = new NanoTimer();
   this.interval = 10000;
   this.tick = -1;
-  this.logger = new infoLogger();
   this.onKeyPress = this.onKeyPress.bind(this);
   this.onTick = this.onTick.bind(this);
 }
@@ -37,25 +36,36 @@ function prepPlayers(players) {
   return players;
 }
 
+function getMarkers(master) {
+  var markers = [];
+  for (var key in master.marker) {
+    master.marker[key].forEach((tick, i) => {
+      markers.push({ tick, key: key + (i + 1).toString() });
+    });
+  }
+  markers.sort((a, b) => {
+    return a.tick > b.tick ? 1 : -1;
+  });
+  return markers;
+}
+
+
 Sequencer.prototype = {
 
   load: function (players) {
-    var allEvents = [];
-    var interpreter;
+
     players = prepPlayers(players);
 
-    //assume same master for each player for now
-    var master = players[0].master;
-    if (master) {
-      master = new Interpreter().interpretMaster(master);
-      this.markers = master.markers;
-    }
+    var events = [];
+    var player1 = players[Object.keys(players)[0]];
+    var master = new Interpreter(player1.macros, player1.master).master;
+    this.markers = getMarkers(master);
 
+    var interpreter;
     for (var key in players) {
-      var player = players[key];
-
-      player.interpreted = new Interpreter(player.macros, master).interpret(player.part);
-      player.interpreted.events.forEach(e => { e.channel = player.channel });
+      interpreter = new Interpreter(players[key].macros, master);
+      players[key].interpreted = interpreter.interpret(players[key].part);
+      players[key].interpreted.events.forEach(e => { e.channel = players[key].channel });
 
       /*
       var dependencies = [];
@@ -70,10 +80,10 @@ Sequencer.prototype = {
       });
       */
 
-      allEvents = allEvents.concat(player.interpreted.events);
+      events = events.concat(players[key].interpreted.events);
     }
 
-    var errors = allEvents.filter(e => {
+    var errors = events.filter(e => {
       return e.tick === undefined || isNaN(e.tick);
     });
 
@@ -81,18 +91,16 @@ Sequencer.prototype = {
       throw (new Error('Missing tick', errors.length));
     }
 
-    allEvents = allEvents.sort(function (a, b) {
+    events.sort(function (a, b) {
       return a.tick > b.tick ? 1 : -1;
     });
 
-    this.events = allEvents;
-
     console.log('indexing...')
-    this.maxTick = this.events[this.events.length - 1].tick;
-    this.indexed = {};
+    this.maxTick = events[events.length - 1].tick;
+    this.events = {};
     for (var i = 0; i <= this.maxTick; i++) {
-      this.indexed[i] = this.events.filter(function (event) {
-        return event.tick === i;
+      this.events[i] = events.filter(function (e) {
+        return e.tick === i;
       });
     }
   },
@@ -117,33 +125,14 @@ Sequencer.prototype = {
     if (options.endBeat) {
       this.endTick = (parseInt(endBeat, 10) * 48);
     }
-
-    var events = this.events;
     if (options.marker) {
-      console.log(options.marker);
       var markerName = /[a-zA-Z]+/.exec(options.marker)[0];
       var markerNthTest = /\d+/.exec(options.marker);
-      var markerNth = markerNthTest ? parseInt(markerNthTest[0], 10) : undefined;
-      var markerTicks = this.markers[markerName];
-      if (!markerNth) {
-        this.startTick = markerTicks[0];
-      } else {
-        this.startTick = markerTicks[markerNth - 1];
-      }
-
-      var markersFlattened = [];
-      for (var key in this.markers) {
-        this.markers[key].forEach((tick, i) => {
-          markersFlattened.push({ tick, marker: key + (i + 1).toString() });
-        });
-      }
-      markersFlattened.sort((a, b) => {
-        return a.tick > b.tick ? 1 : -1;
-      });
-
-      var thisMarker = markersFlattened.filter(m => { return m.tick === this.startTick; })[0];
-      if (markersFlattened.indexOf(thisMarker) < markersFlattened.length - 1) {
-        var nextMarker = markersFlattened[markersFlattened.indexOf(thisMarker) + 1];
+      markerName += markerNthTest ? parseInt(markerNthTest[0], 10) : '';
+      var marker = this.markers.filter(m => m.key === markerName);
+      this.startTick = marker.tick;
+      if (this.markers.indexOf(marker) < this.markers.length - 1) {
+        var nextMarker = this.markers[this.markers.indexOf(thisMarker) + 1];
         this.endTick = nextMarker.tick - 1;
       }
     }
@@ -152,6 +141,7 @@ Sequencer.prototype = {
     this.stopped = false;
     this.paused = false;
     this.fastForwarding = false;
+    this.logger = new infoLogger(this.markers);
 
     if (this.startTick > 0) {
       this.fastForward();
@@ -201,10 +191,10 @@ Sequencer.prototype = {
       }
     }
     if (key && key.name === 'i') {
-      this.logger = new infoLogger();
+      this.logger = new infoLogger(this.markers);
     }
     if (key && key.name === 'p') {
-      this.logger = new pianoRollLogger();
+      this.logger = new pianoRollLogger(this.markers);
     }
 
   },
@@ -256,7 +246,7 @@ Sequencer.prototype = {
       return;
     }
 
-    var events = this.indexed[this.tick];
+    var events = this.events[this.tick];
 
     events.forEach(function (e) {
 

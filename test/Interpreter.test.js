@@ -1,5 +1,6 @@
 var expect = require('expect');
 var eventType = require('../src/interpreter/constants').eventType;
+var macroType = require('../src/interpreter/constants').macroType;
 var AnnotationParser = require('../src/interpreter/parsers/AnnotationParser');
 var State = require('../src/interpreter/State');
 var Interpreter = require('../src/interpreter/Interpreter');
@@ -7,7 +8,7 @@ var utils = require('../src/interpreter/utils')
 
 describe('Interpreter', function () {
   
-  it('should interpret', function () {;
+  it('should interpret', function () {
 
     var annotations = {
       default: '[-3:C] [-2:D] 85=C1 8192=P 0=ON -5=OFF',
@@ -34,8 +35,28 @@ describe('Interpreter', function () {
     var interpreter = new Interpreter(utils.combineMacros(player));
     var result = interpreter.interpret(player.part);
     expect(result.events).toExist();
-   
+  });
+
+  it('should generate animation events', function() {
+     var macros = [
+      {
+        type: macroType.animation,
+        key: 'swell',
+        values: {
+          0: '20=C1',
+          25: '40=C1',
+          50: '90=C1',
+          100: '20=C1'
+        }
+      }
+    ];
+
+    var interpreter = new Interpreter(macros);
+    var result = interpreter.interpret('<swell 48,0:cDEFG swell>');
+    expect(result.events).toExist();
 
   });
+
+
 
 });

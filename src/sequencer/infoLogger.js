@@ -29,7 +29,8 @@ function eventTypeColor(e) {
   }
 }
 
-function Logger() {
+function Logger(markers) {
+  this.markers = markers || [];
   this.logEvent = this.logEvent.bind(this);
   console.log('/n/n');
   this.columns = {
@@ -142,7 +143,12 @@ function Logger() {
     phrase: {
       align: 'left',
       width: 25,
-      color: eventTypeColor,
+      color: e => {
+        if (e.animation) {
+          return colors.cyan;
+        }
+        return eventTypeColor(e);
+      },
       value: function (e) {
         return e.annotation;
       }
@@ -171,8 +177,24 @@ function Logger() {
 Logger.prototype.log = function (tick, events) {
 
   this.beat = Math.floor(tick / 48);
+  
+  this.markers.forEach(m => {
+    if (tick >= m.tick && !m.logged) {
+      this.logMarker(m);
+      m.logged = true;
+    }
+  });
+
   events.forEach(this.logEvent);
   this.lastBeat = this.beat;
+}
+
+Logger.prototype.logMarker = function(m) {
+
+  var log = `- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ${m.key} - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -`.yellow;
+
+  console.log(log);
+
 }
 
 Logger.prototype.logEvent = function (e) {

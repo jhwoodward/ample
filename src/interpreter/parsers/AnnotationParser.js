@@ -15,7 +15,7 @@ function AnnotationParser(macros) {
       return acc;
     }, {});
   } else {
-    this.annotations = [];
+    this.annotations = {};
   }
 }
 
@@ -23,7 +23,7 @@ var prototype = {
   parse: function (s) {
     var key = /\w+/.exec(s)[0];
     if (this.annotations && this.annotations[key]) {
-      return this.annotations[key];
+      return _.cloneDeep(this.annotations[key]);
     }
   },
   mutateState: function (state) {
@@ -44,6 +44,10 @@ var prototype = {
       e.annotation = this.parsed.key;
      });
     return out;
+  },
+  append: function(parsers, key) {
+    this.parsed.parsed = this.parsed.parsed.concat(parsers);
+    this.parsed.key += ' - ' + key;
   }
 }
 

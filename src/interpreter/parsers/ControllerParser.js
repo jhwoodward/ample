@@ -17,16 +17,17 @@ var prototype = {
   mutateState: function (state) {
     state.controller[this.parsed.controller] = this.parsed.value;
   },
-  getEvents: function (state, prev) {
-
-    var offset = -1;
-    return [{
-      offset,
-      tick: state.time.tick + offset,
+  getEvents: function (state) {
+    var event = {
+      offset: -1,
       type: eventType.controller,
       controller: this.parsed.controller,
       value: this.parsed.value
-    }];
+    };
+    if (state) {
+      event.tick = state.time.tick + event.offset;
+    }
+    return [event];
   }
 };
 

@@ -28,7 +28,8 @@ describe('ScaleParser', function () {
     expect(state.pitch.constraint).toNotExist();
     parser.mutateState(state);
     var expected = ['C', 'D', 'E', 'F#', 'G', 'A', 'B'];
-    parser.parsed.forEach(function (p) {
+    expect(state.pitch.constraint).toExist();
+    state.pitch.constraint.forEach(function (p) {
       var ps = pitchUtils.midiPitchToStringNoOctave(p);
       expect(expected.indexOf(ps[0]) > -1 || expected.indexOf(ps[1]) > -1).toExist(ps.join(', '));
     });

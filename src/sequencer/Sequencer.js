@@ -63,6 +63,7 @@ Sequencer.prototype = {
 
     var interpreter;
     for (var key in players) {
+      console.log('Interpreting ' + key);
       interpreter = new Interpreter(players[key].macros, master);
       players[key].interpreted = interpreter.interpret(players[key].part);
       players[key].interpreted.events.forEach(e => { e.channel = players[key].channel });
@@ -128,11 +129,13 @@ Sequencer.prototype = {
     if (options.marker) {
       var markerName = /[a-zA-Z]+/.exec(options.marker)[0];
       var markerNthTest = /\d+/.exec(options.marker);
-      markerName += markerNthTest ? parseInt(markerNthTest[0], 10) : '';
+      markerName += markerNthTest ? parseInt(markerNthTest[0], 10) : '1';
       var marker = this.markers.filter(m => m.key === markerName);
+      if (!marker.length) throw(new Error('Marker not found: ' + markerName));
+      marker = marker[0]
       this.startTick = marker.tick;
       if (this.markers.indexOf(marker) < this.markers.length - 1) {
-        var nextMarker = this.markers[this.markers.indexOf(thisMarker) + 1];
+        var nextMarker = this.markers[this.markers.indexOf(marker) + 1];
         this.endTick = nextMarker.tick - 1;
       }
     }

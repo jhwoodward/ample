@@ -8,22 +8,27 @@ var players = utils.playersFromEnsemble(ensemble.stringQuartet, performer, true)
 
 /*
 https://en.wikipedia.org/wiki/Thirty-two-bar_form
-- chords from over the rainbow
-
+- chords from gershwin's i got rhythm
+- bach-fugue-like strings... thrown down quickly using transpose, that the arrangement is awful is to be expected
 */
 var substitutions = {
-  chordsA: `     96,  Gmaj    /        /  Bmin      /         /         
-                      Cmaj    /        /  Gmaj      /         /
-                      Cmaj    /  Cmin  /  Gmaj      /   Emin  /          
-                      Amin    /  Dmaj  /  Gmaj      /         /
+  chordsA: `     96,  Bb6     /  Gm7   /  Cm7    /  F7      /          
+                      Dm7     /  Gm7   /  Cm7    /  F7      /
+                      Fm7     /  Bb7   /  Eb6    /  Edim7   /          
+                      C9      /  F7    /  Bbmaj  /  F7      /
   `,
-  chordsB: `     96,  Gmaj    /        /   Amin     /         /          
-                      Emin    /        /   Amin     /   Dmaj  /
-                      Gmaj    /        /   F#min    /         /          
-                      Bmin    /        /   Amin     /   D7  /
+  chordsAfinal: `96,  Bb6     /  Gm7   /  Cm7    /  F7      /          
+                      Dm7     /  Gm7   /  Cm7    /  F7      /
+                      Fm7     /  Bb7   /  Eb6    /  Edim7   /          
+                      C9      /  F7    /  Bb6    /          /
+  `,
+  chordsB: `     96,  D9      /        /         /          /          
+                      G7      /        /         /          /
+                      C9      /        /         /          /          
+                      F7      /        /         /          /
   `};
 
-var master = `120=T  $A (chordsA) $A (chordsA) $B (chordsB) $A (chordsA)   `;
+var master = `120=T  $A (chordsA) $A (chordsA) $B (chordsB) $A (chordsAfinal)   `;
 var animations = {
   c: {
     0: '1=C1',
@@ -114,9 +119,9 @@ players.viola.master = master;
 players.viola.substitutions = substitutions; 
 players.cello.master = master;
 players.cello.substitutions = substitutions;
-//
+
 //var seq = new Sequencer();
 //seq.load([players.violin1]);
-//seq.start({marker:'A3'});
+//seq.start();
 
  module.exports = players;

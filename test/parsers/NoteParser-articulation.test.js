@@ -36,9 +36,9 @@ describe('NoteParser', function () {
       parser.mutateState(state);
       expect(state.velocity).toEqual(130);
       var events = parser.getEvents(state, prev);
-      expect(events.length).toEqual(1);
-      expect(events[0].type).toEqual(eventType.noteon);
-      expect(events[0].velocity).toEqual(130);
+      expect(events.length).toEqual(2); //first event is default cc 1 = 85
+      expect(events[1].type).toEqual(eventType.noteon);
+      expect(events[1].velocity).toEqual(130);
     });
 
     it('velocity should revert to phrase value on next note', function () {

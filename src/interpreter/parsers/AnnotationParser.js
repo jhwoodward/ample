@@ -27,7 +27,9 @@ var prototype = {
     }
   },
   mutateState: function (state) {
-    state.phrase = this;
+    if (!this.isArticulation) {
+      state.phrase = this;
+    }
     this.parsed.parsed.forEach(parser => {
       parser.mutateState(state);
     });
@@ -45,7 +47,31 @@ var prototype = {
      });
     return out;
   },
+  merge: function(articulations){
+    var out = new AnnotationParser();
+    out.parsed = {
+      key: this.parsed.key,
+      parsed: []
+    }
+    this.parsed.parsed.forEach(p => {
+      out.parsed.parsed.push(p);
+    });
+    articulations.forEach(a => {
+      out.append(a.parsed, a.key);
+    });
+    out.info = articulations.map(a => a.key).join(', ');
+    out.isArticulation = true;
+    return out;
+  },
   append: function(parsers, key) {
+    var replace = [];
+    this.parsed.parsed.forEach((p,i) => {
+      parsers.forEach(pnew => {
+        if (p.compare && p.compare(pnew)) {
+          this.parsed.parsed.splice(i,1);
+        }
+      });
+    });
     this.parsed.parsed = this.parsed.parsed.concat(parsers);
     this.parsed.key += ' - ' + key;
   }

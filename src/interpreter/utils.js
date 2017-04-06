@@ -88,11 +88,19 @@ var api = {
         }
       });
     }
-
-    if (condition) {
+    if (condition === undefined || condition) {
       state.modifiers.push(modifier);
     }
-
+  },
+  removeModifier: function (state, modifier) {
+    var exists = !!state.modifiers.filter(m => m.id === modifier.id).length;
+    if (exists) {
+      state.modifiers.forEach((m, i) => {
+        if (m.id === modifier.id) {
+          state.modifiers.splice(i, 1);
+        }
+      });
+    }
   }
 };
 

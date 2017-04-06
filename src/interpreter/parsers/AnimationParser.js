@@ -34,9 +34,6 @@ var prototype = {
   },
   mutateState: function (state) {
     state.animation = this.parsed;
-  },
-  next:function(next) {
-    delete next.animation;
   }
 
 }

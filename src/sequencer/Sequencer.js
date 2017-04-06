@@ -49,22 +49,18 @@ function getMarkers(master) {
   return markers;
 }
 
-
 Sequencer.prototype = {
-
   load: function (players) {
-
     players = prepPlayers(players);
-
     var events = [];
-    var player1 = players[Object.keys(players)[0]];
-    var master = new Interpreter(player1.macros, player1.master).master;
-    this.markers = getMarkers(master);
+  //  var player1 = players[Object.keys(players)[1]];
+  //  var master = new Interpreter(player1.macros, player1.master).master;
+  //  this.markers = getMarkers(master);
 
     var interpreter;
     for (var key in players) {
       console.log('Interpreting ' + key);
-      interpreter = new Interpreter(players[key].macros, master);
+      interpreter = new Interpreter(players[key].macros, players[key].master);
       players[key].interpreted = interpreter.interpret(players[key].part);
       players[key].interpreted.events.forEach(e => { e.channel = players[key].channel });
 
@@ -93,6 +89,7 @@ Sequencer.prototype = {
     }
 
     events.sort(function (a, b) {
+      if (a.tick === b.tick) return 0;
       return a.tick > b.tick ? 1 : -1;
     });
 
@@ -151,7 +148,6 @@ Sequencer.prototype = {
     } else {
       this.play();
     }
-
   },
   play: function () {
     console.log('\n');
@@ -199,7 +195,6 @@ Sequencer.prototype = {
     if (key && key.name === 'p') {
       this.logger = new pianoRollLogger(this.markers);
     }
-
   },
   switchOffAllTheShit: function () {
     this.timer.clearInterval();
@@ -228,7 +223,6 @@ Sequencer.prototype = {
     }
   },
   onTick: function () {
-
     if (this.stopped || this.paused) return;
     if (this.tick > this.endTick) {
       if (this.fastForwarding) {

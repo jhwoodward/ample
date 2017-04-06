@@ -22,6 +22,7 @@ var api = {
     }
     var annotation = new AnnotationParser();
     annotation.parsed = parsed;
+    annotation.string = 'init';
     return annotation;
   }
 

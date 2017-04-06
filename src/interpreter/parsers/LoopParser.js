@@ -1,13 +1,11 @@
 var _ = require('lodash');
 var parser = require('./_parser');
 var macroType = require('../constants').macroType;
+var utils = require('../parserUtils');
 
 function LoopParser(macros) {
   this.type = 'Loop';
-  // this.test = /^loop\(\w+,[\d]{1,3}\)/;
-  //this.test = /^\(\w+\)\*[\d]{1,3}/;
 
- // this.test = /\(([^()]|(?R))*\)/;
  this.substitutions = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
@@ -22,39 +20,18 @@ function LoopParser(macros) {
 var prototype = {
   match: function match(s) {
     if (s[0] !== '(') return false;
-    var nest = 1;
-    var c = 1;
-    var bracketed;
-    while (nest > 0 && c < s.length-1) {
-      
-      var char = s.substring(c, c+1);
-      if (char === '(') {
-        nest ++;
-      }
-      if (char === ')') {
-        nest --;
-      }
-      c ++;
-    }
 
-    if (nest === 0) {
-      bracketed = s.substring(1, c-1);
-    }
- 
-    var remainder = s.substring(c, s.length);
-
+    var bracketed = utils.getBracketed(s, 1);
+    var remainder = s.substring(bracketed.length + 2, s.length);
     if (!remainder.length) return false;
     if (remainder[0] !== '*') return false;
-
     var count = /^\*[\d]{1,3}/.exec(remainder)[0].replace('*', '');
-
     var parsed = {
       count: parseInt(count, 10)
     };
- 
     var part = bracketed.trim();
     if (this.substitutions[part]) {
-      parsed.key = part.trim();
+      parsed.key = part;
       parsed.part = this.substitutions[part].value;
     } else {
       parsed.part = part;
@@ -62,7 +39,6 @@ var prototype = {
 
     this.string = '(' + bracketed + ')*' + count,
     this.parsed = parsed;
-    
     return true;
   },
   mutateState: function (state, interpreter) {

@@ -28,6 +28,9 @@ var prototype = {
       event.tick = state.time.tick + event.offset;
     }
     return [event];
+  },
+  compare: function(parser) {
+    return (parser.type === 'Controller' && parser.parsed.controller === this.parsed.controller);
   }
 };
 

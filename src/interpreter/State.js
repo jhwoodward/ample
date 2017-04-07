@@ -48,7 +48,6 @@ State.prototype.clone = function () {
   delete clone.articulation;
   delete clone.animation;
   delete clone.marker;
-  delete clone.bassline;
   return clone;
 }
 

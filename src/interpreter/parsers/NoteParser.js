@@ -43,12 +43,12 @@ var prototype = {
     var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).sort((a,b) => {
       return a.order > b.order ? 1 : -1;
     });
+    state.modifierInfo = [];
+    var rawPitchString = pitchUtils.midiPitchToString(state.pitch.raw);
     modifiers.forEach(m => { 
-      m.fn(state); 
+       var info = m.fn(state); 
+       state.modifierInfo.push(`${m.id}: ${info} (${rawPitchString})`);
     });
-    state.modifierInfo = modifiers.map(m => {
-      return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
-    }).join(', ');
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
@@ -111,7 +111,7 @@ var prototype = {
       velocity: state.velocity,
       annotation: state.phrase.parsed.key,
       articulation: state.articulation.info,
-      modifiers: state.modifierInfo
+      modifiers: state.modifierInfo.join(', ')
     });
 
     return out;

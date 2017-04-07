@@ -6,7 +6,7 @@ var key = require('./_key');
 var modifierType = require('../constants').modifierType;
 var utils = require('../utils');
 
-function BassParser() {
+function MasterBassParser() {
   this.type = 'MasterBass';
   this.test = /^bass:[\d+]/;
 }
@@ -24,5 +24,5 @@ var prototype = {
   }
 }
 
-BassParser.prototype = _.extend({}, parser, prototype);
-module.exports = BassParser;
+MasterBassParser.prototype = _.extend({}, parser, prototype);
+module.exports = MasterBassParser;

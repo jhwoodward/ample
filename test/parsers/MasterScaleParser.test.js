@@ -1,10 +1,10 @@
 var expect = require('expect');
 var eventType = require('../../src/interpreter/constants').eventType;
-var ChordParser = require('../../src/interpreter/parsers/ChordParser');
+var MasterScaleParser = require('../../src/interpreter/parsers/MasterScaleParser');
 var State = require('../../src/interpreter/State');
 var pitchUtils = require('../../src/interpreter/pitchUtils');
 
-  describe('ChordParser', function() {
+  describe('MasterScaleParser', function() {
 
     function checkNotes(expected,actual) {
       actualFlattened = [];
@@ -19,14 +19,14 @@ var pitchUtils = require('../../src/interpreter/pitchUtils');
     }
 
     it('should parse', function() {
-      var parser = new ChordParser();
+      var parser = new MasterScaleParser();
 
       var test = 'Cmaj';
       var found = parser.match(test);
       expect(found).toExist();
       expect(parser.string).toEqual(test);
       var expected = ['C', 'E', 'G'];
-      checkNotes(expected, parser.parsed);
+      checkNotes(expected, parser.parsed.chordConstraint);
     
 
       var test = 'Bb6';
@@ -34,14 +34,14 @@ var pitchUtils = require('../../src/interpreter/pitchUtils');
       expect(found).toExist();
       expect(parser.string).toEqual(test);
       var expected = ['Bb', 'D', 'F', 'G'];
-      checkNotes(expected, parser.parsed);
+      checkNotes(expected, parser.parsed.chordConstraint);
 
       var test = 'Dmin';
       var found = parser.match(test);
       expect(found).toExist();
       expect(parser.string).toEqual(test);
       var expected = ['D', 'F', 'A'];
-      checkNotes(expected, parser.parsed);
+      checkNotes(expected, parser.parsed.chordConstraint);
      
 
       var test = 'Fm7';
@@ -49,12 +49,10 @@ var pitchUtils = require('../../src/interpreter/pitchUtils');
       expect(found).toExist();
       expect(parser.string).toEqual(test);
       var expected = ['F', 'Ab', 'C', 'Eb'];
-      checkNotes(expected, parser.parsed);
+      checkNotes(expected, parser.parsed.chordConstraint);
      
 
     });
-    it ('should constrain pitch to chord', function() {
- 
-    });
+
   
   });

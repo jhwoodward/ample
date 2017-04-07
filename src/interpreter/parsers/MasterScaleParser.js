@@ -85,8 +85,8 @@ var prototype = {
     if (transpose !== 0) {
       chordConstraint = chordConstraint.map(c => { return c + transpose; });
       scaleConstraint = scaleConstraint.map(c => { return c + transpose; });
-      scalePitches.forEach(pitches => {
-        pitches = pitches.map(c => { return c + transpose; });
+      scalePitches.forEach((pitches,i) => {
+        scalePitches[i] = pitches.map(c => { return c + transpose; });
       });
     }
     return {
@@ -98,7 +98,7 @@ var prototype = {
   },
   mutateState: function (state, interpreter) {
     if (interpreter.isMaster) {
-      state.pitch.scale = this.parsed;
+      state.scale = this.parsed;
     }
   }
 }

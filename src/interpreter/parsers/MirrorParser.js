@@ -49,13 +49,13 @@ var prototype = {
 
     var modifier = {
       id: this.type,
-      name: this.type,
       type: modifierType.pitch,
       order: 1,
       fn: function mirrorPitch(state) {
         var axis = 60;
         var distFromAxis = state.pitch.value - axis;
         state.pitch.value = axis - distFromAxis;
+        return '';
       }
     }; 
     if (this.parsed.start) {

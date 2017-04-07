@@ -65,9 +65,9 @@ Interpreter.prototype.interpretMaster = function (master) {
       tick,
       state: {
         key: lastTickState.key,
-        pitch: { constraint: lastTickState.pitch.constraint },
+        scale: lastTickState.scale,
+        bassline: lastTickState.bassline,
         modifiers: lastTickState.modifiers,
-        mutater: lastTickState.mutater,
         time: { tempo: lastTickState.time.tempo }
       }
     };

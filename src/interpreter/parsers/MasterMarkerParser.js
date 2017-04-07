@@ -3,7 +3,7 @@ var parser = require('./_parser');
 var utils = require('../parserUtils');
 
 
-function MarkerParser() {
+function MasterMarkerParser() {
   this.type = 'MasterMarker';
   this.test = /^\$\w+/;
 }
@@ -23,5 +23,5 @@ var prototype = {
   }
 
 }
-MarkerParser.prototype = _.extend({}, parser, prototype);
-module.exports = MarkerParser;
+MasterMarkerParser.prototype = _.extend({}, parser, prototype);
+module.exports = MasterMarkerParser;

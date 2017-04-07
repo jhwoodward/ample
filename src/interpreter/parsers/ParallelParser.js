@@ -45,5 +45,5 @@ var prototype = {
   continue: true
 }
 
-SubstitutionParser.prototype = _.extend({}, parser, prototype);
-module.exports = SubstitutionParser;
+ParallelParser.prototype = _.extend({}, parser, prototype);
+module.exports = ParallelParser;

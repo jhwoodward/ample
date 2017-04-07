@@ -17,11 +17,12 @@ var prototype = {
   },
   mutateState: function (state, interpreter) {
     var modifier = {
-      name: state.scale.name,
-      type: 'chord',
+      id: this.type,
+      type: 'pitch',
       order: 100,
-      fn: function constrainPitch(state) {
-        state.pitch.value = pitchUtils.constrain(state.pitch.value, state.pitch.constraint.values);
+      fn: function constrainPitch(currentState) {
+        currentState.pitch.value = pitchUtils.constrain(currentState.pitch.value, currentState.scale.chordConstraint);
+        return currentState.scale.name;
       }
     };
     utils.addModifier(state, modifier);

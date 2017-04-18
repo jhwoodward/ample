@@ -1,4 +1,4 @@
-# Nomple
+# Nompl
 
 Node Music Programming Language
 

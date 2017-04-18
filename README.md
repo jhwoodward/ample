@@ -1,1 +1,4 @@
-# ample
+# Nomple
+
+Node Music Programming Language
+

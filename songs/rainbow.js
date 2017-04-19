@@ -1,4 +1,4 @@
-var Sequencer = require('../src/sequencer/Sequencer');
+
 var utils = require('../src/utils');
 var ensemble = require("../src/instruments/ensemble");
 var instruments = require("../src/instruments/instruments");

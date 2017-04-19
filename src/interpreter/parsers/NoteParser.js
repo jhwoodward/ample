@@ -6,6 +6,7 @@ var modifierType = require('../constants').modifierType;
 var _ = require('lodash');
 var parser = require('./_parser');
 var noteParser = require('./_noteParser');
+var AnnotationParser = require('./AnnotationParser');
 
 function NoteParser(macros) {
   if (macros) {
@@ -32,24 +33,22 @@ var prototype = {
   },
   mutateState: function (state) {
     var prev = _.cloneDeep(state);
-    state.phrase.mutateState(state);
 
-    this.parsed.articulations.forEach(a => {
-      a.mutateState(state);
-    });
-
-    state.articulationInfo = this.parsed.articulations.map(a => a.key).join(', ');
+    state.articulation = state.phrase.merge(this.parsed.articulations);
+    state.articulation.mutateState(state);
 
     this.adjustOctaveForPitchTransition(state);
     state.pitch.raw = this.getPitch(state);
     state.pitch.value = state.pitch.raw;
-    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch);
-    modifiers.forEach(m => { 
-      m.fn(state); 
+    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).sort((a,b) => {
+      return a.order > b.order ? 1 : -1;
     });
-    state.modifierInfo = modifiers.map(m => {
-      return `${m.id}: ${m.name} (${pitchUtils.midiPitchToString(state.pitch.raw)})`;
-    }).join(', ');
+    state.modifierInfo = [];
+    var rawPitchString = pitchUtils.midiPitchToString(state.pitch.raw);
+    modifiers.forEach(m => { 
+       var info = m.fn(state); 
+       state.modifierInfo.push(`${m.id}: ${info} (${rawPitchString})`);
+    });
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
@@ -61,26 +60,21 @@ var prototype = {
     if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
       //   onOffset = 0;
     }
-    var isRepeatedNote = prev.pitch.value === state.pitch.value;
+    var isRepeatedNote =  prev.pitch.value === state.pitch.value;
     if (isRepeatedNote) {
       onOffset = 0;
     }
     state.on = { 
-      tick: state.time.tick + onOffset, 
-      offset: onOffset };
+      tick: state.time.tick + onOffset,
+      offset: onOffset 
+    };
 
   },
   getEvents: function (state, prev) {
     var out;
-    
-    //expression
-    if (this.parsed.articulations.length) {
-      this.parsed.articulations.forEach(a => {
-        out = a.getEvents(state, prev);
-      });
-    } else {
-      out = state.phrase.getEvents(state, prev);
-    }
+
+    out = state.articulation.getEvents(state, prev);
+
     out.forEach(e => {
       e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
     });
@@ -116,8 +110,8 @@ var prototype = {
       pitch: state.pitch,
       velocity: state.velocity,
       annotation: state.phrase.parsed.key,
-      articulation: state.articulationInfo,
-      modifiers: state.modifierInfo
+      articulation: state.articulation.info,
+      modifiers: state.modifierInfo.join(', ')
     });
 
     return out;

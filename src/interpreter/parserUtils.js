@@ -11,6 +11,26 @@ var api = {
       return { value };
     }
   },
+  getBracketed: (s, startIndex) => {
+    var nest = 1;//assumption is that we are starting already inside the brackets
+    var c = startIndex;
+    while (nest > 0 && c < s.length) {
+      var char = s.substring(c, c + 1);
+      if (char === '(') {
+        nest++;
+      }
+      if (char === ')') {
+        nest--;
+      }
+      c++;
+    }
+
+    if (nest === 0) {
+      return s.substring(startIndex, c - 1);
+    } else {
+      return undefined;
+    }
+  },
   parsePitch: s => {
     var char = /[a-gA-Gx-zX-Z]/.exec(s)[0];
     var octJump = s.match(/!/g);

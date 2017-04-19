@@ -28,7 +28,7 @@ var performers = {
     con sordino F1 off = F#1
     vib speed = c17
     */
-    default: '[-2:C] [-2:+A] 80=V 90=C11 90=C1 0=C14 0=C15 60=C16 30=C17  0=ON  -7=OFF ',
+    default: '[-2:C] [-2:+A] 80=V 90=C1 90=C1 0=C14 0=C15 60=C16 30=C17  0=ON  -7=OFF ',
     slow: '-13=ON 1=OFF',
     fast: '-3=ON 1=OFF',
     legato: '[-2:C]  0=C14 127=C15 -12=ON 1=OFF ',
@@ -36,7 +36,7 @@ var performers = {
     staccato: '[-2:D] 50=V  0=ON  -7=OFF',
     spiccato: '[-2:D] 70=V  0=ON  -7=OFF',
     pizzicato: '[-2:+D]  0=ON  -7=OFF',
-    accent: '120=C11 100=V',
+    accent: '120=C1 100=V',
     portamento: '127=C14 20=V -10=ON 1=OFF [-2:C]',
     tremolo: '[-2:E]',
     consordino: '',

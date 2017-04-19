@@ -52,9 +52,8 @@ describe('AnimationParser', function () {
     expect(state.animation.key).toEqual('swell');
     expect(state.animation.start).toExist();
     expect(state.animation.end).toNotExist();
-
     state = state.clone();
-    parser.next(state);
+
     tune.forEach(p => {
       state.mutate(p);
       expect(state.animation).toNotExist(); 

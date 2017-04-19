@@ -10,15 +10,19 @@ function State(defaultPhraseParser) {
       flats: [],
       sharps: []
     },
+    scale: {
+      name: '',
+      chordConstraint: [],
+      scaleConstraint: [],
+      scalePitches: []
+    },
     pitch: {
       octave: 5,
       relativeStep: 1,
       transpose: 0
-      //constraint: [] = array of pitch values
     },
     on: {},
     off: {},
-    phrase: defaultPhraseParser || stateUtils.getDefaultPhraseParser(), //instance of AnnotationParser
     controller: {},
     pitchbend: undefined,
     velocity: 85,
@@ -32,15 +36,16 @@ function State(defaultPhraseParser) {
     }
   };
 
-  var next = _.cloneDeep(state);
-  next.phrase.mutateState(next);
-  _.merge(this, next);
+  _.merge(this, state);
+  this.mutate(defaultPhraseParser || stateUtils.getDefaultPhraseParser()); 
+
 }
 
 State.prototype.clone = function () {
   var clone = _.cloneDeep(this);
   clone.mutater = undefined;
   clone.articulations = [];
+  delete clone.articulation;
   delete clone.animation;
   delete clone.marker;
   return clone;

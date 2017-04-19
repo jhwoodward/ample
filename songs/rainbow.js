@@ -2,7 +2,7 @@ var Sequencer = require('../src/sequencer/Sequencer');
 var utils = require('../src/utils');
 var ensemble = require("../src/instruments/ensemble");
 var instruments = require("../src/instruments/instruments");
-
+var animations = require("../src/animations");
 var performer = ensemble.stringQuartet.performers.friedfischtriobroz;
 var players = utils.playersFromEnsemble(ensemble.stringQuartet, performer, true);
 
@@ -24,47 +24,11 @@ var substitutions = {
   `};
 
 var master = `120=T  $A (chordsA) $A (chordsA) $B (chordsB) $A (chordsA)   `;
-var animations = {
-  c: {
-    0: '1=C1',
-    10: '10=C1',
-    20: '20=C1',
-    30: '20=C1',
-    40: '40=C1',
-    50: '50=C1',
-    60: '60=C1',
-    70: '70=C1',
-    80: '80=C1',
-    90: '90=C1'
-  }, 
-  s: {
-    0: '50=C1',
-    20: '60=C1',
-    30: '70=C1',
-    40: '90=C1',
-    42: '95=C1',
-    45: '100=C1',
-    47: '105=C1',
-    50: '110=C1',
-    55: '110=C1',
-    60: '110=C1',
-    70: '110=C1',
-    80: '100=C1',
-    85: '95=C1',
-    90: '90=C1'
-  },
-  p: {
-    0: '10=C1',
-    20: '30=C1',
-    30: '60=C1',
-    40: '90=C1',
-    50: '127=C1',
-    60: '120=C1',
-    70: '100=C1',
-    80: '80=C1',
-    90: '40=C1'
-  }
-};
+
+
+var harmonies = {
+  c: [-3, -5, -7 -9]
+}
 
 
 players.violin1.animations = animations;
@@ -103,12 +67,7 @@ players.cello.part = `
 players.violin1.master = master;
 players.violin1.substitutions = substitutions;
 players.violin2.master = master;
-/*
-players.violin2.constraints = [{
-  type: 'pitch',
-  player: 'violin1',
-  allowIntervals: [-3, -5, -7 -9]
-}];*/
+
 players.violin2.substitutions = substitutions;
 players.viola.master = master;
 players.viola.substitutions = substitutions; 

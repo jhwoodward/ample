@@ -13,8 +13,9 @@ function Interpreter(macros, master) {
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation;
   }).forEach(macro => {
-    macro.parsed = parse(macro.value);
+    macro.parsed = parse(macro.value, this.macros);
   });
+  
 
   this.animations = {};
   this.macros.filter(macro => {
@@ -64,9 +65,9 @@ Interpreter.prototype.interpretMaster = function (master) {
       tick,
       state: {
         key: lastTickState.key,
-        pitch: { constraint: lastTickState.pitch.constraint },
+        scale: lastTickState.scale,
+        bassline: lastTickState.bassline,
         modifiers: lastTickState.modifiers,
-        mutater: lastTickState.mutater,
         time: { tempo: lastTickState.time.tempo }
       }
     };
@@ -191,6 +192,7 @@ Interpreter.prototype.getEvents = function () {
   })
 
   events.sort(function (a, b) {
+    if (a.tick === b.tick) return 0;
     return a.tick > b.tick ? 1 : -1;
   });
 
@@ -242,8 +244,11 @@ Interpreter.prototype.interpret = function (part) {
 
   this.isMaster = false;
   this.master.states.forEach(s => s.applied = false);
-  this.states = [new State(this.defaultPhraseParser)];
+ 
+  var initState = new State(this.defaultPhraseParser);
+  this.states = [initState];
   this.next = undefined;
+
   this.generateState(this.parse(part));
 
   return {

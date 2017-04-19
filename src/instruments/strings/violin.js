@@ -53,7 +53,7 @@ var performers = {
     p: '50=C1 50=V',
     f: '120=C1 120=V',
     slow: '-13=ON 1=OFF',
-    legato: '[-2:G] [-1:F] 127=C15 -10=ON 1=OFF 80=C17',
+    legato: '[-2:G] [-1:F] 127=C15 -13=ON 1=OFF 80=C17',
     staccato: '[-2:A]  0=ON  -7=OFF',
     spiccato: '[-2:A]  0=ON  -7=OFF',
     pizzicato: '[-2:+A]  0=ON  -7=OFF',

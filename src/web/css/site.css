@@ -1,0 +1,103 @@
+  body {
+    background-color: #74a8ea;
+  }
+  .loading {
+      opacity: 0;
+      transition: 500ms opacity;
+    }
+    
+    .loaded {
+      opacity: 1 !important;
+    }
+
+    .view-container {
+      padding:30px;
+      margin-top:50px;
+    }
+  
+    .CodeMirror {
+      height: auto;
+      font-size:1.2em;
+    }
+    .CodeMirror pre > * { text-indent: 0px; }
+    
+    .log {
+      max-height: calc(100vh - 560px);
+      overflow:auto;
+      white-space: nowrap;
+      color:#999;
+      -webkit-box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);
+      -moz-box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);
+      box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);
+      border-top: 1px solid #ccc;
+    }
+    .log.playing {
+      overflow: hidden;
+    }
+    .piano-roll {
+      font-size:18px;
+      line-height:14px;
+    }
+    .piano-roll .pitch {
+      color: #e4e4e4;
+      width: calc(100% - 50px);
+      float:left;
+    }
+    .piano-roll .pitch .channel1 {
+       color: #6ca700;
+     }
+     .piano-roll .pitch .channel2 {
+       color: #1f6cff
+     }
+     .panel-grey {
+       background-color: #cec6bb;
+       color: #fff;
+     }
+     .panel-heading .channel {
+       float:right;
+       border-radius: 5px;
+       padding:2px 6px;
+       margin-top:-3px;
+
+     }
+     .panel-heading .channel1 {
+      background-color: #6ca700;
+      color:#fff;
+     }
+    .panel-heading .channel2 {
+       background-color: #1f6cff;
+         color:#fff;
+     }
+
+    .piano-roll .beat {
+      width:50px;
+      float:left;
+    }
+
+    .piano-roll-row {
+      width:100%;
+    }
+
+    .fixed-width-font {
+      font-family: monospace;
+    }
+
+    .panel-body .btn-group {
+      font-size:68px;
+    }
+
+
+    .toolbar {
+       margin-top:15px;
+    }
+
+    .btn-stop {
+      color: #fff;
+      background: #000
+    }
+    .btn-pause {
+      color: #fff;
+      background: #999;
+    }
+
+ 

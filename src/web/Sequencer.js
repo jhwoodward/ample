@@ -2,29 +2,23 @@
 var eventType = require('../interpreter/constants').eventType;
 var utils = require('../interpreter/utils');
 var Interpreter = require('../interpreter/Interpreter');
+var webmidi = require('webmidi');
 
-var space = '                                                            ';
-var sPaused = '- - - - - - - - - - - - - - - - - - - - - - - - - - - - - P A U S E D - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -'.magenta;
-var sStart = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = S T A R T = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.yellow;
-var sEnd = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = E N D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.red;
-var sStopped = '= = = = = = = = = = = = = = = = = = = = = = = = = = = = = S T O P P E D = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ='.blue;
-
-function Sequencer() {
+function Sequencer(logger) {
   this.stopped = false;
   this.paused = false;
-  this.logMode = 'info';// 'pianoroll';
-  //this.output = new easymidi.Output('IAC Driver Bus 1');
-  //this.timer = new NanoTimer();
-  this.interval = 10000;
+  this.interval = 10;
   this.tick = -1;
-  //this.onKeyPress = this.onKeyPress.bind(this);
   this.onTick = this.onTick.bind(this);
+  this.logger = logger;
 }
 
 function prepPlayers(players) {
   for (var key in players) {
     var player = players[key];
-    delete player.annotations.name;
+    if (player.annotations && player.annotations.name) {
+      delete player.annotations.name;
+    }
     player.macros = utils.combineMacros(player);
   }
   return players;
@@ -44,8 +38,19 @@ function getMarkers(master) {
 }
 
 Sequencer.prototype = {
+  init: function (cb) {
+    webmidi.enable(function (err) {
+      console.log(webmidi.inputs);
+      console.log(webmidi.outputs);
+      this.output = webmidi.outputs[0];
+      cb(this.output);
+    }.bind(this));
+  },
   load: function (players) {
     players = prepPlayers(players);
+    var player1 = players[Object.keys(players)[1]];
+    var master = new Interpreter(player1.macros, player1.master).master;
+    this.markers = getMarkers(master);
     var events = [];
     var interpreter;
     for (var key in players) {
@@ -53,7 +58,6 @@ Sequencer.prototype = {
       interpreter = new Interpreter(players[key].macros, players[key].master);
       players[key].interpreted = interpreter.interpret(players[key].part);
       players[key].interpreted.events.forEach(e => { e.channel = players[key].channel });
-
       events = events.concat(players[key].interpreted.events);
     }
 
@@ -78,6 +82,7 @@ Sequencer.prototype = {
         return e.tick === i;
       });
     }
+    return this;
   },
   start: function (options) {
     this.allNotesOff();
@@ -87,8 +92,7 @@ Sequencer.prototype = {
       throw (new Error('No players loaded'));
     }
 
-    this.timer.clearInterval();
-    process.stdin.on('keypress', this.onKeyPress);
+    window.clearInterval(this.timer);
 
     this.startTick = 0;
     this.endTick = this.maxTick;
@@ -105,7 +109,7 @@ Sequencer.prototype = {
       var markerNthTest = /\d+/.exec(options.marker);
       markerName += markerNthTest ? parseInt(markerNthTest[0], 10) : '1';
       var marker = this.markers.filter(m => m.key === markerName);
-      if (!marker.length) throw(new Error('Marker not found: ' + markerName));
+      if (!marker.length) throw (new Error('Marker not found: ' + markerName));
       marker = marker[0]
       this.startTick = marker.tick;
       if (this.markers.indexOf(marker) < this.markers.length - 1) {
@@ -118,7 +122,6 @@ Sequencer.prototype = {
     this.stopped = false;
     this.paused = false;
     this.fastForwarding = false;
-    this.logger = new infoLogger(this.markers);
 
     if (this.startTick > 0) {
       this.fastForward();
@@ -127,60 +130,51 @@ Sequencer.prototype = {
     }
   },
   play: function () {
-    console.log('\n');
-    console.log(sStart);
-    this.timer.setInterval(this.onTick, '', this.interval + 'u');
+    this.logger.logEvent({ type: 'start' });
+    this.timer = window.setInterval(this.onTick, this.interval);
   },
   fastForward: function () {
     this.ffendTick = this.endTick;
     this.endTick = this.startTick - 1;
     this.fastForwarding = true;
-    this.timer.setInterval(this.onTick, '', '10u');
+    this.timer = windows.setInterval(this.onTick, 1);
   },
   onFastForwardCompleted: function () {
-    this.timer.clearInterval();
-    console.log('ff end ', this.tick);
+    window.clearInterval(this.timer);
     this.endTick = this.ffendTick;
     this.fastForwarding = false;
     this.play();
   },
   allNotesOff: function () {
-    cnt = 0;
     for (var i = 0; i < 3; i++) {
       for (var c = 0; c < 16; c++) {
         for (var p = 0; p < 128; p++) {
-          this.output.send('noteoff', {
-            note: p,
-            channel: c
-          });
+          this.output.stopNote(p, c + 1);
         }
       }
     }
   },
   switchOffAllTheShit: function () {
-    this.timer.clearInterval();
+    window.clearInterval(this.timer);
     this.stopped = true;
     this.allNotesOff();
-    process.stdin.removeListener('keypress', this.onKeyPress);
   },
   stop: function () {
     this.switchOffAllTheShit();
-    console.log(sStopped);
-    console.log('\n');
+    this.logger.logEvent({type: 'stop'});
   },
   end: function () {
     this.switchOffAllTheShit();
-    console.log(sEnd);
-    console.log('\n');
+    this.logger.logEvent({type: 'end'});
   },
   togglePause: function () {
     this.paused = !this.paused;
     if (this.paused) {
-      this.timer.clearInterval();
+      window.clearInterval(this.timer);
       this.allNotesOff();
-      console.log(sPaused);
+      this.logger.logEvent({type: 'pause'});
     } else {
-      this.timer.setInterval(this.onTick, '', this.interval + 'u');
+      this.timer = window.setInterval(this.onTick, this.interval);
     }
   },
   onTick: function () {
@@ -192,7 +186,7 @@ Sequencer.prototype = {
       }
       if (this.loop) {
         this.tick = 0;
-        this.timer.clearInterval();
+        window.clearInterval(this.timer);
         if (this.startTick > 0) {
           this.fastForward();
         } else {
@@ -210,43 +204,28 @@ Sequencer.prototype = {
 
       switch (e.type) {
         case eventType.tempo:
-          var newInterval = Math.round(1000000 / (e.value * 0.8));
+          var newInterval = Math.round(1000 / (e.value * 0.8));
           if (newInterval !== this.interval) {
             this.interval = newInterval;
-            this.timer.clearInterval();
-            this.timer.setInterval(this.onTick, '', this.interval + 'u');
+            window.clearInterval(this.timer);
+            this.timer = windows.setInterval(this.onTick, this.interval);
           }
           break;
         case eventType.controller:
-          this.output.send(eventType.controller, {
-            value: e.value,
-            controller: e.controller,
-            channel: e.channel
-          });
+          this.output.sendControlChange(e.controller, e.value, e.channel + 1);
           break;
         case eventType.pitchbend:
-          this.output.send(eventType.pitchbend, {
-            value: e.value,
-            channel: e.channel
-          });
-          e.sent = true;
-
+          var val = (e.value - 8192) / 8192;
+          this.output.sendPitchBend(val, e.channel + 1); //value needs to be between -1 and 1 for webmidi
           break;
         case eventType.noteon:
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.send(eventType.noteon, {
-              note: e.pitch.value,
-              velocity: e.velocity || 80,
-              channel: e.channel
-            });
+            this.output.playNote(e.pitch.value, e.channel + 1, { rawVelocity: true, velocity: e.velocity || 80 });
           }
           break;
         case eventType.noteoff:
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.send(eventType.noteoff, {
-              note: e.pitch.value,
-              channel: e.channel
-            });
+            this.output.stopNote(e.pitch.value, e.channel + 1);
           }
           break;
         default:
@@ -257,6 +236,17 @@ Sequencer.prototype = {
     }.bind(this));
 
     if (!this.fastForwarding) {
+
+      this.markers.forEach(m => {
+        if (this.tick >= m.tick && !m.logged) {
+          this.logger.logEvent({
+            type: 'marker',
+            value: m.key
+          });
+          m.logged = true;
+        }
+      });
+
       this.logger.log(this.tick, events);
     }
 

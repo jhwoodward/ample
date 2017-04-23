@@ -36,8 +36,6 @@ describe('NoteParser pitch', function () {
         var expectedNotes = ['C5', 'C6'];
         expect(notes).toEqual(expectedNotes);  
       });
-
-
     });
 
     describe('When previous note is lower case and flat but the same character', function() {
@@ -81,7 +79,6 @@ describe('NoteParser pitch', function () {
         expect(notes).toEqual(expectedNotes);  
       });
 
-
       describe('With accidental', function() {
         it('should move down a semitone', function () {
           var test = 'cDEFedc-c';
@@ -102,13 +99,8 @@ describe('NoteParser pitch', function () {
         });
 
       });
-      
-
 
     });
-
-
-
 
     describe('When previous note is upper case but the same character', function() {
       it('should drop one octave', function() {
@@ -119,6 +111,25 @@ describe('NoteParser pitch', function () {
         var expectedNotes = ['C5', 'C4'];
         expect(notes).toEqual(expectedNotes);  
       });
+
+       it('should switch octaves (1)', function() {
+          var test = 'CcCc';
+        var interpeter = new Interpreter();
+        var result = interpeter.interpret(test);
+        var notes = getNotes(result.states);
+        var expectedNotes = ['C5', 'C4','C5', 'C4'];
+        expect(notes).toEqual(expectedNotes);  
+      });
+
+      it('should switch octaves (2)', function() {
+        var test = '24,-1:cGgG';
+        var interpeter = new Interpreter();
+        var result = interpeter.interpret(test);
+        var notes = getNotes(result.states);
+        var expectedNotes = ['C4', 'G4', 'G3', 'G4'];
+        expect(notes).toEqual(expectedNotes);  
+      });
+
     });
 
     describe('When previous note is upper case and flat but the same character', function() {

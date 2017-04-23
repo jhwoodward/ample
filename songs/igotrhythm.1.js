@@ -1,4 +1,4 @@
-var Sequencer = require('../src/Sequencer');
+
 var utils = require('../src/utils');
 var ensemble = require("../src/instruments/ensemble");
 var instruments = require("../src/instruments/instruments");
@@ -12,15 +12,15 @@ https://en.wikipedia.org/wiki/Thirty-two-bar_form
 - bach-fugue-like strings... thrown down quickly using transpose, that the arrangement is awful is to be expected
 */
 var substitutions = {
-  chordsA: `     96,  Bb6     /  Gm7   /   Cm7   /  F7      /          
+  chordsA: `     96,  Bb6   /  Gm7   /   Cm7   /  F7      /          
                       Dm7   /  Gm7   /   Cm7   /  F7      /
-                      Fm7   /  Bb7     /   Eb6     /  Edim7   /          
-                      C9     /  F7      /   Bbmaj   /  F7      /
+                      Fm7   /  Bb7   /   Eb6   /  Edim7   /          
+                      C9    /  F7    /   Bbmaj /  F7      /
   `,
-  chordsAfinal: `96,  Bb6     /  Gm7   /   Cm7   /  F7      /          
+  chordsAfinal: `96,  Bb6   /  Gm7   /   Cm7   /  F7      /          
                       Dm7   /  Gm7   /   Cm7   /  F7      /
-                      Fm7   /  Bb7     /   Eb6     /  Edim7   /          
-                      C9     /  F7      /   Bb6   /          /
+                      Fm7   /  Bb7   /   Eb6   /  Edim7   /          
+                      C9    /  F7    /   Bb6   /          /
   `,
   chordsB: `     96,  D9      /          /           /          /          
                       G7      /          /           /          /
@@ -31,6 +31,7 @@ var substitutions = {
 var master = `120=T  $A (chordsA) $A (chordsA) $B (chordsB) $A (chordsAfinal)   `;
 
 players.violin1.part = `
+constrain:chord
   $A1( (48,1: -bD 24, FAge)*8 ^ )
   $A2( (24,1: dEGd  48,ge)*8 ^ )
   $B(  (24,1: eGcEbgDaCEGAbdbC )*4 ^  )
@@ -38,6 +39,7 @@ players.violin1.part = `
 `;
 
 players.violin2.part = `
+constrain:chord
 -5@
   $A1( (48,1: -bD 24, FAge)*8 ^ )
   $A2( (24,1: dEGd  48,ge)*8 ^ )
@@ -46,6 +48,7 @@ players.violin2.part = `
 `;
 
 players.viola.part = `
+constrain:chord
 3@
   $A1( (24,0: dEGd  48,ge)*8 ^ )
   $A2( (48,0: -bD 24, FAge)*8 ^ )
@@ -54,6 +57,7 @@ players.viola.part = `
 `;
 
 players.cello.part = `
+constrain:chord
 -31@
   $A1( (24,1: dEGd  48,g^)*8 ^ )
   $A2( (48,1: -bD 24, FAge)*8 ^ )
@@ -70,7 +74,4 @@ players.viola.substitutions = substitutions;
 players.cello.master = master;
 players.cello.substitutions = substitutions;
 
-//var seq = new Sequencer();
-//seq.load(players);
-//seq.start();
 module.exports = players;

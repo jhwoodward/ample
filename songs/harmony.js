@@ -1,4 +1,4 @@
-var Sequencer = require('../src/sequencer/Sequencer');
+////var Sequencer = require('../src/sequencer/Sequencer');
 var utils = require('../src/utils');
 var ensemble = require("../src/instruments/ensemble");
 var instruments = require("../src/instruments/instruments");
@@ -77,8 +77,8 @@ players.cello.master = master;
 players.cello.substitutions = substitutions;
 players.cello.animations = animations;
 
-var seq = new Sequencer();
-seq.load([players.cello]);
+//var seq = new Sequencer();
+//seq.load([players.cello]);
 //seq.start();
 
 module.exports = players;

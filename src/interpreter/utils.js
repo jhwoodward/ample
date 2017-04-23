@@ -1,8 +1,16 @@
 var macroType = require('./constants').macroType;
 var parserUtils = require('./parserUtils');
+var _ = require('lodash');
 
 var api = {
   combineMacros: function (player) {
+
+    player.annotations = _.extend({
+      accent: '120=V'
+    },
+    player.annotations);
+    player.substitutions = player.sub || player.substitutions;
+
     return api.buildMacros(
       player.substitutions, 
       player.annotations, 

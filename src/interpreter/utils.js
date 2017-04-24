@@ -78,6 +78,29 @@ var api = {
     return macros;
 
   },
+  mergeMacros: function(existing, add) {
+    add.forEach(a => {
+      var replaced = false;
+      existing.filter(x => x.type === a.type).forEach(x => {
+        if (x.key === a.key) {
+          if (x.value) {
+            x.value = a.value;
+          }
+          if (x.values) {
+            x.values = a.values;
+          }
+          if (x.parsed) {
+            x.parsed = a.parsed;
+          }
+          replaced = true;
+        }
+      });
+      if (!replaced) {
+        existing.push(a);
+      }
+    });
+    return existing;
+  },
   eventsFromStates: function (states) {
     return states.reduce(function (acc, item) {
       acc = acc.concat(item.events);

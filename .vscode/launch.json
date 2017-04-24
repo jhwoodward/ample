@@ -15,7 +15,7 @@
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceRoot}/test/Interpreter.test"
+        "${workspaceRoot}/test/parsers/AnnotationSetterParser.test.js"
       ],
       "internalConsoleOptions": "openOnSessionStart"
     },

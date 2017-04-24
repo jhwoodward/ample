@@ -17,11 +17,10 @@ module.exports = {
     sub: {
       a: `24,-1:cGgG cGgG cGgG ccDE`
     },
-    part: `(a)=(cDEFGA)
-{default}={-10=ON}
+    part: `(a)=(24,-1:cGgGcGgGcGgGccDE)
+{default}={0=ON 0=OFF}
 
-(melody:a)
-
+(a)
 
 FAfA cEcEd +Fd+F Gfed
 

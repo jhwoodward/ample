@@ -21,7 +21,6 @@ var Interpreter = require('../../src/interpreter/Interpreter');
 
       expect(state.marker).toNotExist(); //default
       var interpreter = new Interpreter();
-      interpreter.isMaster = true;
       parser.mutateState(state, interpreter);
       expect(state.marker).toEqual('beginning');
     })

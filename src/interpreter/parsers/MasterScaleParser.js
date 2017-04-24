@@ -8,6 +8,7 @@ var utils = require('../utils');
 
 function MasterScaleParser() {
   this.type = 'MasterScale';
+  this.master = true;
   this.test = /^[A-G](#|b)?(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/;
 }
 
@@ -97,9 +98,7 @@ var prototype = {
     }
   },
   mutateState: function (state, interpreter) {
-    if (interpreter.isMaster) {
-      state.scale = this.parsed;
-    }
+    state.scale = this.parsed;
   }
 }
 

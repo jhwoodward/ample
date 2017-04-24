@@ -8,6 +8,7 @@ var utils = require('../utils');
 
 function MasterBassParser() {
   this.type = 'MasterBass';
+  this.master = true;
   this.test = /^bass:[\d+]/;
 }
 
@@ -18,9 +19,7 @@ var prototype = {
     return bass;
   },
   mutateState: function (state, interpreter) {
-    if (interpreter.isMaster) {
-      state.bassline = this.parsed;
-    }
+    state.bassline = this.parsed;
   }
 }
 

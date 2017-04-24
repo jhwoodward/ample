@@ -1,8 +1,6 @@
-module.exports = [
+var parsers = [
   require('./parsers/ScaleParser'),
   require('./parsers/KeyParser'),
-  require('./parsers/MasterScaleParser'),
-  require('./parsers/MasterBassParser'),
   require('./parsers/BassConstraintParser'),
   require('./parsers/ChordConstraintParser'),
   require('./parsers/AnimationParser'),
@@ -11,8 +9,9 @@ module.exports = [
   require('./parsers/NthTimeParser'),
   require('./parsers/LoopParser'),
   require('./parsers/MarkerParser'),
-  require('./parsers/MasterMarkerParser'),
+  require('./parsers/IgnoreSubstitutionSetterParser'),
   require('./parsers/SubstitutionParser'),
+  require('./parsers/IgnoreAnnotationSetterParser'),
   require('./parsers/AnnotationParser'),
   require('./parsers/KeyswitchParser'),
   require('./parsers/KeyParser'),
@@ -30,3 +29,18 @@ module.exports = [
   require('./parsers/OffParser'),
   require('./parsers/VelocityParser')
 ];
+var setterParsers = [
+  require('./parsers/SubstitutionSetterParser'),
+  require('./parsers/AnnotationSetterParser')
+];
+var masterParsers = [
+  require('./parsers/MasterScaleParser'),
+  require('./parsers/MasterBassParser'),
+  require('./parsers/MasterMarkerParser')
+]
+
+module.exports = {
+  main: parsers,
+  setter: setterParsers,
+  master: masterParsers
+};

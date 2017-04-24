@@ -5,6 +5,7 @@ var NoteParser = require('../../src/interpreter/parsers/NoteParser');
 var State = require('../../src/interpreter/State');
 var Interpreter = require('../../src/interpreter/Interpreter');
 var parse = require('../../src/interpreter/parse');
+var parsers = require('../../src/interpreter/parsers').main;
 
 describe('NoteParser', function () {
 
@@ -16,7 +17,7 @@ describe('NoteParser', function () {
       type: macroType.articulation,
       value: '130=V'
     };
-    accent.parsed = parse(accent.value);
+    accent.parsed = parse(parsers, accent.value);
 
     beforeEach(function () {
       parser = new NoteParser([accent]);

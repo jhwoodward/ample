@@ -2,7 +2,6 @@ var expect = require('expect');
 var eventType = require('../../src/interpreter/constants').eventType;
 var macroType = require('../../src/interpreter/constants').macroType;
 var NoteParser = require('../../src/interpreter/parsers/NoteParser');
-var State = require('../../src/interpreter/State');
 var Interpreter = require('../../src/interpreter/Interpreter');
 
 describe('NoteParser pitch', function () {

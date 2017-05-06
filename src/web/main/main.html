@@ -1,0 +1,61 @@
+<md-toolbar class="main-toolbar">
+  <div class="md-toolbar-tools main">
+
+    <h2 flex md-truncate>Scriptophonics</h2>
+    <md-input-container>
+      <label for="songName">Song name</label>
+      <input type="text" id="songName" ng-model="vm.song.name" />
+    </md-input-container>
+
+    <md-button class="md-icon-button ion-play" ng-click="vm.play()">
+    </md-button>
+    <md-button class="md-icon-button ion-pause" ng-click="vm.togglePause()">
+    </md-button>
+    <md-button class="md-icon-button ion-stop" ng-click="vm.stop()">
+    </md-button>
+
+    <md-button ng-click="vm.save()" class="md-default">
+      Save
+    </md-button>
+    <md-button ng-click="vm.clone()" class="md-default">
+      Clone
+    </md-button>
+    <md-button ng-click="vm.delete()" ng-if="vm.song.created" class="md-default">
+      Delete
+    </md-button>
+    <md-button ng-click="vm.new()" class="md-default">
+      New
+    </md-button>
+    <md-button ng-click="vm.toggleRight()" class="md-default">
+      Load
+    </md-button>
+
+  </div>
+</md-toolbar>
+
+
+<section>
+  <div layout="column">
+    <div layout="row" class="track-row" flex>
+      <track 
+        flex 
+        ng-repeat="track in vm.tracks" 
+        track="track"
+        track-index="$index"
+        sequencer="vm.sequencer">
+      </track>
+    </div>
+  </div>
+
+  <div id="log" class="panel-footer clearfix fixed-width-font log" ng-class="{'playing':vm.playing}">
+    <piano-roll sequencer="vm.sequencer"></piano-roll>
+    <div ng-repeat="data in vm.logs track by $index" class="row">
+      <div ng-repeat="item in data track by $index" class="col-xs-1">{{item}}</div>
+    </div>
+  </div>
+
+  <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="right">
+    <store></store>
+  </md-sidenav>
+
+</section>

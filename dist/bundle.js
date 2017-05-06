@@ -76,7 +76,7 @@
 	  $locationProvider.html5Mode(true);
 	
 	  $routeProvider.when('/', {
-	    template: __webpack_require__(66),
+	    template: __webpack_require__(70),
 	    controller: 'demoController',
 	    controllerAs: 'vm'
 	  }).otherwise({
@@ -88,7 +88,7 @@
 	//require('bootstrap');
 	//require('./css/animate.css');
 	//require('./css/animations.css');
-	__webpack_require__(67);
+	__webpack_require__(71);
 	
 	//require('jquery.easing');
 	
@@ -40580,11 +40580,11 @@
 	var eventType = __webpack_require__(13).eventType;
 	var utils = __webpack_require__(14);
 	var Interpreter = __webpack_require__(18);
-	var Sequencer = __webpack_require__(57);
-	var jingle = __webpack_require__(59);
-	var InfoLogger = __webpack_require__(60);
-	var PianoRollLogger = __webpack_require__(61);
-	var beautify_js = __webpack_require__(62).js_beautify;
+	var Sequencer = __webpack_require__(61);
+	var jingle = __webpack_require__(63);
+	var InfoLogger = __webpack_require__(64);
+	var PianoRollLogger = __webpack_require__(65);
+	var beautify_js = __webpack_require__(66).js_beautify;
 	
 	module.exports = function (ngModule) {
 	  ngModule.controller('demoController', ['$scope', '$timeout', controller]);
@@ -40592,8 +40592,9 @@
 	
 	function controller($scope, $timeout) {
 	  var vm = this;
-	  vm.brand = 'Nomple';
-	  vm.song = beautify_js(JSON.stringify(jingle).replace(/\\n/g, '').replace(/\\t/g, ''), { indent_size: 2 });
+	  vm.brand = 'Nompl';
+	  vm.song = songToString(jingle);
+	  vm.tracks = songToArray(jingle);
 	  vm.options = {
 	    lineWrapping: true,
 	    lineNumbers: false,
@@ -40607,6 +40608,45 @@
 	    }
 	  };
 	
+	  var autoScroll;
+	  var logElement;
+	  $timeout(function () {
+	    logElement = document.getElementById('log');
+	  });
+	
+	  function songToArray(song) {
+	    var out = [];
+	    for (var key in song) {
+	      out.push({
+	        key: key,
+	        part: song[key].part,
+	        sub: song[key].sub,
+	        channel: song[key].channel
+	      });
+	    }
+	    return out;
+	  }
+	
+	  function songFromArray(tracks) {
+	    var out = {};
+	    tracks.forEach(function (t) {
+	      out[t.key] = {
+	        channel: t.channel,
+	        sub: t.sub,
+	        part: t.part
+	      };
+	    });
+	    return out;
+	  }
+	
+	  function songToString(song) {
+	    return beautify_js(JSON.stringify(song).replace(/\\n/g, '').replace(/\\t/g, ''), { indent_size: 2 });
+	  }
+	
+	  function scrollToBottom() {
+	    logElement.scrollTop = logElement.scrollHeight;
+	  }
+	
 	  vm.codemirrorLoaded = function (editor) {
 	
 	    var charWidth = editor.defaultCharWidth(),
@@ -40616,17 +40656,11 @@
 	      elt.style.textIndent = "-" + off + "px";
 	      elt.style.paddingLeft = basePadding + off + "px";
 	    });
-	
-	    window.setInterval(function () {
-	      var element = document.getElementById('pianoRoll');
-	      element.scrollTop = element.scrollHeight;
-	    }, 100);
-	
 	    editor.refresh();
 	    editor.focus();
 	  };
 	
-	  // var logger = new InfoLogger(onLogInfo);
+	  //var logger = new InfoLogger(onLogInfo);
 	  var logger = new PianoRollLogger(onLogPianoRoll);
 	
 	  var seq = new Sequencer(logger);
@@ -40634,54 +40668,85 @@
 	    console.log('output', output);
 	  });
 	
+	  function startScrollLogWindow() {
+	    window.clearInterval(autoScroll);
+	    autoScroll = window.setInterval(scrollToBottom, 100);
+	  }
+	  function stopScrollLogWindow() {
+	    window.clearInterval(autoScroll);
+	  }
+	
 	  vm.play = function () {
 	    vm.logs = [];
 	    vm.pianoRoll = [];
-	    var song = JSON.parse(vm.song);
+	    //var song = JSON.parse(vm.song);
+	    var song = songFromArray(vm.tracks);
+	    startScrollLogWindow();
 	    seq.load(song).start();
+	    vm.playing = true;
 	  };
 	
+	  vm.playing = false;
+	
 	  vm.togglePause = function () {
+	    if (seq.paused) {
+	      startScrollLogWindow();
+	      vm.playing = true;
+	    } else {
+	      stopScrollLogWindow();
+	      vm.playing = false;
+	    }
 	    seq.togglePause();
 	  };
 	
 	  vm.stop = function () {
-	    seq.stop();
+	    $timeout(function () {
+	      $scope.$apply(function () {
+	        stopScrollLogWindow();
+	        seq.stop();
+	        vm.playing = false;
+	      });
+	    });
 	  };
+	
+	  function handleEvent(e) {
+	    if (e.type === 'end') {
+	      vm.stop();
+	    }
+	  }
 	
 	  vm.logs = [];
 	  vm.pianoRoll = [];
-	  function onLogInfo(data) {
+	  function onLogInfo(e) {
+	    handleEvent(e);
 	    $timeout(function () {
 	      $scope.$apply(function () {
-	        vm.logs.push(data);
+	        vm.logs.push(e.data);
 	      });
 	    });
 	  }
 	
-	  function onLogPianoRoll(row) {
-	
-	    if (row.type) return;
+	  function onLogPianoRoll(e) {
+	    handleEvent(e);
+	    if (e.type !== 'pitch') return;
 	    // convert pitch object to array
 	    var arr = [];
-	
 	    for (var i = 0; i < 128; i++) {
-	      var channel = this.pitch[i];
-	      arr.push(channel);
+	      arr.push(e.pitch[i]);
 	    }
-	
-	    row.pitch = arr.reduce(function (acc, item) {
+	    e.pitch = arr.reduce(function (acc, item) {
 	      if (item) {
-	        acc += '<i class="ion-record" ></i>';
+	        // acc += '<i class="ion-record" ></i>';
+	        acc += '<span class="channel' + item + '">█</span>';
 	      } else {
-	        acc += '.';
+	        acc += '·';
 	      }
 	      return acc;
 	    }, '');
 	
 	    $timeout(function () {
 	      $scope.$apply(function () {
-	        vm.pianoRoll.push(row);
+	        vm.pianoRoll.push(e);
 	      });
 	    });
 	  }
@@ -40785,6 +40850,31 @@
 	
 	    return macros;
 	  },
+	  mergeMacros: function mergeMacros(existing, add) {
+	    add.forEach(function (a) {
+	      var replaced = false;
+	      existing.filter(function (x) {
+	        return x.type === a.type;
+	      }).forEach(function (x) {
+	        if (x.key === a.key) {
+	          if (x.value) {
+	            x.value = a.value;
+	          }
+	          if (x.values) {
+	            x.values = a.values;
+	          }
+	          if (x.parsed) {
+	            x.parsed = a.parsed;
+	          }
+	          replaced = true;
+	        }
+	      });
+	      if (!replaced) {
+	        existing.push(a);
+	      }
+	    });
+	    return existing;
+	  },
 	  eventsFromStates: function eventsFromStates(states) {
 	    return states.reduce(function (acc, item) {
 	      acc = acc.concat(item.events);
@@ -40846,15 +40936,17 @@
 	      return { value: value };
 	    }
 	  },
-	  getBracketed: function getBracketed(s, startIndex) {
+	  getBracketed: function getBracketed(s, startIndex, open, close) {
+	    open = open || '(';
+	    close = close || ')';
 	    var nest = 1; //assumption is that we are starting already inside the brackets
 	    var c = startIndex;
 	    while (nest > 0 && c < s.length) {
 	      var char = s.substring(c, c + 1);
-	      if (char === '(') {
+	      if (char === open) {
 	        nest++;
 	      }
-	      if (char === ')') {
+	      if (char === close) {
 	        nest--;
 	      }
 	      c++;
@@ -58046,43 +58138,17 @@
 	
 	var parse = __webpack_require__(19);
 	var utils = __webpack_require__(14);
-	var stateUtils = __webpack_require__(55);
-	var State = __webpack_require__(56);
+	var stateUtils = __webpack_require__(20);
+	var State = __webpack_require__(60);
 	var macroType = __webpack_require__(13).macroType;
 	var eventType = __webpack_require__(13).eventType;
 	var _ = __webpack_require__(16);
+	var parsers = __webpack_require__(23);
 	
 	function Interpreter(macros, master) {
-	  var _this = this;
-	
 	  this.macros = macros || [];
-	  this.macros.filter(function (macro) {
-	    return macro.type === macroType.annotation || macro.type === macroType.substitution || macro.type === macroType.articulation;
-	  }).forEach(function (macro) {
-	    macro.parsed = parse(macro.value, _this.macros);
-	  });
-	
-	  this.animations = {};
-	  this.macros.filter(function (macro) {
-	    return macro.type === macroType.animation;
-	  }).forEach(function (animation) {
-	    _this.animations[animation.key] = [];
-	    for (var key in animation.values) {
-	      _this.animations[animation.key].push({
-	        key: animation.key,
-	        percent: parseInt(key, 10),
-	        parsers: parse(animation.values[key])
-	      });
-	    }
-	    _this.animations[animation.key].sort(function (a, b) {
-	      return a.percent > b.percent ? 1 : -1;
-	    });
-	  });
-	
-	  this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
 	
 	  this.master = { states: [], marker: {} };
-	
 	  if (master) {
 	    if (!master.states) {
 	      this.master = this.interpretMaster(master);
@@ -58092,15 +58158,14 @@
 	  }
 	}
 	
-	Interpreter.prototype.interpretMaster = function (master) {
-	  var _this2 = this;
+	Interpreter.prototype.interpretMaster = function (part) {
+	  var _this = this;
 	
 	  var state = new State();
-	  this.isMaster = true; //to set markers instead of read them
 	  this.states = [state];
 	  this.next = undefined;
 	  this.events = [];
-	  this.generateState(this.parse(master));
+	  this.generateState(parse(parsers.master, part));
 	
 	  //take only the final state for each tick;
 	  var states = this.states.reduce(function (acc, s) {
@@ -58108,7 +58173,7 @@
 	    if (acc.filter(function (m) {
 	      return m.tick === tick;
 	    }).length) return acc;
-	    var tickStates = _this2.states.filter(function (x) {
+	    var tickStates = _this.states.filter(function (x) {
 	      return x.time.tick === tick;
 	    });
 	    var lastTickState = tickStates[tickStates.length - 1];
@@ -58138,7 +58203,7 @@
 	};
 	
 	Interpreter.prototype.parse = function (part) {
-	  return parse(part, this.macros);
+	  return parse(parsers.main, part, this.macros);
 	};
 	
 	Interpreter.prototype.generateState = function (parsers) {
@@ -58166,7 +58231,7 @@
 	};
 	
 	Interpreter.prototype.getAnimation = function () {
-	  var _this3 = this;
+	  var _this2 = this;
 	
 	  var states = this.states.filter(function (s) {
 	    return s.animation !== undefined;
@@ -58192,7 +58257,7 @@
 	    var duration = a.end - a.start,
 	        from,
 	        to;
-	    var steps = _this3.animations[a.key];
+	    var steps = _this2.animations[a.key];
 	    steps.forEach(function (step, i) {
 	      from = Math.round(step.percent * duration / 100) + a.start;
 	      if (i < steps.length - 1) {
@@ -58222,7 +58287,7 @@
 	};
 	
 	Interpreter.prototype.getEvents = function () {
-	  var _this4 = this;
+	  var _this3 = this;
 	
 	  //add animation events
 	  var animation = this.getAnimation();
@@ -58239,7 +58304,7 @@
 	
 	  var events = this.states.reduce(function (acc, s, i) {
 	    if (i > 0 && s.parser.getEvents) {
-	      var e = s.parser.getEvents(s, _this4.states[i - 1]);
+	      var e = s.parser.getEvents(s, _this3.states[i - 1]);
 	      acc = acc.concat(e);
 	    }
 	    return acc;
@@ -58297,13 +58362,55 @@
 	  return filteredEvents;
 	};
 	
+	Interpreter.prototype.setMacro = function (macro) {
+	  utils.mergeMacros(this.macros, [macro]);
+	};
+	
+	Interpreter.prototype.parseMacros = function (part) {
+	  var _this4 = this;
+	
+	  //macros can be either passed into the ctor or inline following the setter syntax
+	
+	  //macro setter pass
+	  var state = new State();
+	  this.states = [state];
+	  this.next = undefined;
+	  this.events = [];
+	  this.generateState(parse(parsers.setter, part));
+	
+	  this.macros.filter(function (macro) {
+	    return macro.type === macroType.annotation || macro.type === macroType.substitution || macro.type === macroType.articulation;
+	  }).forEach(function (macro) {
+	    macro.parsed = parse(parsers.main, macro.value, _this4.macros);
+	  });
+	
+	  this.animations = {};
+	  this.macros.filter(function (macro) {
+	    return macro.type === macroType.animation;
+	  }).forEach(function (animation) {
+	    _this4.animations[animation.key] = [];
+	    for (var key in animation.values) {
+	      _this4.animations[animation.key].push({
+	        key: animation.key,
+	        percent: parseInt(key, 10),
+	        parsers: parse(parsers.main, animation.values[key])
+	      });
+	    }
+	    _this4.animations[animation.key].sort(function (a, b) {
+	      return a.percent > b.percent ? 1 : -1;
+	    });
+	  });
+	};
+	
 	Interpreter.prototype.interpret = function (part) {
 	
-	  this.isMaster = false;
+	  this.parseMacros(part);
+	
+	  this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
+	
 	  this.master.states.forEach(function (s) {
 	    return s.applied = false;
 	  });
-	
 	  var initState = new State(this.defaultPhraseParser);
 	  this.states = [initState];
 	  this.next = undefined;
@@ -58320,15 +58427,14 @@
 
 /***/ }),
 /* 19 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-	'use strict';
+	"use strict";
 	
-	var parsers = __webpack_require__(20);
 	/*
 	  Returns the first parser who's regex matchs the part string
 	*/
-	function findMatch(part, macros) {
+	function findMatch(parsers, part, macros) {
 	  var result, parser;
 	  for (var i = 0; i < parsers.length; i++) {
 	    parser = new parsers[i](macros);
@@ -58344,12 +58450,12 @@
 	/*
 	Returns an array of parsers who's regex's match the part string
 	*/
-	var parse = function parse(part, macros) {
+	var parse = function parse(parsers, part, macros) {
 	  var out = [],
 	      parser;
 	  var cursor = 0;
 	  while (part.length && out.length < 9999999) {
-	    parser = findMatch(part, macros);
+	    parser = findMatch(parsers, part, macros);
 	    if (parser) {
 	      out.push(parser);
 	      part = part.substring(parser.string.length, part.length);
@@ -58371,7 +58477,39 @@
 
 	'use strict';
 	
-	module.exports = [__webpack_require__(21), __webpack_require__(24), __webpack_require__(26), __webpack_require__(27), __webpack_require__(28), __webpack_require__(29), __webpack_require__(30), __webpack_require__(31), __webpack_require__(32), __webpack_require__(33), __webpack_require__(34), __webpack_require__(35), __webpack_require__(36), __webpack_require__(37), __webpack_require__(38), __webpack_require__(39), __webpack_require__(24), __webpack_require__(40), __webpack_require__(41), __webpack_require__(42), __webpack_require__(45), __webpack_require__(46), __webpack_require__(47), __webpack_require__(48), __webpack_require__(49), __webpack_require__(50), __webpack_require__(51), __webpack_require__(52), __webpack_require__(53), __webpack_require__(54)];
+	var parse = __webpack_require__(19);
+	var AnnotationParser = __webpack_require__(21);
+	var parsers = __webpack_require__(23).main;
+	
+	var api = {
+	  getDefaultPhraseParser: function getDefaultPhraseParser(macros) {
+	    var parsed;
+	    macros = macros || [];
+	    var defaultAnnotation = macros.filter(function (m) {
+	      return m.type === 'annotation' && m.key === 'default';
+	    });
+	    if (defaultAnnotation.length) {
+	      parsed = defaultAnnotation[0];
+	    } else {
+	      var defaultPhrase = '8192=P 85=C1 90=V 0=ON -5=OFF';
+	      var parsed = {
+	        type: 'annotation',
+	        key: 'default',
+	        value: defaultPhrase,
+	        parsed: parse(parsers, defaultPhrase)
+	      };
+	      //add to macros for future use... impure
+	      macros.push(parsed);
+	    }
+	    var annotation = new AnnotationParser();
+	    annotation.parsed = parsed;
+	    annotation.string = 'init';
+	    return annotation;
+	  }
+	
+	};
+	
+	module.exports = api;
 
 /***/ }),
 /* 21 */
@@ -58379,11 +58517,138 @@
 
 	'use strict';
 	
+	var _ = __webpack_require__(16);
+	var parser = __webpack_require__(22);
+	var macroType = __webpack_require__(13).macroType;
+	var eventType = __webpack_require__(13).eventType;
+	
+	function AnnotationParser(macros) {
+	  this.type = 'Annotation';
+	  this.test = /^{\w+}/;
+	
+	  if (macros) {
+	    this.annotations = macros.reduce(function (acc, item) {
+	      if (item.type === macroType.annotation) {
+	        acc[item.key] = item;
+	      }
+	      return acc;
+	    }, {});
+	  } else {
+	    this.annotations = {};
+	  }
+	}
+	
+	var prototype = {
+	  parse: function parse(s) {
+	    var key = /\w+/.exec(s)[0];
+	    if (this.annotations && this.annotations[key]) {
+	      return _.cloneDeep(this.annotations[key]);
+	    }
+	  },
+	  mutateState: function mutateState(state) {
+	    if (!this.isArticulation) {
+	      state.phrase = this;
+	    }
+	    this.parsed.parsed.forEach(function (parser) {
+	      parser.mutateState(state);
+	    });
+	  },
+	  waitForNote: true,
+	  continue: true,
+	  getEvents: function getEvents(state, prev, events) {
+	    var _this = this;
+	
+	    var out = this.parsed.parsed.reduce(function (acc, parser) {
+	      if (!parser.getEvents) return acc;
+	      acc = acc.concat(parser.getEvents(state, prev, events));
+	      return acc;
+	    }, []);
+	    out.forEach(function (e) {
+	      e.annotation = _this.parsed.key;
+	    });
+	    return out;
+	  },
+	  merge: function merge(articulations) {
+	    var out = new AnnotationParser();
+	    out.parsed = {
+	      key: this.parsed.key,
+	      parsed: []
+	    };
+	    this.parsed.parsed.forEach(function (p) {
+	      out.parsed.parsed.push(p);
+	    });
+	    articulations.forEach(function (a) {
+	      out.append(a.parsed, a.key);
+	    });
+	    out.info = articulations.map(function (a) {
+	      return a.key;
+	    }).join(', ');
+	    out.isArticulation = true;
+	    return out;
+	  },
+	  append: function append(parsers, key) {
+	    var _this2 = this;
+	
+	    var replace = [];
+	    this.parsed.parsed.forEach(function (p, i) {
+	      parsers.forEach(function (pnew) {
+	        if (p.compare && p.compare(pnew)) {
+	          _this2.parsed.parsed.splice(i, 1);
+	        }
+	      });
+	    });
+	    this.parsed.parsed = this.parsed.parsed.concat(parsers);
+	    this.parsed.key += ' - ' + key;
+	  }
+	};
+	
+	AnnotationParser.prototype = _.extend({}, parser, prototype);
+	module.exports = AnnotationParser;
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	
+	module.exports = {
+	  match: function match(s) {
+	    var result = this.test.exec(s);
+	    if (result) {
+	      this.string = result[0];
+	      this.parsed = this.parse(this.string);
+	    }
+	    return !!result && !!this.parsed;
+	  }
+	};
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var parsers = [__webpack_require__(24), __webpack_require__(26), __webpack_require__(28), __webpack_require__(29), __webpack_require__(30), __webpack_require__(31), __webpack_require__(32), __webpack_require__(33), __webpack_require__(34), __webpack_require__(35), __webpack_require__(36), __webpack_require__(37), __webpack_require__(38), __webpack_require__(21), __webpack_require__(39), __webpack_require__(26), __webpack_require__(40), __webpack_require__(41), __webpack_require__(42), __webpack_require__(45), __webpack_require__(46), __webpack_require__(47), __webpack_require__(48), __webpack_require__(49), __webpack_require__(50), __webpack_require__(51), __webpack_require__(52), __webpack_require__(53), __webpack_require__(54)];
+	var setterParsers = [__webpack_require__(55), __webpack_require__(56)];
+	var masterParsers = [__webpack_require__(57), __webpack_require__(58), __webpack_require__(59)];
+	
+	module.exports = {
+	  main: parsers,
+	  setter: setterParsers,
+	  master: masterParsers
+	};
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
 	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
+	var pitchUtils = __webpack_require__(25);
 	var utils = __webpack_require__(14);
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var modifierType = __webpack_require__(13).modifierType;
 	
 	function ScaleParser() {
@@ -58415,7 +58680,7 @@
 	module.exports = ScaleParser;
 
 /***/ }),
-/* 22 */
+/* 25 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -58521,32 +58786,15 @@
 	module.exports = api;
 
 /***/ }),
-/* 23 */
-/***/ (function(module, exports) {
-
-	"use strict";
-	
-	module.exports = {
-	  match: function match(s) {
-	    var result = this.test.exec(s);
-	    if (result) {
-	      this.string = result[0];
-	      this.parsed = this.parse(this.string);
-	    }
-	    return !!result && !!this.parsed;
-	  }
-	};
-
-/***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var utils = __webpack_require__(15);
-	var key = __webpack_require__(25);
+	var key = __webpack_require__(27);
 	
 	function KeyParser() {
 	  this.type = 'Key';
@@ -58575,7 +58823,7 @@
 	module.exports = KeyParser;
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -58616,170 +58864,16 @@
 	module.exports = key;
 
 /***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
-	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
-	var key = __webpack_require__(25);
-	var modifierType = __webpack_require__(13).modifierType;
-	var utils = __webpack_require__(14);
-	
-	function MasterScaleParser() {
-	  this.type = 'MasterScale';
-	  this.test = /^[A-G](#|b)?(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/;
-	}
-	
-	var prototype = {
-	  parse: function parse(s) {
-	    var parsed = {
-	      root: /^[A-G]/.exec(s)[0],
-	      accidental: /(#|b)/.exec(s) ? /(#|b)/.exec(s)[0] : undefined,
-	      type: /(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/.exec(s)[0]
-	    };
-	    //work off C and transpose accordingly
-	    var chordString;
-	    switch (parsed.type) {
-	      case 'maj':
-	        chordString = 'CEG';
-	        scaleString = 'CDEFGAB';
-	        break;
-	      case 'min':
-	        chordString = 'C-EG';
-	        scaleString = 'CD-EFG-AB'; // harmonic minor
-	        break;
-	      case '6':
-	        chordString = 'CEGA';
-	        scaleString = 'CDEFGAB';
-	        break;
-	      case '7':
-	        chordString = 'CEG-B';
-	        scaleString = 'CDEFGA-B';
-	        break;
-	      case '9':
-	        chordString = 'CEG-BD';
-	        scaleString = 'CDEFGA-B';
-	        break;
-	      case 'mj7':
-	        chordString = 'CEGB';
-	        scaleString = 'CDEFGAB';
-	        break;
-	      case 'm7':
-	        chordString = 'C-EG-B';
-	        scaleString = 'CD-EFG-A-B'; // melodic minor
-	        break;
-	      case 'm6':
-	        chordString = 'C-EGA';
-	        scaleString = 'CD-EFGA-B';
-	        break;
-	      case 'dim7':
-	        chordString = 'C-E-GA';
-	        scaleString = 'C-E-GA';
-	        break;
-	      case 'sus4':
-	        chordString = 'CFG';
-	        scaleString = 'CDEFGAB';
-	        break;
-	      default:
-	        throw new Error('Unsupported chord type: ' + parsed.type);
-	        break;
-	    }
-	
-	    var name = this.string;
-	
-	    var scale = parserUtils.parseNotes(scaleString);
-	    var scaleConstraint = pitchUtils.allPitches(scale);
-	
-	    var scalePitches = []; //each element of array contains pitches for all octaves for that note of the scale
-	    scale.forEach(function (note, i) {
-	      scalePitches[i + 1] = pitchUtils.allPitches([note]);
-	    });
-	
-	    var chord = parserUtils.parseNotes(chordString);
-	    var chordConstraint = pitchUtils.allPitches(chord);
-	    var C5 = 60;
-	    var accidental = parsed.accidental === '#' ? 1 : parsed.accidental === 'b' ? -1 : 0;
-	    var rootPitch = pitchUtils.midiPitchFromNote(parsed.root, 5, accidental);
-	    var transpose = rootPitch - C5;
-	    if (transpose !== 0) {
-	      chordConstraint = chordConstraint.map(function (c) {
-	        return c + transpose;
-	      });
-	      scaleConstraint = scaleConstraint.map(function (c) {
-	        return c + transpose;
-	      });
-	      scalePitches.forEach(function (pitches, i) {
-	        scalePitches[i] = pitches.map(function (c) {
-	          return c + transpose;
-	        });
-	      });
-	    }
-	    return {
-	      name: name,
-	      chordConstraint: chordConstraint,
-	      scaleConstraint: scaleConstraint,
-	      scalePitches: scalePitches
-	    };
-	  },
-	  mutateState: function mutateState(state, interpreter) {
-	    if (interpreter.isMaster) {
-	      state.scale = this.parsed;
-	    }
-	  }
-	};
-	
-	MasterScaleParser.prototype = _.extend({}, parser, prototype);
-	module.exports = MasterScaleParser;
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
-	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
-	var key = __webpack_require__(25);
-	var modifierType = __webpack_require__(13).modifierType;
-	var utils = __webpack_require__(14);
-	
-	function MasterBassParser() {
-	  this.type = 'MasterBass';
-	  this.test = /^bass:[\d+]/;
-	}
-	
-	var prototype = {
-	  parse: function parse(s) {
-	    var bass = parseInt(s.replace('bass:', ''), 10);
-	    return bass;
-	  },
-	  mutateState: function mutateState(state, interpreter) {
-	    if (interpreter.isMaster) {
-	      state.bassline = this.parsed;
-	    }
-	  }
-	};
-	
-	MasterBassParser.prototype = _.extend({}, parser, prototype);
-	module.exports = MasterBassParser;
-
-/***/ }),
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
-	var key = __webpack_require__(25);
+	var pitchUtils = __webpack_require__(25);
+	var key = __webpack_require__(27);
 	var modifierType = __webpack_require__(13).modifierType;
 	var utils = __webpack_require__(14);
 	
@@ -58818,10 +58912,10 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
-	var key = __webpack_require__(25);
+	var pitchUtils = __webpack_require__(25);
+	var key = __webpack_require__(27);
 	var modifierType = __webpack_require__(13).modifierType;
 	var utils = __webpack_require__(14);
 	
@@ -58858,7 +58952,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var utils = __webpack_require__(15);
 	var macroType = __webpack_require__(13).macroType;
 	
@@ -58905,7 +58999,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var macroType = __webpack_require__(13).macroType;
 	
 	function ParallelParser(macros) {
@@ -58963,10 +59057,10 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
-	var key = __webpack_require__(25);
+	var pitchUtils = __webpack_require__(25);
+	var key = __webpack_require__(27);
 	var modifierType = __webpack_require__(13).modifierType;
 	var macroType = __webpack_require__(13).macroType;
 	var utils = __webpack_require__(14);
@@ -59044,7 +59138,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var macroType = __webpack_require__(13).macroType;
 	
 	function NthTimeParser(macros) {
@@ -59131,7 +59225,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var macroType = __webpack_require__(13).macroType;
 	var utils = __webpack_require__(15);
 	
@@ -59192,7 +59286,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var utils = __webpack_require__(15);
 	var macroType = __webpack_require__(13).macroType;
 	
@@ -59270,31 +59364,37 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
-	var utils = __webpack_require__(15);
+	var parser = __webpack_require__(22);
+	var macroType = __webpack_require__(13).macroType;
+	var parserUtils = __webpack_require__(15);
 	
-	function MasterMarkerParser() {
-	  this.type = 'MasterMarker';
-	  this.test = /^\$\w+/;
+	function IgnoreSubstitutionSetterParser() {
+	  this.type = 'IgnoreSubstitutionSetter';
+	  this.setter = true;
+	  this.master = true;
 	}
 	
 	var prototype = {
-	  parse: function parse(s) {
-	    var markerName = s.replace('$', '');
-	    return markerName;
+	  match: function match(s) {
+	    var startTest = /^\(\w+\)=\(/.exec(s);
+	    if (!startTest) return false;
+	
+	    var key = /^\(\w+\)=/.exec(s)[0].replace('(', '').replace(')', '').replace('=', '');
+	    var bracketed = parserUtils.getBracketed(s, startTest[0].length);
+	    var value = bracketed.trim();
+	    this.string = startTest[0] + bracketed + ')';
+	    this.parsed = { type: 'substitution', key: key, value: value };
+	
+	    return true;
 	  },
 	  mutateState: function mutateState(state, interpreter) {
-	    if (interpreter.isMaster) {
-	      state.marker = this.parsed;
-	    }
+	    //dont do anything
 	  },
-	  next: function next(_next) {
-	    delete _next.marker;
-	  }
-	
+	  continue: true
 	};
-	MasterMarkerParser.prototype = _.extend({}, parser, prototype);
-	module.exports = MasterMarkerParser;
+	
+	IgnoreSubstitutionSetterParser.prototype = _.extend({}, parser, prototype);
+	module.exports = IgnoreSubstitutionSetterParser;
 
 /***/ }),
 /* 37 */
@@ -59303,12 +59403,12 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var macroType = __webpack_require__(13).macroType;
 	
 	function SubstitutionParser(macros) {
 	  this.type = 'Substitution';
-	  this.test = /^\(\w+\)/;
+	  this.test = /^\(\w+\)(?!=)/;
 	  this.substitutions = {};
 	  if (macros) {
 	    this.substitutions = macros.reduce(function (acc, item) {
@@ -59344,92 +59444,37 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var macroType = __webpack_require__(13).macroType;
-	var eventType = __webpack_require__(13).eventType;
+	var parserUtils = __webpack_require__(15);
 	
-	function AnnotationParser(macros) {
-	  this.type = 'Annotation';
-	  this.test = /^{\w+}/;
-	
-	  if (macros) {
-	    this.annotations = macros.reduce(function (acc, item) {
-	      if (item.type === macroType.annotation) {
-	        acc[item.key] = item;
-	      }
-	      return acc;
-	    }, {});
-	  } else {
-	    this.annotations = {};
-	  }
+	function IgnoreAnnotationSetterParser() {
+	  this.type = 'AnnotationSetter';
+	  this.setter = true;
+	  this.master = true;
 	}
 	
 	var prototype = {
-	  parse: function parse(s) {
-	    var key = /\w+/.exec(s)[0];
-	    if (this.annotations && this.annotations[key]) {
-	      return _.cloneDeep(this.annotations[key]);
-	    }
-	  },
-	  mutateState: function mutateState(state) {
-	    if (!this.isArticulation) {
-	      state.phrase = this;
-	    }
-	    this.parsed.parsed.forEach(function (parser) {
-	      parser.mutateState(state);
-	    });
-	  },
-	  waitForNote: true,
-	  continue: true,
-	  getEvents: function getEvents(state, prev, events) {
-	    var _this = this;
+	  match: function match(s) {
+	    var startTest = /^\{\w+\}=\{/.exec(s);
+	    if (!startTest) return false;
 	
-	    var out = this.parsed.parsed.reduce(function (acc, parser) {
-	      if (!parser.getEvents) return acc;
-	      acc = acc.concat(parser.getEvents(state, prev, events));
-	      return acc;
-	    }, []);
-	    out.forEach(function (e) {
-	      e.annotation = _this.parsed.key;
-	    });
-	    return out;
-	  },
-	  merge: function merge(articulations) {
-	    var out = new AnnotationParser();
-	    out.parsed = {
-	      key: this.parsed.key,
-	      parsed: []
-	    };
-	    this.parsed.parsed.forEach(function (p) {
-	      out.parsed.parsed.push(p);
-	    });
-	    articulations.forEach(function (a) {
-	      out.append(a.parsed, a.key);
-	    });
-	    out.info = articulations.map(function (a) {
-	      return a.key;
-	    }).join(', ');
-	    out.isArticulation = true;
-	    return out;
-	  },
-	  append: function append(parsers, key) {
-	    var _this2 = this;
+	    var key = /^\{\w+\}=/.exec(s)[0].replace('{', '').replace('}', '').replace('=', '');
+	    var bracketed = parserUtils.getBracketed(s, startTest[0].length, '{', '}');
+	    var value = bracketed.trim();
+	    this.string = startTest[0] + bracketed + '}';
+	    this.parsed = { type: 'annotation', key: key, value: value };
 	
-	    var replace = [];
-	    this.parsed.parsed.forEach(function (p, i) {
-	      parsers.forEach(function (pnew) {
-	        if (p.compare && p.compare(pnew)) {
-	          _this2.parsed.parsed.splice(i, 1);
-	        }
-	      });
-	    });
-	    this.parsed.parsed = this.parsed.parsed.concat(parsers);
-	    this.parsed.key += ' - ' + key;
-	  }
+	    return true;
+	  },
+	  mutateState: function mutateState(state, interpreter) {
+	    //dont do anything
+	  },
+	  continue: true
 	};
 	
-	AnnotationParser.prototype = _.extend({}, parser, prototype);
-	module.exports = AnnotationParser;
+	IgnoreAnnotationSetterParser.prototype = _.extend({}, parser, prototype);
+	module.exports = IgnoreAnnotationSetterParser;
 
 /***/ }),
 /* 39 */
@@ -59438,10 +59483,10 @@
 	'use strict';
 	
 	var utils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
+	var pitchUtils = __webpack_require__(25);
 	var _ = __webpack_require__(16);
 	var eventType = __webpack_require__(13).eventType;
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function KeyswitchParser() {
 	  this.type = 'Keyswitch';
@@ -59488,7 +59533,7 @@
 	'use strict';
 	
 	var utils = __webpack_require__(15);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var eventType = __webpack_require__(13).eventType;
 	var _ = __webpack_require__(16);
 	
@@ -59534,7 +59579,7 @@
 	'use strict';
 	
 	var utils = __webpack_require__(15);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var _ = __webpack_require__(16);
 	
 	function DurationParser() {
@@ -59560,14 +59605,14 @@
 	'use strict';
 	
 	var parserUtils = __webpack_require__(15);
-	var pitchUtils = __webpack_require__(22);
+	var pitchUtils = __webpack_require__(25);
 	var eventType = __webpack_require__(13).eventType;
 	var macroType = __webpack_require__(13).macroType;
 	var modifierType = __webpack_require__(13).modifierType;
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var noteParser = __webpack_require__(43);
-	var AnnotationParser = __webpack_require__(38);
+	var AnnotationParser = __webpack_require__(21);
 	
 	function NoteParser(macros) {
 	  if (macros) {
@@ -59692,7 +59737,7 @@
 
 	'use strict';
 	
-	var pitchUtils = __webpack_require__(22);
+	var pitchUtils = __webpack_require__(25);
 	var ArticulationParser = __webpack_require__(44);
 	module.exports = {
 	  parseArticulation: function parseArticulation(s) {
@@ -59786,7 +59831,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var macroType = __webpack_require__(13).macroType;
 	var eventType = __webpack_require__(13).eventType;
 	
@@ -59806,10 +59851,6 @@
 	  getEvents: function getEvents(state, prev, events) {
 	    var _this = this;
 	
-	    /*
-	    if (prev.articulations.filter(a=> a.key === this.key).length) {
-	      return [];
-	    }*/
 	    var out = this.parsed.reduce(function (acc, parser) {
 	      if (!parser.getEvents) return acc;
 	      acc = acc.concat(parser.getEvents(state, prev, events));
@@ -59833,7 +59874,7 @@
 	
 	var utils = __webpack_require__(15);
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function OctaveParser() {
 	  this.type = 'Octave';
@@ -59863,7 +59904,7 @@
 	var _ = __webpack_require__(16);
 	var utils = __webpack_require__(15);
 	var eventType = __webpack_require__(13).eventType;
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function PitchbendParser() {
 	  this.type = 'Pitchbend';
@@ -59896,10 +59937,10 @@
 
 	'use strict';
 	
-	var pitchUtils = __webpack_require__(22);
+	var pitchUtils = __webpack_require__(25);
 	var eventType = __webpack_require__(13).eventType;
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	var noteParser = __webpack_require__(43);
 	
 	function RelativeNoteParser() {
@@ -59962,7 +60003,7 @@
 	
 	var _ = __webpack_require__(16);
 	var eventType = __webpack_require__(13).eventType;
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function RestParser() {
 	  this.type = 'Rest';
@@ -60017,7 +60058,7 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function SustainParser() {
 	  this.type = 'Sustain';
@@ -60044,7 +60085,7 @@
 	var utils = __webpack_require__(15);
 	var eventType = __webpack_require__(13).eventType;
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function TempoParser() {
 	  this.type = 'Tempo';
@@ -60081,7 +60122,7 @@
 	
 	var utils = __webpack_require__(15);
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function TransposeParser() {
 	  this.type = 'Transpose';
@@ -60107,7 +60148,7 @@
 	
 	var utils = __webpack_require__(15);
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function OnParser() {
 	  this.type = 'On';
@@ -60133,7 +60174,7 @@
 	
 	var utils = __webpack_require__(15);
 	var _ = __webpack_require__(16);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function OffParser() {
 	  this.type = 'Off';
@@ -60161,7 +60202,7 @@
 	
 	var _ = __webpack_require__(16);
 	var utils = __webpack_require__(15);
-	var parser = __webpack_require__(23);
+	var parser = __webpack_require__(22);
 	
 	function VelocityParser() {
 	  this.type = 'Velocity';
@@ -60184,38 +60225,38 @@
 
 	'use strict';
 	
-	var parse = __webpack_require__(19);
-	var AnnotationParser = __webpack_require__(38);
+	var _ = __webpack_require__(16);
+	var parser = __webpack_require__(22);
+	var macroType = __webpack_require__(13).macroType;
+	var parserUtils = __webpack_require__(15);
 	
-	var api = {
-	  getDefaultPhraseParser: function getDefaultPhraseParser(macros) {
-	    var parsed;
-	    macros = macros || [];
-	    var defaultAnnotation = macros.filter(function (m) {
-	      return m.type === 'annotation' && m.key === 'default';
-	    });
-	    if (defaultAnnotation.length) {
-	      parsed = defaultAnnotation[0];
-	    } else {
-	      var defaultPhrase = '8192=P 85=C1 90=V 0=ON -5=OFF';
-	      var parsed = {
-	        type: 'annotation',
-	        key: 'default',
-	        value: defaultPhrase,
-	        parsed: parse(defaultPhrase)
-	      };
-	      //add to macros for future use... impure
-	      macros.push(parsed);
-	    }
-	    var annotation = new AnnotationParser();
-	    annotation.parsed = parsed;
-	    annotation.string = 'init';
-	    return annotation;
-	  }
+	function SubstitutionSetterParser() {
+	  this.type = 'SubstitutionSetter';
+	  this.setter = true;
+	  this.master = true;
+	}
 	
+	var prototype = {
+	  match: function match(s) {
+	    var startTest = /^\(\w+\)=\(/.exec(s);
+	    if (!startTest) return false;
+	
+	    var key = /^\(\w+\)=/.exec(s)[0].replace('(', '').replace(')', '').replace('=', '');
+	    var bracketed = parserUtils.getBracketed(s, startTest[0].length);
+	    var value = bracketed.trim();
+	    this.string = startTest[0] + bracketed + ')';
+	    this.parsed = { type: 'substitution', key: key, value: value };
+	
+	    return true;
+	  },
+	  mutateState: function mutateState(state, interpreter) {
+	    interpreter.setMacro(this.parsed);
+	  },
+	  continue: true
 	};
 	
-	module.exports = api;
+	SubstitutionSetterParser.prototype = _.extend({}, parser, prototype);
+	module.exports = SubstitutionSetterParser;
 
 /***/ }),
 /* 56 */
@@ -60224,8 +60265,233 @@
 	'use strict';
 	
 	var _ = __webpack_require__(16);
+	var parser = __webpack_require__(22);
+	var macroType = __webpack_require__(13).macroType;
 	var eventType = __webpack_require__(13).eventType;
-	var stateUtils = __webpack_require__(55);
+	var parserUtils = __webpack_require__(15);
+	
+	function AnnotationSetterParser(macros) {
+	  this.type = 'AnnotationSetter';
+	  this.setter = true;
+	  this.master = true;
+	}
+	
+	var prototype = {
+	  match: function match(s) {
+	    var startTest = /^\{\w+\}=\{/.exec(s);
+	    if (!startTest) return false;
+	
+	    var key = /^\{\w+\}=/.exec(s)[0].replace('{', '').replace('}', '').replace('=', '');
+	    var bracketed = parserUtils.getBracketed(s, startTest[0].length, '{', '}');
+	    var value = bracketed.trim();
+	    this.string = startTest[0] + bracketed + '}';
+	    this.parsed = { type: 'annotation', key: key, value: value };
+	
+	    return true;
+	  },
+	  mutateState: function mutateState(state, interpreter) {
+	    interpreter.setMacro(this.parsed);
+	  },
+	  continue: true
+	
+	};
+	
+	AnnotationSetterParser.prototype = _.extend({}, parser, prototype);
+	module.exports = AnnotationSetterParser;
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(16);
+	var parser = __webpack_require__(22);
+	var parserUtils = __webpack_require__(15);
+	var pitchUtils = __webpack_require__(25);
+	var key = __webpack_require__(27);
+	var modifierType = __webpack_require__(13).modifierType;
+	var utils = __webpack_require__(14);
+	
+	function MasterScaleParser() {
+	  this.type = 'MasterScale';
+	  this.master = true;
+	  this.test = /^[A-G](#|b)?(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/;
+	}
+	
+	var prototype = {
+	  parse: function parse(s) {
+	    var parsed = {
+	      root: /^[A-G]/.exec(s)[0],
+	      accidental: /(#|b)/.exec(s) ? /(#|b)/.exec(s)[0] : undefined,
+	      type: /(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/.exec(s)[0]
+	    };
+	    //work off C and transpose accordingly
+	    var chordString;
+	    switch (parsed.type) {
+	      case 'maj':
+	        chordString = 'CEG';
+	        scaleString = 'CDEFGAB';
+	        break;
+	      case 'min':
+	        chordString = 'C-EG';
+	        scaleString = 'CD-EFG-AB'; // harmonic minor
+	        break;
+	      case '6':
+	        chordString = 'CEGA';
+	        scaleString = 'CDEFGAB';
+	        break;
+	      case '7':
+	        chordString = 'CEG-B';
+	        scaleString = 'CDEFGA-B';
+	        break;
+	      case '9':
+	        chordString = 'CEG-BD';
+	        scaleString = 'CDEFGA-B';
+	        break;
+	      case 'mj7':
+	        chordString = 'CEGB';
+	        scaleString = 'CDEFGAB';
+	        break;
+	      case 'm7':
+	        chordString = 'C-EG-B';
+	        scaleString = 'CD-EFG-A-B'; // melodic minor
+	        break;
+	      case 'm6':
+	        chordString = 'C-EGA';
+	        scaleString = 'CD-EFGA-B';
+	        break;
+	      case 'dim7':
+	        chordString = 'C-E-GA';
+	        scaleString = 'C-E-GA';
+	        break;
+	      case 'sus4':
+	        chordString = 'CFG';
+	        scaleString = 'CDEFGAB';
+	        break;
+	      default:
+	        throw new Error('Unsupported chord type: ' + parsed.type);
+	        break;
+	    }
+	
+	    var name = this.string;
+	
+	    var scale = parserUtils.parseNotes(scaleString);
+	    var scaleConstraint = pitchUtils.allPitches(scale);
+	
+	    var scalePitches = []; //each element of array contains pitches for all octaves for that note of the scale
+	    scale.forEach(function (note, i) {
+	      scalePitches[i + 1] = pitchUtils.allPitches([note]);
+	    });
+	
+	    var chord = parserUtils.parseNotes(chordString);
+	    var chordConstraint = pitchUtils.allPitches(chord);
+	    var C5 = 60;
+	    var accidental = parsed.accidental === '#' ? 1 : parsed.accidental === 'b' ? -1 : 0;
+	    var rootPitch = pitchUtils.midiPitchFromNote(parsed.root, 5, accidental);
+	    var transpose = rootPitch - C5;
+	    if (transpose !== 0) {
+	      chordConstraint = chordConstraint.map(function (c) {
+	        return c + transpose;
+	      });
+	      scaleConstraint = scaleConstraint.map(function (c) {
+	        return c + transpose;
+	      });
+	      scalePitches.forEach(function (pitches, i) {
+	        scalePitches[i] = pitches.map(function (c) {
+	          return c + transpose;
+	        });
+	      });
+	    }
+	    return {
+	      name: name,
+	      chordConstraint: chordConstraint,
+	      scaleConstraint: scaleConstraint,
+	      scalePitches: scalePitches
+	    };
+	  },
+	  mutateState: function mutateState(state, interpreter) {
+	    state.scale = this.parsed;
+	  }
+	};
+	
+	MasterScaleParser.prototype = _.extend({}, parser, prototype);
+	module.exports = MasterScaleParser;
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(16);
+	var parser = __webpack_require__(22);
+	var parserUtils = __webpack_require__(15);
+	var pitchUtils = __webpack_require__(25);
+	var key = __webpack_require__(27);
+	var modifierType = __webpack_require__(13).modifierType;
+	var utils = __webpack_require__(14);
+	
+	function MasterBassParser() {
+	  this.type = 'MasterBass';
+	  this.master = true;
+	  this.test = /^bass:[\d+]/;
+	}
+	
+	var prototype = {
+	  parse: function parse(s) {
+	    var bass = parseInt(s.replace('bass:', ''), 10);
+	    return bass;
+	  },
+	  mutateState: function mutateState(state, interpreter) {
+	    state.bassline = this.parsed;
+	  }
+	};
+	
+	MasterBassParser.prototype = _.extend({}, parser, prototype);
+	module.exports = MasterBassParser;
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(16);
+	var parser = __webpack_require__(22);
+	var utils = __webpack_require__(15);
+	
+	function MasterMarkerParser() {
+	  this.type = 'MasterMarker';
+	  this.master = true;
+	  this.test = /^\$\w+/;
+	}
+	
+	var prototype = {
+	  parse: function parse(s) {
+	    var markerName = s.replace('$', '');
+	    return markerName;
+	  },
+	  mutateState: function mutateState(state, interpreter) {
+	    state.marker = this.parsed;
+	  },
+	  next: function next(_next) {
+	    delete _next.marker;
+	  }
+	
+	};
+	MasterMarkerParser.prototype = _.extend({}, parser, prototype);
+	module.exports = MasterMarkerParser;
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(16);
+	var eventType = __webpack_require__(13).eventType;
+	var stateUtils = __webpack_require__(20);
 	
 	function State(defaultPhraseParser) {
 	
@@ -60294,7 +60560,7 @@
 	module.exports = State;
 
 /***/ }),
-/* 57 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60302,7 +60568,7 @@
 	var eventType = __webpack_require__(13).eventType;
 	var utils = __webpack_require__(14);
 	var Interpreter = __webpack_require__(18);
-	var webmidi = __webpack_require__(58);
+	var webmidi = __webpack_require__(62);
 	
 	function Sequencer(logger) {
 	  this.stopped = false;
@@ -60563,7 +60829,7 @@
 	module.exports = Sequencer;
 
 /***/ }),
-/* 58 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -60599,7 +60865,7 @@
 	var nLevel=Math.round((bend+1)/2*16383),msb=nLevel>>7&127,lsb=127&nLevel;return this._convertChannelToArray(channel).forEach(function(ch){that.send((wm.MIDI_CHANNEL_MESSAGES.pitchbend<<4)+(ch-1),[lsb,msb],that._parseTimeParameter(options.time))}),this},Output.prototype._parseTimeParameter=function(time){var parsed,value;return"string"==typeof time&&"+"===time.substring(0,1)?(parsed=parseFloat(time),parsed&&parsed>0&&(value=wm.time+parsed)):(parsed=parseFloat(time),parsed>wm.time&&(value=parsed)),value},Output.prototype._convertNoteToArray=function(note){var notes=[];return Array.isArray(note)||(note=[note]),note.forEach(function(item){notes.push(wm.guessNoteNumber(item))}),notes},Output.prototype._convertChannelToArray=function(channel){if(("all"===channel||void 0===channel)&&(channel=["all"]),Array.isArray(channel)||(channel=[channel]),channel.indexOf("all")>-1){channel=[];for(var i=1;16>=i;i++)channel.push(i)}return channel.forEach(function(ch){if(!(ch>=1&&16>=ch))throw new RangeError("MIDI channels must be between 1 and 16.")}),channel},Output.prototype._onMidiMessage=function(e){}, true?!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function(){return wm}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):"undefined"!=typeof module&&module.exports?module.exports=wm:scope.WebMidi||(scope.WebMidi=wm)}(this);
 
 /***/ }),
-/* 59 */
+/* 63 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -60607,19 +60873,19 @@
 	module.exports = {
 	  melody: {
 	    channel: 0,
-	    part: " \n      12,1:>'E^'E^'E^'EE>>E'E'E >>E/EE^ E/>>'G^c//D>>'E^// ///^\n      ^F/F/F//F e/'e^//e e/d/d/E/d// >'G^///\n      24,1:E/// E^// E^E^ E/// F^// e^// d^d^ c//^\n      12,1:     F/F/F//F F/ e/ e/ 8,eee 12, G/G/f/d/c/// ///^\n    "
+	    part: "12,1:\n\t>'E^'E^'E^'EE>>E'E'E >>E/EE^ \n\tE/>>'G^c//D>>'E^// ///^\n\t^F/F/F//F e/'e^//e e/d/d/E/d// >'G^///\n24,1:\n\tE/// E^// E^E^ E/// F^// e^// d^d^ c//^\n12,1:     \n\tF/F/F//F F/ e/ e/ 8,eee \n12, G/G/f/d/c/// ///^\n    "
 	  },
 	  bass: {
-	    channel: 0,
+	    channel: 1,
 	    sub: {
 	      a: "24,-1:cGgG cGgG cGgG ccDE"
 	    },
-	    part: "\n      (a)\n \t    FAfA cEcEd +Fd+F Gfed\n      (a)\n \t    FAfA cEcE ggAB CgC^\n      "
+	    part: "(a)=(24,-1:cGgGcGgGcGgGccDE)\n{default}={0=ON 0=OFF}\n\n(a)\n\nFAfA cEcEd +Fd+F Gfed\n\n(a)\n\nFAfA cEcE ggAB CgC^\n      "
 	  }
 	};
 
 /***/ }),
-/* 60 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60738,13 +61004,13 @@
 	    var value = c.value(e);
 	    data.push(value);
 	  }
-	  this.onLog(data);
+	  this.onLog({ type: e.type, data: data });
 	};
 	
 	module.exports = Logger;
 
 /***/ }),
-/* 61 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -60763,6 +61029,7 @@
 	Logger.prototype.log = function (tick, events) {
 	  var _this = this;
 	
+	  this.tick = tick;
 	  events.filter(function (e) {
 	    return e.type === eventType.noteoff;
 	  }).forEach(function (e) {
@@ -60776,19 +61043,20 @@
 	
 	  if (tick % 12 !== 0) return;
 	
-	  var beat = Math.floor(tick / 48);
-	  var showBeat = beat > 0 && (!this.lastBeat || beat !== this.lastBeat);
+	  this.beat = Math.floor(tick / 48);
+	  var showBeat = this.beat > 0 && (!this.lastBeat || this.beat !== this.lastBeat);
 	  this.onLog({
-	    beat: showBeat ? beat : undefined,
+	    type: 'pitch',
+	    beat: showBeat ? this.beat : undefined,
 	    pitch: this.pitch
 	  });
-	  this.lastBeat = beat;
+	  this.lastBeat = this.beat;
 	};
 	
 	module.exports = Logger;
 
 /***/ }),
-/* 62 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -60856,9 +61124,9 @@
 	if (true) {
 	    // Add support for AMD ( https://github.com/amdjs/amdjs-api/wiki/AMD#defineamd-property- )
 	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [
-	        __webpack_require__(63),
-	        __webpack_require__(64),
-	        __webpack_require__(65)
+	        __webpack_require__(67),
+	        __webpack_require__(68),
+	        __webpack_require__(69)
 	    ], __WEBPACK_AMD_DEFINE_RESULT__ = function(js_beautify, css_beautify, html_beautify) {
 	        return get_beautify(js_beautify, css_beautify, html_beautify);
 	    }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -60874,7 +61142,7 @@
 	}
 
 /***/ }),
-/* 63 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
@@ -63360,7 +63628,7 @@
 	}());
 
 /***/ }),
-/* 64 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
@@ -63936,7 +64204,7 @@
 	}());
 
 /***/ }),
-/* 65 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
@@ -65035,9 +65303,9 @@
 	
 	    if (true) {
 	        // Add support for AMD ( https://github.com/amdjs/amdjs-api/wiki/AMD#defineamd-property- )
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, __webpack_require__(63), __webpack_require__(64)], __WEBPACK_AMD_DEFINE_RESULT__ = function(requireamd) {
-	            var js_beautify = __webpack_require__(63);
-	            var css_beautify = __webpack_require__(64);
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [__webpack_require__, __webpack_require__(67), __webpack_require__(68)], __WEBPACK_AMD_DEFINE_RESULT__ = function(requireamd) {
+	            var js_beautify = __webpack_require__(67);
+	            var css_beautify = __webpack_require__(68);
 	
 	            return {
 	                html_beautify: function(html_source, options) {
@@ -65069,22 +65337,22 @@
 	}());
 
 /***/ }),
-/* 66 */
+/* 70 */
 /***/ (function(module, exports) {
 
-	module.exports = "<nav class=\"navbar navbar-inverse navbar-fixed-top\">\n  <div class=\"container-fluid\">\n     <div class=\"navbar-header\">\n    <a class=\"navbar-brand\" href='#'>{{vm.brand}}</a>\n    </div>\n  </div>\n</nav>\n<div>\n  <div class=\"panel panel-info\">\n    <div class=\"panel-heading\">\n      <h3 class=\"panel-title\">Jingle Bells</h3>\n    </div>\n    <div class=\"panel-body\">\n      <textarea ui-codemirror=\"{ onLoad : vm.codemirrorLoaded }\" ui-codemirror-opts=\"vm.options\" class=\"form-control\" ng-model=\"vm.song\"></textarea>\n      <div class=\"btn-group pull-right\" >\n        <a class=\"btn btn-success ion-play\" ng-click=\"vm.play()\">&nbsp;</a>\n        <a class=\"btn btn-pause ion-pause\" ng-click=\"vm.togglePause()\">&nbsp;</a>\n        <a class=\"btn btn-stop ion-stop\" ng-click=\"vm.stop()\">&nbsp;</a>\n      </div>\n    </div>\n    <!--<ui-codemirror ui-codemirror-opts=\"vm.options\" class=\"form-control\" ng-model=\"vm.song\"></ui-codemirror>-->\n    <div id=\"pianoRoll\" class=\"panel-footer clearfix fixed-width-font piano-roll\" >\n       <div ng-repeat=\"row in vm.pianoRoll track by $index\" class=\"piano-roll-row clearfix\" >\n       <div class=\"beat\">{{row.beat || '.'}}</div>  \n       <div class=\"pitch\" ng-bind-html=\"row.pitch\"></div>\n         <!--\n        <div ng-repeat=\"item in row.pitch track by $index\"  ng-class=\"{'pitch': item}\" style=\"width:0.78%;float:left\">\n          <span ng-if=\"item\">{{item}}</span>\n          <span ng-if=\"!item\">.</span>\n\n        </div>\n        -->\n      </div>\n      <!--\n      <div ng-repeat=\"data in vm.logs track by $index\" class=\"row\">\n        <div ng-repeat=\"item in data track by $index\" class=\"col-xs-1\">{{item}}</div>\n      </div>\n      -->\n    </div>\n  </div>\n\n\n\n</div>"
+	module.exports = "<nav class=\"navbar navbar-inverse navbar-fixed-top\">\n  <div class=\"container-fluid\">\n    <div class=\"navbar-header\">\n      <a class=\"navbar-brand\" href='#'>{{vm.brand}}</a>\n    </div>\n  </div>\n</nav>\n<div>\n  <div class=\"panel panel-info\">\n    <div class=\"panel-heading\">\n      <h3 class=\"panel-title\">Jingle Bells</h3>\n    </div>\n    <div class=\"panel-body\">\n      <div class=\"clearfix \">\n        <div class=\"pull-left panel panel-info\" style=\"margin-right:10px;margin-left:10px;{{'width: calc(' + (100 / (vm.tracks.length)) + '% - 20px)' }}\" ng-repeat=\"track in vm.tracks\">\n          <div class=\"panel-heading\">\n             <div class=\"channel {{'channel'+(track.channel+1)}}\">Channel {{track.channel+1}}</div>\n            <h3 class=\"panel-title\">{{track.key}} </h3>\n           \n          </div>\n          <textarea ui-codemirror=\"{ onLoad : vm.codemirrorLoaded }\" ui-codemirror-opts=\"vm.options\" class=\"form-control\" ng-model=\"track.part\"></textarea>\n        </div>\n      </div>\n      <!--\n      <textarea ui-codemirror=\"{ onLoad : vm.codemirrorLoaded }\" ui-codemirror-opts=\"vm.options\" class=\"form-control\" ng-model=\"vm.song\"></textarea>\n      -->\n      <div class=\"btn-group pull-right\">\n        <a class=\"btn btn-success ion-play\" ng-click=\"vm.play()\">&nbsp;</a>\n        <a class=\"btn btn-pause ion-pause\" ng-click=\"vm.togglePause()\">&nbsp;</a>\n        <a class=\"btn btn-stop ion-stop\" ng-click=\"vm.stop()\">&nbsp;</a>\n      </div>\n    </div>\n\n    <div id=\"log\" class=\"panel-footer clearfix fixed-width-font log\" ng-class=\"{'playing':vm.playing}\">\n      <div class=\"piano-roll\">\n        <div ng-repeat=\"row in vm.pianoRoll track by $index\" class=\"piano-roll-row clearfix\">\n          <div class=\"beat\">{{row.beat || '&nbsp;'}}</div>\n          <div class=\"pitch\" ng-bind-html=\"row.pitch\"></div>\n        </div>\n      </div>\n      <div ng-repeat=\"data in vm.logs track by $index\" class=\"row\">\n        <div ng-repeat=\"item in data track by $index\" class=\"col-xs-1\">{{item}}</div>\n      </div>\n\n    </div>\n\n\n\n\n  </div>\n\n\n\n</div>"
 
 /***/ }),
-/* 67 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
 	
 	// load the styles
-	var content = __webpack_require__(68);
+	var content = __webpack_require__(72);
 	if(typeof content === 'string') content = [[module.id, content, '']];
 	// add the styles to the DOM
-	var update = __webpack_require__(70)(content, {});
+	var update = __webpack_require__(74)(content, {});
 	if(content.locals) module.exports = content.locals;
 	// Hot Module Replacement
 	if(false) {
@@ -65101,21 +65369,21 @@
 	}
 
 /***/ }),
-/* 68 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	exports = module.exports = __webpack_require__(69)();
+	exports = module.exports = __webpack_require__(73)();
 	// imports
 	
 	
 	// module
-	exports.push([module.id, "  body {\n    background-color: #74a8ea;\n  }\n  .loading {\n      opacity: 0;\n      transition: 500ms opacity;\n    }\n    \n    .loaded {\n      opacity: 1 !important;\n    }\n\n    .view-container {\n      padding:30px;\n      margin-top:50px;\n    }\n  \n    .CodeMirror {\n      height: auto;\n      font-size:1.2em;\n    }\n    .CodeMirror pre > * { text-indent: 0px; }\n    \n    .log {\n      margin-top:15px;\n      height:100px;\n      overflow: auto;\n    }\n    .piano-roll {\n      max-height:400px;\n      overflow:auto;\n      white-space: nowrap;\n      color:#999;\n    }\n    .piano-roll .pitch {\n      width: calc(100% - 50px);\n      color: red;\n      float:left;\n    }\n\n    .piano-roll .beat {\n      width:50px;\n      float:left;\n    }\n\n    .piano-roll-row {\n      width:100%;\n    }\n\n    .fixed-width-font {\n      font-family: monospace;\n    }\n\n    .panel-body .btn-group {\n      font-size:68px;\n    }\n\n\n    .toolbar {\n       margin-top:15px;\n    }\n\n    .btn-stop {\n      color: #fff;\n      background: #000\n    }\n    .btn-pause {\n      color: #fff;\n      background: #999;\n    }\n\n ", ""]);
+	exports.push([module.id, "  body {\n    background-color: #74a8ea;\n  }\n  .loading {\n      opacity: 0;\n      transition: 500ms opacity;\n    }\n    \n    .loaded {\n      opacity: 1 !important;\n    }\n\n    .view-container {\n      padding:30px;\n      margin-top:50px;\n    }\n  \n    .CodeMirror {\n      height: auto;\n      font-size:1.2em;\n    }\n    .CodeMirror pre > * { text-indent: 0px; }\n    \n    .log {\n      max-height: calc(100vh - 560px);\n      overflow:auto;\n      white-space: nowrap;\n      color:#999;\n      -webkit-box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);\n      -moz-box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);\n      box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);\n      border-top: 1px solid #ccc;\n    }\n    .log.playing {\n      overflow: hidden;\n    }\n    .piano-roll {\n      font-size:18px;\n      line-height:14px;\n    }\n    .piano-roll .pitch {\n      color: #e4e4e4;\n      width: calc(100% - 50px);\n      float:left;\n    }\n    .piano-roll .pitch .channel1 {\n       color: #6ca700;\n     }\n     .piano-roll .pitch .channel2 {\n       color: #1f6cff\n     }\n     .panel-grey {\n       background-color: #cec6bb;\n       color: #fff;\n     }\n     .panel-heading .channel {\n       float:right;\n       border-radius: 5px;\n       padding:2px 6px;\n       margin-top:-3px;\n\n     }\n     .panel-heading .channel1 {\n      background-color: #6ca700;\n      color:#fff;\n     }\n    .panel-heading .channel2 {\n       background-color: #1f6cff;\n         color:#fff;\n     }\n\n    .piano-roll .beat {\n      width:50px;\n      float:left;\n    }\n\n    .piano-roll-row {\n      width:100%;\n    }\n\n    .fixed-width-font {\n      font-family: monospace;\n    }\n\n    .panel-body .btn-group {\n      font-size:68px;\n    }\n\n\n    .toolbar {\n       margin-top:15px;\n    }\n\n    .btn-stop {\n      color: #fff;\n      background: #000\n    }\n    .btn-pause {\n      color: #fff;\n      background: #999;\n    }\n\n ", ""]);
 	
 	// exports
 
 
 /***/ }),
-/* 69 */
+/* 73 */
 /***/ (function(module, exports) {
 
 	/*
@@ -65171,7 +65439,7 @@
 
 
 /***/ }),
-/* 70 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/*

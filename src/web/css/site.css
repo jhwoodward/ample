@@ -1,5 +1,5 @@
-  body {
-    background-color: #74a8ea;
+  body, .main-toolbar, .log {
+    background-color: rgb(160, 5, 83);
   }
   .loading {
       opacity: 0;
@@ -10,9 +10,17 @@
       opacity: 1 !important;
     }
 
+    .songs md-list-item {
+      padding: 0
+    }
+
     .view-container {
-      padding:30px;
+
       margin-top:50px;
+    }
+
+    .md-toolbar-tools.main .md-icon-button {
+      font-size: 1.2em
     }
   
     .CodeMirror {
@@ -22,14 +30,15 @@
     .CodeMirror pre > * { text-indent: 0px; }
     
     .log {
-      max-height: calc(100vh - 560px);
+      max-height: calc(100vh - 510px);
       overflow:auto;
       white-space: nowrap;
       color:#999;
-      -webkit-box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);
-      -moz-box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);
-      box-shadow: inset 1px 7px 40px -5px rgba(0,0,0,0.3);
-      border-top: 1px solid #ccc;
+      
+      -webkit-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+      -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+      box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+      border-top: none !important;
     }
     .log.playing {
       overflow: hidden;
@@ -39,7 +48,7 @@
       line-height:14px;
     }
     .piano-roll .pitch {
-      color: #e4e4e4;
+      color: #9f52a2;
       width: calc(100% - 50px);
       float:left;
     }
@@ -53,18 +62,87 @@
        background-color: #cec6bb;
        color: #fff;
      }
-     .panel-heading .channel {
-       float:right;
-       border-radius: 5px;
-       padding:2px 6px;
-       margin-top:-3px;
+    .track-toolbar {
+      height:40px;
+      min-height: 40px;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+      background-color: transparent !important;
+    }
 
-     }
-     .panel-heading .channel1 {
+    .track-content {
+      border-radius: 10px;
+      height:400px;
+      background-color: #0C1021;
+    }
+
+    .track-row {
+     background-color: #e60e52;
+    }
+
+    #songName {
+      color: white;
+      text-align: right;
+      margin-top: 22px;
+    }
+.channel-menu {
+  max-height:200px;
+  min-width:93px;
+  width: 98px;
+  overflow: auto;
+  padding:0;
+}
+.md-open-menu-container, .channel-menu {
+  border-radius: 10px;
+}
+
+.md-toolbar-tools .md-button {
+    margin: 0;
+}
+.badge.channel {
+      border-radius: 15px;
+    height: 28px;
+    min-height: 28px;
+    padding: 0 10px;
+    line-height: 20px;
+}
+
+.track {
+  min-width:300px !important;
+  border-radius: 10px;
+  margin: 5px;
+}
+.channel-menu-item {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  height: 30px;
+  min-height: 30px;
+  text-transform:  uppercase;
+  padding: 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.demo-menu-item:hover,
+.demo-menu-item:focus {
+  background-color: rgb(238, 238, 238);
+}
+
+.demo-menu-item.selected {
+  color: rgb(16, 108, 200);
+}
+
+.highlight {
+  border-bottom:3px solid white;
+ /* background-color: white; color: black !important;*/
+}
+
+     .badge.channel1 {
       background-color: #6ca700;
       color:#fff;
      }
-    .panel-heading .channel2 {
+    .badge.channel2 {
        background-color: #1f6cff;
          color:#fff;
      }
@@ -86,18 +164,5 @@
       font-size:68px;
     }
 
-
-    .toolbar {
-       margin-top:15px;
-    }
-
-    .btn-stop {
-      color: #fff;
-      background: #000
-    }
-    .btn-pause {
-      color: #fff;
-      background: #999;
-    }
 
  

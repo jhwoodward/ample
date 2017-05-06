@@ -111,7 +111,8 @@ var prototype = {
       velocity: state.velocity,
       annotation: state.phrase.parsed.key,
       articulation: state.articulation.info,
-      modifiers: state.modifierInfo.join(', ')
+      modifiers: state.modifierInfo.join(', '),
+      origin: this.origin //ref to string position
     });
 
     return out;

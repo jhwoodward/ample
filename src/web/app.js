@@ -1,51 +1,69 @@
 require('angular');
-require('angular-route');
 require('angular-animate');
 require('angular-messages');
 require('angular-sanitize');
+require('@uirouter/angularjs');
+require('angular-aria');
+require('angular-material');
 
 require('angular-ui-codemirror');
 
-let demoModule = angular.module('demoModule', []);
-require('./demo/demo.controller')(demoModule);
+require('angular-material/angular-material.css');
+// Icons
+//require('font-awesome/css/font-awesome.css');
 
-let coreModule = angular.module('coreModule', []);
-coreModule.directive('unload', ['$timeout', function ($timeout) {
-    return {
-      restrict: 'A',
-      link: function ($scope, element, attrs) {
-        $timeout(function () {
-          element.addClass("loaded");
-        });
-      }
+
+let mainModule = angular.module('mainModule', []);
+require('./main/main.controller')(mainModule);
+require('./main/piano-roll')(mainModule);
+require('./main/track')(mainModule);
+
+let storeModule = angular.module('storeModule', []);
+require('./store/store.service')(storeModule);
+require('./store/store')(storeModule);
+
+let sharedModule = angular.module('sharedModule', []);
+sharedModule.directive('unload', ['$timeout', function ($timeout) {
+  return {
+    restrict: 'A',
+    link: function ($scope, element, attrs) {
+      $timeout(function () {
+        element.addClass("loaded");
+      });
     }
+  }
+}]);
+
+let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'ui.router', 'ui.codemirror', 'sharedModule', 'storeModule', 'mainModule']);
+
+app.config(['$stateProvider', '$urlRouterProvider',
+  function ($stateProvider, $urlRouterProvider) {
+    $stateProvider
+      .state('root', {
+        url: '/:key',
+        template: require('./main/main.html'),
+        controller: 'mainController',
+        controllerAs: 'vm',
+        params: {
+          key: null
+        },
+        resolve: {
+          song: function (storeService, $stateParams) {
+
+            if (!$stateParams.key) {
+              return storeService.new();
+            } else {
+              return storeService.getOne($stateParams.key);
+            }
+
+          }
+        }
+      });
+      $urlRouterProvider.otherwise('/');
   }]);
 
-
-
-let app = angular.module('app', ['ngRoute', 'ngAnimate','ngMessages','ngSanitize', 'ui.codemirror', 'coreModule', 'demoModule']);
-
-app.config(['$routeProvider', '$locationProvider',
-    function ($routeProvider, $locationProvider) {
-        
-        $locationProvider.html5Mode(true);
-        
-        $routeProvider
-          .when('/', {
-            template: require('./demo/demo.html'),
-            controller: 'demoController',
-            controllerAs: 'vm'
-        }).otherwise({
-            redirectTo:'/'
-        });
-    }]);
-    
-//global.jQuery = global.$ = require('jquery');
-//require('bootstrap');
-//require('./css/animate.css');
-//require('./css/animations.css');
 require('./css/site.css');
+require('./css/blackboard.css')
 
-//require('jquery.easing');
 
 module.exports = app;

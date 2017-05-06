@@ -25,9 +25,16 @@ const parse = (parsers, part, macros) => {
   while (part.length && out.length < 9999999) {
     parser = findMatch(parsers, part, macros);
     if (parser) {
+      //reference to position in string
+      parser.origin = {
+        start: cursor,
+        end: cursor + parser.string.length
+      };
       out.push(parser);
       part = part.substring(parser.string.length, part.length);
+      cursor += parser.string.length;
     } else {
+      cursor ++;
       out.push(null);
       part = part.substring(1, part.length)
     }

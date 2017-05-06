@@ -1,16 +1,15 @@
-
-var eventType = require('../interpreter/constants').eventType;
-var utils = require('../interpreter/utils');
-var Interpreter = require('../interpreter/Interpreter');
+var eventType = require('../../interpreter/constants').eventType;
+var utils = require('../../interpreter/utils');
+var Interpreter = require('../../interpreter/Interpreter');
 var webmidi = require('webmidi');
 
-function Sequencer(logger) {
+function Sequencer() {
   this.stopped = false;
   this.paused = false;
   this.interval = 10;
   this.tick = -1;
   this.onTick = this.onTick.bind(this);
-  this.logger = logger;
+  this.listeners = [];
 }
 
 function prepPlayers(players) {
@@ -46,6 +45,14 @@ Sequencer.prototype = {
       cb(this.output);
     }.bind(this));
   },
+  subscribe: function(listener) {
+    this.listeners.push(listener);
+  },
+  raiseEvent: function(e) {
+    this.listeners.forEach(function(listener) {
+      listener(e);
+    });
+  },
   load: function (players) {
     players = prepPlayers(players);
     var player1 = players[Object.keys(players)[1]];
@@ -57,7 +64,10 @@ Sequencer.prototype = {
       console.log('Interpreting ' + key);
       interpreter = new Interpreter(players[key].macros, players[key].master);
       players[key].interpreted = interpreter.interpret(players[key].part);
-      players[key].interpreted.events.forEach(e => { e.channel = players[key].channel });
+      players[key].interpreted.events.forEach(e => { 
+        e.channel = players[key].channel;
+        e.track = key; 
+      });
       events = events.concat(players[key].interpreted.events);
     }
 
@@ -130,7 +140,7 @@ Sequencer.prototype = {
     }
   },
   play: function () {
-    this.logger.logEvent({ type: 'start' });
+    this.raiseEvent({ type: 'start' });
     this.timer = window.setInterval(this.onTick, this.interval);
   },
   fastForward: function () {
@@ -161,18 +171,18 @@ Sequencer.prototype = {
   },
   stop: function () {
     this.switchOffAllTheShit();
-    this.logger.logEvent({type: 'stop'});
+    this.raiseEvent({type: 'stop'});
   },
   end: function () {
     this.switchOffAllTheShit();
-    this.logger.logEvent({type: 'end'});
+    this.raiseEvent({type: 'end'});
   },
   togglePause: function () {
     this.paused = !this.paused;
     if (this.paused) {
       window.clearInterval(this.timer);
       this.allNotesOff();
-      this.logger.logEvent({type: 'pause'});
+      this.raiseEvent({type: 'pause'});
     } else {
       this.timer = window.setInterval(this.onTick, this.interval);
     }
@@ -220,7 +230,11 @@ Sequencer.prototype = {
           break;
         case eventType.noteon:
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.playNote(e.pitch.value, e.channel + 1, { rawVelocity: true, velocity: e.velocity || 80 });
+            this.output.playNote(e.pitch.value, e.channel + 1, 
+            { 
+              rawVelocity: true, 
+              velocity: e.velocity || 80 
+            });
           }
           break;
         case eventType.noteoff:
@@ -239,7 +253,7 @@ Sequencer.prototype = {
 
       this.markers.forEach(m => {
         if (this.tick >= m.tick && !m.logged) {
-          this.logger.logEvent({
+          this.raiseEvent({
             type: 'marker',
             value: m.key
           });
@@ -247,7 +261,11 @@ Sequencer.prototype = {
         }
       });
 
-      this.logger.log(this.tick, events);
+      this.raiseEvent({ 
+        type: 'tick', 
+        tick: this.tick, 
+        events: events 
+      });
     }
 
     this.tick++;

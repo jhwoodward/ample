@@ -41,8 +41,7 @@ var config = {
              ,
              {
                 test: /\.css$/,
-                loader:'style!css-loader',
-                exclude:/node_modules/
+                loader:'style!css-loader'
             }
             ,
             { test: /\.(png|jpg|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader' }

@@ -1,0 +1,33 @@
+<div class="track track{{vm.trackIndex}}">
+  <md-toolbar class="track-toolbar">
+    <div class="md-toolbar-tools">
+      <h4>
+        <span>{{vm.track.key}}</span>
+      </h4>
+      <span flex class="flex"></span>
+
+      <md-menu md-position-mode="target-right bottom">
+        <md-button aria-label="Select channel" class="badge channel channel{{vm.track.channel+1}}" ng-click="vm.showChannelDropdown($mdMenu, $event)">
+          Channel {{vm.track.channel+1}}
+        </md-button>
+        <md-menu-content class="channel-menu">
+          <md-menu-item 
+            ng-repeat="channel in vm.channels"
+            style="border-radius:0" 
+            class="channel-menu-item badge channel{{$index+1}}" ng-click="vm.selectChannel(channel)"
+            >
+            Channel {{ channel }}
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
+    </div>
+  </md-toolbar>
+  <md-content class="track-content" flex>
+    <textarea 
+      ui-codemirror="{ onLoad : vm.codemirrorLoaded }" 
+      ui-codemirror-opts="{{vm.options}}" 
+      ng-model="vm.track.part">
+    </textarea>
+  </md-content>
+
+</div>

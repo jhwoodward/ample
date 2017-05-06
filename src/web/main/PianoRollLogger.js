@@ -1,16 +1,18 @@
-var eventType = require('../interpreter/constants').eventType;
+var eventType = require('../../interpreter/constants').eventType;
 
-function Logger(onLog) {
+function Logger(callback) {
   this.pitch = {};
-  this.onLog = onLog;
+  this.callback = callback;
+  this.handler = this.handler.bind(this);
 }
 
-Logger.prototype.logEvent = function (e) {
-  this.onLog(e);
-}
+Logger.prototype.handler = function (event) {
+  if (event.type !== 'tick') return;
 
-Logger.prototype.log = function (tick, events) {
+  var events = event.events;
+  var tick = event.tick;
   this.tick = tick;
+
   events.filter(e => e.type === eventType.noteoff)
     .forEach(e => {
       delete this.pitch[e.pitch.value];
@@ -24,17 +26,12 @@ Logger.prototype.log = function (tick, events) {
 
   this.beat = Math.floor(tick / 48);
   var showBeat = this.beat > 0 && (!this.lastBeat || this.beat !== this.lastBeat);
-  this.onLog({ 
-    type: 'pitch',
+  this.callback({ 
+    type: 'tick',
     beat: showBeat ? this.beat : undefined, 
     pitch: this.pitch 
   });
   this.lastBeat = this.beat;
 }
-
-
-
-
-
 
 module.exports = Logger;

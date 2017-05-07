@@ -1,22 +1,34 @@
 <div class="track track{{vm.trackIndex}}">
   <md-toolbar class="track-toolbar">
     <div class="md-toolbar-tools">
+      <span class="track-led" ng-class="{'active': vm.active}">●</span>
       <h4>
         <span>{{vm.track.key}}</span>
       </h4>
       <span flex class="flex"></span>
+ <md-button aria-label="Solo" class="md-fab md-micro mute"
+ ng-class="{'active': vm.track.isMuted}"  
+ ng-click="vm.toggleMute()">
+        <md-tooltip md-direction="top">Mute</md-tooltip>
+     M
+      </md-button>
+      <md-button aria-label="Solo" class="md-fab md-micro solo" ng-click="vm.solo()">
+        <md-tooltip md-direction="top">Solo</md-tooltip>
+      S
+      </md-button>
 
-      <md-menu md-position-mode="target-right bottom">
-        <md-button aria-label="Select channel" class="badge channel channel{{vm.track.channel+1}}" ng-click="vm.showChannelDropdown($mdMenu, $event)">
-          Channel {{vm.track.channel+1}}
+      <md-menu class="channel-menu" md-position-mode="target-right bottom">
+        <md-button aria-label="Select channel" class="md-fab md-micro channel channel{{vm.track.channel+1}}" ng-click="vm.showChannelDropdown($mdMenu, $event)">
+          <md-tooltip md-direction="top">Channel</md-tooltip>
+          {{vm.track.channel+1}}
         </md-button>
-        <md-menu-content class="channel-menu">
+        <md-menu-content class="channel-menu-content">
           <md-menu-item 
             ng-repeat="channel in vm.channels"
             style="border-radius:0" 
             class="channel-menu-item badge channel{{$index+1}}" ng-click="vm.selectChannel(channel)"
             >
-            Channel {{ channel }}
+            {{ channel }}
           </md-menu-item>
         </md-menu-content>
       </md-menu>

@@ -10,17 +10,19 @@ function Sequencer() {
   this.tick = -1;
   this.onTick = this.onTick.bind(this);
   this.listeners = [];
+  this.muted = [];
+
 }
 
-function prepPlayers(players) {
-  for (var key in players) {
-    var player = players[key];
-    if (player.annotations && player.annotations.name) {
-      delete player.annotations.name;
+function preptracks(tracks) {
+  for (var key in tracks) {
+    var track = tracks[key];
+    if (track.annotations && track.annotations.name) {
+      delete track.annotations.name;
     }
-    player.macros = utils.combineMacros(player);
+    track.macros = utils.combineMacros(track);
   }
-  return players;
+  return tracks;
 }
 
 function getMarkers(master) {
@@ -53,22 +55,22 @@ Sequencer.prototype = {
       listener(e);
     });
   },
-  load: function (players) {
-    players = prepPlayers(players);
-    var player1 = players[Object.keys(players)[1]];
-    var master = new Interpreter(player1.macros, player1.master).master;
+  load: function (tracks) {
+    tracks = preptracks(tracks);
+    var track1 = tracks[Object.keys(tracks)[1]];
+    var master = new Interpreter(track1.macros, track1.master).master;
     this.markers = getMarkers(master);
     var events = [];
     var interpreter;
-    for (var key in players) {
+    for (var key in tracks) {
       console.log('Interpreting ' + key);
-      interpreter = new Interpreter(players[key].macros, players[key].master);
-      players[key].interpreted = interpreter.interpret(players[key].part);
-      players[key].interpreted.events.forEach(e => { 
-        e.channel = players[key].channel;
+      interpreter = new Interpreter(tracks[key].macros, tracks[key].master);
+      tracks[key].interpreted = interpreter.interpret(tracks[key].part);
+      tracks[key].interpreted.events.forEach(e => { 
+        e.channel = tracks[key].channel;
         e.track = key; 
       });
-      events = events.concat(players[key].interpreted.events);
+      events = events.concat(tracks[key].interpreted.events);
     }
 
     var errors = events.filter(e => {
@@ -99,7 +101,7 @@ Sequencer.prototype = {
     options = options || {};
 
     if (!this.events) {
-      throw (new Error('No players loaded'));
+      throw (new Error('No tracks loaded'));
     }
 
     window.clearInterval(this.timer);
@@ -137,6 +139,16 @@ Sequencer.prototype = {
       this.fastForward();
     } else {
       this.play();
+    }
+  },
+  toggleMute: function(track) {
+    var mutedIndex = this.muted.indexOf(track.key);
+    if (mutedIndex > -1) {
+      track.isMuted = false;
+      this.muted.splice(mutedIndex);
+    } else {
+      track.isMuted = true;
+      this.muted.push(track.key);
     }
   },
   play: function () {
@@ -185,6 +197,7 @@ Sequencer.prototype = {
       this.raiseEvent({type: 'pause'});
     } else {
       this.timer = window.setInterval(this.onTick, this.interval);
+      this.raiseEvent({type: 'continue'});
     }
   },
   onTick: function () {
@@ -208,7 +221,7 @@ Sequencer.prototype = {
       return;
     }
 
-    var events = this.events[this.tick];
+    var events = this.events[this.tick].filter(e => this.muted.indexOf(e.track) === -1);
 
     events.forEach(function (e) {
 
@@ -242,8 +255,11 @@ Sequencer.prototype = {
             this.output.stopNote(e.pitch.value, e.channel + 1);
           }
           break;
+        case eventType.substitution:
+          //
+          break;
         default:
-          throw 'Unknown event type: ' + e.type
+        //  throw 'Unknown event type: ' + e.type
           break
       }
 

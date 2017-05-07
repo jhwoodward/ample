@@ -18,11 +18,17 @@ var prototype = {
     var bracketed = parserUtils.getBracketed(s, startTest[0].length);
     var value = bracketed.trim();
     this.string = startTest[0] + bracketed + ')';
-    this.parsed = { type: 'substitution', key, value };
+    this.parsed = { 
+      type: 'substitution', 
+      definitionStart: startTest[0].length,
+      key, 
+      value 
+  };
 
     return true;
   },
   mutateState: function (state, interpreter) {
+    this.parsed.definitionStart += this.origin.start;
     interpreter.setMacro(this.parsed);
   },
   continue: true

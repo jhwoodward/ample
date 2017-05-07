@@ -60,8 +60,8 @@ Interpreter.prototype.interpretMaster = function (part) {
   return { states, marker };
 }
 
-Interpreter.prototype.parse = function (part) {
-  return parse(parsers.main, part, this.macros);
+Interpreter.prototype.parse = function (part, cursor) {
+  return parse(parsers.main, part, this.macros, cursor);
 }
 
 Interpreter.prototype.generateState = function (parsers) {
@@ -234,7 +234,8 @@ Interpreter.prototype.parseMacros = function (part) {
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation;
   }).forEach(macro => {
-    macro.parsed = parse(parsers.main, macro.value, this.macros);
+    console.log('defstart',macro.definitionStart);
+    macro.parsed = parse(parsers.main, macro.value, this.macros, macro.definitionStart);
   });
 
   this.animations = {};

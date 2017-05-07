@@ -19,6 +19,7 @@ module.exports = function (ngModule) {
     var vm = this;
     var logger = new PianoRollLogger(callback);
     vm.data = [];
+
     $scope.$watch('vm.sequencer', function (seq) {
       if (seq) {
         seq.subscribe(logger.handler);
@@ -26,6 +27,14 @@ module.exports = function (ngModule) {
     });
 
     function callback(e) {
+
+      if (e.type !== 'tick') {
+        if (e.type === 'start') {
+          vm.data = [];
+          logger.pitch = {};
+        }
+        return;
+      }
       // convert pitch object to array
       var arr = [];
       for (var i = 0; i < 128; i++) {
@@ -33,7 +42,6 @@ module.exports = function (ngModule) {
       }
       e.pitch = arr.reduce(function (acc, item) {
         if (item) {
-          // acc += '<i class="ion-record" ></i>';
           acc += '<span class="channel' + item + '">█</span>';
         } else {
           acc += '·';

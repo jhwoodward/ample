@@ -36,13 +36,15 @@ var prototype = {
     } else {
       parsed.part = part;
     }
-
+    parsed.definitionStart = 1;
+    
     this.string = '(' + bracketed + ')*' + count,
     this.parsed = parsed;
     return true;
   },
   mutateState: function (state, interpreter) {
-    var parsed = interpreter.parse(this.parsed.part);
+    var cursor = this.origin.start + this.parsed.definitionStart;
+    var parsed = interpreter.parse(this.parsed.part, cursor);
     for (var i = 0; i < this.parsed.count; i++) {
       interpreter.generateState(parsed);
     }

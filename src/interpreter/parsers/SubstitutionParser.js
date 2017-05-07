@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var parser = require('./_parser');
 var macroType = require('../constants').macroType;
+var eventType = require('../constants').eventType;
 
 function SubstitutionParser(macros) {
   this.type = 'Substitution';
@@ -24,8 +25,16 @@ var prototype = {
     }
   },
   mutateState: function (state, interpreter) {
-    var part = this.substitutions[this.parsed];
-    interpreter.generateState(part.parsed);
+    var sub = this.substitutions[this.parsed];
+    interpreter.generateState(sub.parsed);
+  },
+  getEvents: function(state) {
+   
+    return [{
+      tick: state.time.tick,
+      type: eventType.substitution,
+      origin: this.origin //ref to string position
+    }];
   },
   continue: true
 }

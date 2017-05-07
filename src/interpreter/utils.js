@@ -92,6 +92,7 @@ var api = {
           if (x.parsed) {
             x.parsed = a.parsed;
           }
+          x.definitionStart = a.definitionStart;
           replaced = true;
         }
       });

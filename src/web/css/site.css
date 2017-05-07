@@ -1,6 +1,13 @@
-  body, .main-toolbar, .log {
-    background-color: rgb(160, 5, 83);
+
+  body, .track-row,.channel-menu-content,.channel-menu-item {
+     background-color: #3e5569;
+    }
+  
+  .main-toolbar {
+    background-color: rgb(67, 106, 125) !important;
   }
+   
+
   .loading {
       opacity: 0;
       transition: 500ms opacity;
@@ -30,7 +37,7 @@
     .CodeMirror pre > * { text-indent: 0px; }
     
     .log {
-      max-height: calc(100vh - 510px);
+      height: calc(100vh - 519px);
       overflow:auto;
       white-space: nowrap;
       color:#999;
@@ -39,6 +46,10 @@
       -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       border-top: none !important;
+
+      border-radius: 10px;
+      margin: 5px;
+      margin-top: 0;
     }
     .log.playing {
       overflow: hidden;
@@ -48,7 +59,7 @@
       line-height:14px;
     }
     .piano-roll .pitch {
-      color: #9f52a2;
+      color: #3d424e;
       width: calc(100% - 50px);
       float:left;
     }
@@ -76,22 +87,18 @@
       background-color: #0C1021;
     }
 
-    .track-row {
-     background-color: #e60e52;
+   
+    .log {
+    background-color: #334452;
     }
-
     #songName {
       color: white;
       text-align: right;
       margin-top: 22px;
     }
-.channel-menu {
-  max-height:200px;
-  min-width:93px;
-  width: 98px;
-  overflow: auto;
-  padding:0;
-}
+
+  
+
 .md-open-menu-container, .channel-menu {
   border-radius: 10px;
 }
@@ -99,12 +106,38 @@
 .md-toolbar-tools .md-button {
     margin: 0;
 }
-.badge.channel {
-      border-radius: 15px;
-    height: 28px;
-    min-height: 28px;
+.track-toolbar .badge  {
+  border-radius: 15px;
+height: 28px;
+min-height: 28px;
+        min-width: 30px;
     padding: 0 10px;
     line-height: 20px;
+}
+
+
+
+.md-button.md-fab.md-micro {
+    line-height: 30px;
+    width: 30px;
+    height: 30px;
+    min-height: 30px;
+    background: transparent;
+    transition: all .1s cubic-bezier(.55,0,.55,.2);
+    -webkit-transition:  all .1s cubic-bezier(.55,0,.55,.2);
+    margin-left: 2px;
+}
+.md-button.md-fab.mute.md-micro:hover {
+  background-color: #d62222;
+}
+.md-button.md-fab.mute.md-micro.active {
+  background-color: #d62222 !important;
+}
+.md-button.md-fab.solo.md-micro:hover {
+  background-color:  #72a202 !important;
+}
+.md-button.md-fab.solo.md-micro.active {
+  background-color:  #72a202 !important;
 }
 
 .track {
@@ -112,12 +145,26 @@
   border-radius: 10px;
   margin: 5px;
 }
+  .channel-menu > .md-fab {
+      margin-top: -1px !important;
+    }
+.channel-menu-content {
+  max-height:150px;
+  min-width:40px;
+  width: 40px;
+  overflow: auto;
+  padding:0;
+  padding-top:5px;
+  padding-bottom: 5px;
+  border-radius:10px;
+}
 .channel-menu-item {
-  align-items: center;
+  align-items: right;
+  text-align:right;
   cursor: pointer;
   display: flex;
-  height: 30px;
-  min-height: 30px;
+      height: 24px;
+    min-height: 24px;
   text-transform:  uppercase;
   padding: 0 8px;
   font-size: 14px;
@@ -133,16 +180,45 @@
   color: rgb(16, 108, 200);
 }
 
-.highlight {
-  border-bottom:3px solid white;
- /* background-color: white; color: black !important;*/
+.main-toolbar .md-button {
+  min-width: 0;
 }
 
-     .badge.channel1 {
+
+.track-led {
+ border-radius: 50%;
+ width:20px;
+ height:20px;
+ color: #000;
+margin-left: -15px;
+    margin-top: -4px;
+}
+
+.track-led.active {
+  color: white !important;
+   text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
+}
+
+.highlight {
+  border-bottom:3px solid white;
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
+  color: white !important;
+ 
+}
+.sustain-highlight {
+  border-bottom:3px solid grey;
+   
+ 
+}
+.sub-highlight {
+ background-color: white; color: black !important;
+}
+
+     .md-fab.channel1 {
       background-color: #6ca700;
       color:#fff;
      }
-    .badge.channel2 {
+    .md-fab.channel2 {
        background-color: #1f6cff;
          color:#fff;
      }
@@ -150,6 +226,7 @@
     .piano-roll .beat {
       width:50px;
       float:left;
+      font-size: 16px;
     }
 
     .piano-roll-row {

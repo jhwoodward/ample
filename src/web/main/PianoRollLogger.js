@@ -7,7 +7,11 @@ function Logger(callback) {
 }
 
 Logger.prototype.handler = function (event) {
-  if (event.type !== 'tick') return;
+  
+  if (event.type !== 'tick') {
+    this.callback(event);
+    return;
+  }
 
   var events = event.events;
   var tick = event.tick;

@@ -1,3 +1,5 @@
+var eventType = require('../../interpreter/constants').eventType;
+
 module.exports = function (ngModule) {
 
   ngModule.directive('track', [function () {
@@ -11,17 +13,31 @@ module.exports = function (ngModule) {
         track: '='
       },
       bindToController: true,
-      controller: ['$scope', controller],
+      controller: ['$scope', '$timeout', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope) {
+  function controller($scope, $timeout) {
     var vm = this;
     vm.channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16];
     vm.showChannelDropdown = function ($mdMenu, ev) {
       $mdMenu.open(ev);
     };
+    vm.toggleMute = function () {
+      vm.sequencer.toggleMute(vm.track);
+      if (vm.track.isMuted) {
+        if (marker) {
+          marker.clear();
+        }
+        if (subMarker) {
+          subMarker.clear();
+        }
+        if (sustainMarker) {
+          sustainMarker.clear();
+        }
+      }
+    }
 
     $scope.$watch('vm.sequencer', function (seq) {
       if (seq) {
@@ -31,29 +47,53 @@ module.exports = function (ngModule) {
 
     //  http://codemirror.net/doc/manual.html#api_marker
     var marker;
+    var subMarker;
+    var sustainMarker;
     function handler(event) {
-      if (event.type=== 'stop') {
+      if (event.type === 'stop' && marker) {
         marker.clear();
       }
       if (event.type !== 'tick') return;
       event.events.forEach(function (e) {
         if (e.track === vm.track.key && e.origin) {
-          if (marker) { marker.clear();}
           var start = editor.posFromIndex(e.origin.start);
           var end = editor.posFromIndex(e.origin.end);
-          console.log(start);
-          marker = editor.markText(start, end, { className: 'highlight' });
+          if (e.type === eventType.substitution) {
+            subMarker = editor.markText(start, end, { className: 'sub-highlight' });
+          } else if (e.type === eventType.sustain) {
+            if (sustainMarker) { sustainMarker.clear(); }
+            sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
+          } else {
+            if (marker) { marker.clear(); }
+            if (sustainMarker) { sustainMarker.clear(); }
+            if (e.type === eventType.noteon) {
+              vm.setActive(true);
+            }
+            if (e.type === eventType.noteoff) {
+              vm.setActive(false);
+            }
+
+            marker = editor.markText(start, end, { className: 'highlight' });
+          }
+
         }
       });
     }
 
+    vm.setActive = function (active) {
+      $timeout(function () {
+        $scope.$apply(function () {
+          vm.active = active;
+        });
+      });
+    }
+
     vm.selectChannel = function (channel) {
-      console.log(channel, index);
       vm.track.channel = channel - 1;
     }
     vm.options = {
       lineWrapping: true,
-      //lineNumbers: false,
+      lineNumbers: true,
       height: '100%',
       mode: {
         name: 'javascript',

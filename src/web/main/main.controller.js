@@ -27,21 +27,12 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
       $state.go('root', { key: undefined });
     }
   }
-  vm.toggleRight = buildToggler('right');
+  vm.toggleRight = function() {
+    $mdSidenav('right').toggle();
+  } 
   vm.isOpenRight = function () {
     return $mdSidenav('right').isOpen();
   };
-
-  function buildToggler(navID) {
-    return function () {
-      // Component lookup should always be available since we are not using `ng-if`
-      $mdSidenav(navID)
-        .toggle()
-        .then(function () {
-          $log.info("toggle " + navID + " is done");
-        });
-    };
-  }
 
   function save() {
     vm.song.parts = songFromArray(vm.tracks);

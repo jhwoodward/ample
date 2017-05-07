@@ -19,9 +19,9 @@ function findMatch(parsers, part, macros) {
 /*
 Returns an array of parsers who's regex's match the part string
 */
-const parse = (parsers, part, macros) => {
+const parse = (parsers, part, macros, cursor) => {
   var out = [], parser;
-  var cursor = 0;
+  var cursor = cursor || 0;
   while (part.length && out.length < 9999999) {
     parser = findMatch(parsers, part, macros);
     if (parser) {

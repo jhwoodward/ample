@@ -42,7 +42,7 @@ module.exports = function (ngModule) {
       }
       e.pitch = arr.reduce(function (acc, item) {
         if (item) {
-          acc += '<span class="channel' + item + '">█</span>';
+          acc += '<span class="channel' + item.channel + ' track' + item.track + '">█</span>';
         } else {
           acc += '·';
         }

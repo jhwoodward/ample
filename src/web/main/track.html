@@ -1,20 +1,29 @@
-<div class="track track{{vm.trackIndex}}">
+<div class="track track{{vm.trackIndex+1}}">
   <md-toolbar class="track-toolbar">
     <div class="md-toolbar-tools">
-      <span class="track-led" ng-class="{'active': vm.active}">●</span>
-      <h4>
+      <span 
+      class="track-led" 
+      ng-class="{'active': vm.active && (!vm.sequencer.solo || vm.sequencer.solo === vm.track.key)}">●</span>
+      <h4 class="track-key">
         <span>{{vm.track.key}}</span>
       </h4>
       <span flex class="flex"></span>
- <md-button aria-label="Solo" class="md-fab md-micro mute"
- ng-class="{'active': vm.track.isMuted}"  
- ng-click="vm.toggleMute()">
+      <md-button 
+        aria-label="Mute" 
+        class="md-fab md-micro mute" 
+        ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}" 
+        ng-click="vm.toggleMute()">
         <md-tooltip md-direction="top">Mute</md-tooltip>
-     M
+        M
       </md-button>
-      <md-button aria-label="Solo" class="md-fab md-micro solo" ng-click="vm.solo()">
+      <md-button 
+        aria-label="Solo" 
+        class="md-fab md-micro solo" 
+        ng-click="vm.sequencer.toggleSolo(vm.track)"
+        ng-class="{'active': vm.track.key === vm.sequencer.solo}"
+        >
         <md-tooltip md-direction="top">Solo</md-tooltip>
-      S
+        S
       </md-button>
 
       <md-menu class="channel-menu" md-position-mode="target-right bottom">
@@ -23,11 +32,8 @@
           {{vm.track.channel+1}}
         </md-button>
         <md-menu-content class="channel-menu-content">
-          <md-menu-item 
-            ng-repeat="channel in vm.channels"
-            style="border-radius:0" 
-            class="channel-menu-item badge channel{{$index+1}}" ng-click="vm.selectChannel(channel)"
-            >
+          <md-menu-item ng-repeat="channel in vm.channels" style="border-radius:0" class="channel-menu-item badge channel{{$index+1}}"
+            ng-click="vm.selectChannel(channel)">
             {{ channel }}
           </md-menu-item>
         </md-menu-content>
@@ -35,10 +41,7 @@
     </div>
   </md-toolbar>
   <md-content class="track-content" flex>
-    <textarea 
-      ui-codemirror="{ onLoad : vm.codemirrorLoaded }" 
-      ui-codemirror-opts="{{vm.options}}" 
-      ng-model="vm.track.part">
+    <textarea ui-codemirror="{ onLoad : vm.codemirrorLoaded }" ui-codemirror-opts="{{vm.options}}" ng-model="vm.track.part">
     </textarea>
   </md-content>
 

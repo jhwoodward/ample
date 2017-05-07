@@ -63,12 +63,7 @@
       width: calc(100% - 50px);
       float:left;
     }
-    .piano-roll .pitch .channel1 {
-       color: #6ca700;
-     }
-     .piano-roll .pitch .channel2 {
-       color: #1f6cff
-     }
+ 
      .panel-grey {
        background-color: #cec6bb;
        color: #fff;
@@ -106,38 +101,36 @@
 .md-toolbar-tools .md-button {
     margin: 0;
 }
-.track-toolbar .badge  {
-  border-radius: 15px;
-height: 28px;
-min-height: 28px;
-        min-width: 30px;
-    padding: 0 10px;
-    line-height: 20px;
-}
 
-
-
-.md-button.md-fab.md-micro {
-    line-height: 30px;
-    width: 30px;
-    height: 30px;
-    min-height: 30px;
-    background: transparent;
+.track-toolbar .md-button.md-fab.md-micro {
+    line-height: 28px;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
+    background-color: transparent;
     transition: all .1s cubic-bezier(.55,0,.55,.2);
     -webkit-transition:  all .1s cubic-bezier(.55,0,.55,.2);
     margin-left: 2px;
 }
-.md-button.md-fab.mute.md-micro:hover {
-  background-color: #d62222;
+.track-toolbar .md-button.md-fab.mute.md-micro:hover {
+  color: #d62222; 
+  background-color: transparent;
 }
-.md-button.md-fab.mute.md-micro.active {
+.track-toolbar .md-button.md-fab.mute.md-micro.active {
   background-color: #d62222 !important;
 }
-.md-button.md-fab.solo.md-micro:hover {
+.track-toolbar .md-button.md-fab.mute.md-micro.active:hover {
+  color:white;
+}
+.track-toolbar .md-button.md-fab.solo.md-micro:hover {
+  color:  #72a202;
+  background-color: transparent;
+}
+.track-toolbar .md-button.md-fab.solo.md-micro.active {
   background-color:  #72a202 !important;
 }
-.md-button.md-fab.solo.md-micro.active {
-  background-color:  #72a202 !important;
+.track-toolbar .md-button.md-fab.solo.md-micro.active:hover {
+  color:white;
 }
 
 .track {
@@ -145,8 +138,41 @@ min-height: 28px;
   border-radius: 10px;
   margin: 5px;
 }
+
+.track1 .track-toolbar .track-key {
+  background-color: red;
+}
+   .piano-roll .pitch .track1 {
+       color: red;
+     }
+  
+.track-toolbar .track-key {
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+.track2 .track-toolbar .track-key {
+  background-color: green;
+}
+   .piano-roll .pitch .track2 {
+       color: green
+     }
+
+.track3 .track-toolbar .track-key {
+  background-color: blue;
+}  
+.piano-roll .pitch .track3 {
+       color: blue;
+    }
+.track4 .track-toolbar .track-key {
+  background-color: purple;
+}
+  .piano-roll .pitch .track4 {
+       color: purple;
+     }
+
+
   .channel-menu > .md-fab {
-      margin-top: -1px !important;
+      margin-top: -4px !important;
     }
 .channel-menu-content {
   max-height:150px;
@@ -213,15 +239,6 @@ margin-left: -15px;
 .sub-highlight {
  background-color: white; color: black !important;
 }
-
-     .md-fab.channel1 {
-      background-color: #6ca700;
-      color:#fff;
-     }
-    .md-fab.channel2 {
-       background-color: #1f6cff;
-         color:#fff;
-     }
 
     .piano-roll .beat {
       width:50px;

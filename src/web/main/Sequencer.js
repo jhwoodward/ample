@@ -11,7 +11,7 @@ function Sequencer() {
   this.onTick = this.onTick.bind(this);
   this.listeners = [];
   this.muted = [];
-
+  this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
 }
 
 function preptracks(tracks) {
@@ -47,11 +47,11 @@ Sequencer.prototype = {
       cb(this.output);
     }.bind(this));
   },
-  subscribe: function(listener) {
+  subscribe: function (listener) {
     this.listeners.push(listener);
   },
-  raiseEvent: function(e) {
-    this.listeners.forEach(function(listener) {
+  raiseEvent: function (e) {
+    this.listeners.forEach(function (listener) {
       listener(e);
     });
   },
@@ -62,16 +62,20 @@ Sequencer.prototype = {
     this.markers = getMarkers(master);
     var events = [];
     var interpreter;
+    var trackIndex = 0;
     for (var key in tracks) {
       console.log('Interpreting ' + key);
       interpreter = new Interpreter(tracks[key].macros, tracks[key].master);
       tracks[key].interpreted = interpreter.interpret(tracks[key].part);
-      tracks[key].interpreted.events.forEach(e => { 
+      tracks[key].interpreted.events.forEach(e => {
         e.channel = tracks[key].channel;
-        e.track = key; 
+        e.track = key;
+        e.trackIndex = trackIndex;
       });
+      trackIndex ++;
       events = events.concat(tracks[key].interpreted.events);
     }
+    this.tracks = tracks;
 
     var errors = events.filter(e => {
       return e.tick === undefined || isNaN(e.tick);
@@ -141,7 +145,7 @@ Sequencer.prototype = {
       this.play();
     }
   },
-  toggleMute: function(track) {
+  toggleMute: function (track) {
     var mutedIndex = this.muted.indexOf(track.key);
     if (mutedIndex > -1) {
       track.isMuted = false;
@@ -149,7 +153,28 @@ Sequencer.prototype = {
     } else {
       track.isMuted = true;
       this.muted.push(track.key);
+      for (var key in this.noteState[track.key]) {
+        this.output.stopNote(key, track.channel + 1);
+        delete this.noteState[track.key][key];
+      }
+
     }
+  },
+  toggleSolo: function (track) {
+    if (this.solo === track.key) {
+      this.solo = undefined;
+    } else {
+      this.solo = track.key;
+      for (var trackKey in this.tracks) {
+        if (trackKey !== this.solo) {
+          for (var key in this.noteState[trackKey]) {
+            this.output.stopNote(key, this.tracks[trackKey].channel + 1);
+            delete this.noteState[trackKey][key];
+          }
+        }
+      }
+    }
+
   },
   play: function () {
     this.raiseEvent({ type: 'start' });
@@ -172,6 +197,7 @@ Sequencer.prototype = {
       for (var c = 0; c < 16; c++) {
         for (var p = 0; p < 128; p++) {
           this.output.stopNote(p, c + 1);
+          this.raiseEvent({ type: 'noteoff', pitch: { value: p } })
         }
       }
     }
@@ -183,21 +209,21 @@ Sequencer.prototype = {
   },
   stop: function () {
     this.switchOffAllTheShit();
-    this.raiseEvent({type: 'stop'});
+    this.raiseEvent({ type: 'stop' });
   },
   end: function () {
     this.switchOffAllTheShit();
-    this.raiseEvent({type: 'end'});
+    this.raiseEvent({ type: 'end' });
   },
   togglePause: function () {
     this.paused = !this.paused;
     if (this.paused) {
       window.clearInterval(this.timer);
       this.allNotesOff();
-      this.raiseEvent({type: 'pause'});
+      this.raiseEvent({ type: 'pause' });
     } else {
       this.timer = window.setInterval(this.onTick, this.interval);
-      this.raiseEvent({type: 'continue'});
+      this.raiseEvent({ type: 'continue' });
     }
   },
   onTick: function () {
@@ -221,7 +247,12 @@ Sequencer.prototype = {
       return;
     }
 
-    var events = this.events[this.tick].filter(e => this.muted.indexOf(e.track) === -1);
+    var events;
+    if (this.solo) {
+      events = this.events[this.tick].filter(e => e.track === this.solo);
+    } else {
+      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track) === -1);
+    }
 
     events.forEach(function (e) {
 
@@ -243,23 +274,26 @@ Sequencer.prototype = {
           break;
         case eventType.noteon:
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.playNote(e.pitch.value, e.channel + 1, 
-            { 
-              rawVelocity: true, 
-              velocity: e.velocity || 80 
-            });
+            this.output.playNote(e.pitch.value, e.channel + 1,
+              {
+                rawVelocity: true,
+                velocity: e.velocity || 80
+              });
+            this.noteState[e.track] = this.noteState[e.track] || {};
+            this.noteState[e.track][e.pitch.value] = 1;
           }
           break;
         case eventType.noteoff:
           if (!this.fastForwarding || e.keyswitch) {
             this.output.stopNote(e.pitch.value, e.channel + 1);
+            delete this.noteState[e.track][e.pitch.value];
           }
           break;
         case eventType.substitution:
           //
           break;
         default:
-        //  throw 'Unknown event type: ' + e.type
+          //  throw 'Unknown event type: ' + e.type
           break
       }
 
@@ -277,10 +311,10 @@ Sequencer.prototype = {
         }
       });
 
-      this.raiseEvent({ 
-        type: 'tick', 
-        tick: this.tick, 
-        events: events 
+      this.raiseEvent({
+        type: 'tick',
+        tick: this.tick,
+        events: events
       });
     }
 

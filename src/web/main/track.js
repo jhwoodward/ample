@@ -36,6 +36,7 @@ module.exports = function (ngModule) {
         if (sustainMarker) {
           sustainMarker.clear();
         }
+        vm.setActive(false);
       }
     }
 

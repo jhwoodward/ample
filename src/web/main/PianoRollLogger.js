@@ -21,9 +21,13 @@ Logger.prototype.handler = function (event) {
     .forEach(e => {
       delete this.pitch[e.pitch.value];
     });
+
   events.filter(e => e.type === eventType.noteon)
   .forEach(e => {
-    this.pitch[e.pitch.value] = parseInt(e.channel, 10) + 1;
+    this.pitch[e.pitch.value] = { 
+      track: e.trackIndex + 1,
+      channel: parseInt(e.channel, 10) + 1
+    };
   });
 
   if (tick % 12 !== 0) return;

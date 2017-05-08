@@ -9,8 +9,8 @@ function SubstitutionParser(macros) {
   this.substitutions = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
-      if (item.type === macroType.substitution) { 
-        acc[item.key] = item; 
+      if (item.type === macroType.substitution) {
+        acc[item.key] = item;
       }
       return acc;
     }, {});
@@ -25,16 +25,29 @@ var prototype = {
     }
   },
   mutateState: function (state, interpreter) {
+    this.startState = _.clone(state);
     var sub = this.substitutions[this.parsed];
     interpreter.generateState(sub.parsed);
+    var finalState = _.cloneDeep(interpreter.getTopState());
+    if (finalState.parser.next) {
+      finalState.parser.next(finalState);
+    }
+    this.endTick = finalState.time.tick;
   },
-  getEvents: function(state) {
-   
-    return [{
-      tick: state.time.tick,
-      type: eventType.substitution,
-      origin: this.origin //ref to string position
-    }];
+  getEvents: function () {
+    return [
+      {
+        tick: this.startState.time.tick,
+        type: eventType.substitution,
+        origin: this.origin //ref to string position
+      },
+      {
+        tick: this.endTick,
+        type: eventType.substitutionEnd,
+        origin: this.origin 
+      }
+    ];
+    
   },
   continue: true
 }

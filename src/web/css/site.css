@@ -59,7 +59,7 @@
       line-height:14px;
     }
     .piano-roll .pitch {
-      color: #3d424e;
+      color: #222225;
       width: calc(100% - 50px);
       float:left;
     }
@@ -79,12 +79,12 @@
     .track-content {
       border-radius: 10px;
       height:400px;
-      background-color: #0C1021;
+      background-color: #0C1021
     }
 
    
     .log {
-    background-color: #334452;
+    background-color: #23313e;
     }
     #songName {
       color: white;
@@ -140,10 +140,10 @@
 }
 
 .track1 .track-toolbar .track-key {
-  background-color: red;
+  background-color: #d83e00;
 }
    .piano-roll .pitch .track1 {
-       color: red;
+       color: #d83e00;
      }
   
 .track-toolbar .track-key {
@@ -151,23 +151,23 @@
     border-radius: 20px;
   }
 .track2 .track-toolbar .track-key {
-  background-color: green;
+  background-color: #8e8b00;
 }
    .piano-roll .pitch .track2 {
-       color: green
+       color: #8e8b00;
      }
 
 .track3 .track-toolbar .track-key {
-  background-color: blue;
+  background-color: #0079b5;
 }  
 .piano-roll .pitch .track3 {
-       color: blue;
+       color: #0079b5;
     }
 .track4 .track-toolbar .track-key {
-  background-color: purple;
+  background-color: #2e8c73;
 }
   .piano-roll .pitch .track4 {
-       color: purple;
+       color: #2e8c73;
      }
 
 
@@ -237,7 +237,7 @@ margin-left: -15px;
  
 }
 .sub-highlight {
- background-color: white; color: black !important;
+  background-color: #fffdaf; color: black !important;
 }
 
     .piano-roll .beat {

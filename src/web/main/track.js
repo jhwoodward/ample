@@ -51,34 +51,41 @@ module.exports = function (ngModule) {
     var subMarker;
     var sustainMarker;
     function handler(event) {
-      if (event.type === 'stop' && marker) {
-        marker.clear();
-      }
-      if (event.type !== 'tick') return;
-      event.events.forEach(function (e) {
-        if (e.track === vm.track.key && e.origin) {
-          var start = editor.posFromIndex(e.origin.start);
-          var end = editor.posFromIndex(e.origin.end);
-          if (e.type === eventType.substitution) {
-            subMarker = editor.markText(start, end, { className: 'sub-highlight' });
-          } else if (e.type === eventType.sustain) {
-            if (sustainMarker) { sustainMarker.clear(); }
-            sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
-          } else {
-            if (marker) { marker.clear(); }
-            if (sustainMarker) { sustainMarker.clear(); }
-            if (e.type === eventType.noteon) {
-              vm.setActive(true);
-            }
-            if (e.type === eventType.noteoff) {
-              vm.setActive(false);
+      if (event.type === 'stop') {
+        if (marker) { marker.clear(); }
+        if (subMarker) { subMarker.clear(); }
+        if (sustainMarker) { sustainMarker.clear(); }
+        vm.setActive(false);
+      } else if (event.type === 'pause') {
+      } else if (event.type === 'tick') {
+        event.events.forEach(function (e) {
+          if (e.track === vm.track.key && e.origin) {
+            var start = editor.posFromIndex(e.origin.start);
+            var end = editor.posFromIndex(e.origin.end);
+            if (e.type === eventType.substitution) {
+              if (subMarker) { subMarker.clear(); }
+              subMarker = editor.markText(start, end, { className: 'sub-highlight' });
+            } else if (e.type === eventType.substitutionEnd) {
+              if (subMarker) { subMarker.clear(); }
+            } else if (e.type === eventType.sustain) {
+              if (sustainMarker) { sustainMarker.clear(); }
+              sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
+            } else {
+              if (marker) { marker.clear(); }
+              if (sustainMarker) { sustainMarker.clear(); }
+              if (e.type === eventType.noteon) {
+                vm.setActive(true);
+              }
+              if (e.type === eventType.noteoff) {
+                vm.setActive(false);
+              }
+
+              marker = editor.markText(start, end, { className: 'highlight' });
             }
 
-            marker = editor.markText(start, end, { className: 'highlight' });
           }
-
-        }
-      });
+        });
+      }
     }
 
     vm.setActive = function (active) {

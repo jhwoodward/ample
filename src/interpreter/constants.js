@@ -6,6 +6,7 @@ module.exports = {
     tempo: 'tempo',
     pitchbend: 'pitch',
     substitution: 'substitution',
+    substitutionEnd: 'substitutionEnd',
     sustain: 'sustain'
   },
   macroType: {

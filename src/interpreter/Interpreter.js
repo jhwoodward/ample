@@ -68,8 +68,13 @@ Interpreter.prototype.generateState = function (parsers) {
   for (var i = 0; i < parsers.length; i++) {
     var parser = parsers[i];
     var state = this.next || this.getNextState();
+
     state.mutate(parser, this);
+   
     if (parser.continue) {
+      if (parser.getEvents) {
+        this.statelessEvents = this.statelessEvents.concat(parser.getEvents());
+      }
       continue;
     }
     this.states.push(state);
@@ -161,6 +166,8 @@ Interpreter.prototype.getEvents = function () {
     return acc;
   }, []);
 
+  events = events.concat(this.statelessEvents);
+
   animation.forEach(a => {
     events = events.concat(a.events);
   })
@@ -214,10 +221,10 @@ Interpreter.prototype.getEvents = function () {
 
 }
 
-Interpreter.prototype.setMacro = function(macro) {
+Interpreter.prototype.setMacro = function (macro) {
   utils.mergeMacros(this.macros, [macro]);
 }
- 
+
 Interpreter.prototype.parseMacros = function (part) {
 
   //macros can be either passed into the ctor or inline following the setter syntax
@@ -234,7 +241,7 @@ Interpreter.prototype.parseMacros = function (part) {
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation;
   }).forEach(macro => {
-    console.log('defstart',macro.definitionStart);
+    console.log('defstart', macro.definitionStart);
     macro.parsed = parse(parsers.main, macro.value, this.macros, macro.definitionStart);
   });
 
@@ -263,16 +270,28 @@ Interpreter.prototype.interpret = function (part) {
   this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
 
   this.master.states.forEach(s => s.applied = false);
+  this.statelessEvents = [];
   var initState = new State(this.defaultPhraseParser);
   this.states = [initState];
   this.next = undefined;
 
   this.generateState(this.parse(part));
 
-  return {
+  var out = {
     states: this.states,
     events: this.getEvents()
   };
+  /*
+  out.events.sort(function (a, b) {
+      if (a.tick === b.tick) return 0;
+      return a.tick > b.tick ? 1 : -1;
+    })
+  console.log(out);
+  var subEvents = out.events.filter(e => e.type === eventType.substitution);
+  debugger;
+  */
+  return out;
+ 
 }
 
 module.exports = Interpreter;

@@ -17,11 +17,11 @@ module.exports = function (ngModule) {
           name: 'new song',
           description: '',
           parts: {
-            melody: {
+            part1: {
               channel: 0,
               part: ``
             },
-            bass: {
+            part2: {
               channel: 1,
               part: ``
             },

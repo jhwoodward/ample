@@ -2,20 +2,23 @@ var eventType = require('../../interpreter/constants').eventType;
 var utils = require('../../interpreter/utils');
 var Interpreter = require('../../interpreter/Interpreter');
 var Sequencer = require('./Sequencer.js');
-var InfoLogger = require('../InfoLogger');
 var beautify_js = require('js-beautify').js_beautify
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$log', '$state', 'song', controller]);
+  ngModule.controller('mainController', ['$scope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', controller]);
 }
 
 
-function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $log, $state, song) {
+function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService) {
   var vm = this;
 
   vm.brand = 'Scriptophonics';
   vm.song = song;
   vm.tracks = songToArray(vm.song);
+
+  vm.sequencer = new Sequencer(webMidiService.selectedOutput);
+  vm.sequencer.subscribe(handleEvent);
+  vm.sequencer.load(vm.tracks);
 
   vm.save = save;
   vm.delete = del;
@@ -23,13 +26,14 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     if (!vm.song.created) {
       vm.song = storeService.new();
       vm.tracks = songToArray(vm.song);
+      vm.sequencer.load(vm.tracks);
     } else {
-      $state.go('root', { key: undefined });
+      $state.go('root.main', { key: undefined });
     }
   }
-  vm.toggleRight = function() {
+  vm.toggleRight = function () {
     $mdSidenav('right').toggle();
-  } 
+  }
   vm.isOpenRight = function () {
     return $mdSidenav('right').isOpen();
   };
@@ -47,32 +51,19 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     });
   }
 
-  var autoScroll;
-  var logElement;
-  $timeout(function () {
-    logElement = document.getElementById('log');
-  });
-  function scrollToBottom() {
-    logElement.scrollTop = logElement.scrollHeight
-  }
-  function startScrollLogWindow() {
-    window.clearInterval(autoScroll);
-    autoScroll = window.setInterval(scrollToBottom, 100);
-  }
-  function stopScrollLogWindow() {
-    window.clearInterval(autoScroll);
-  }
-
 
   function songToArray(song) {
     var out = [];
+    var index = 0;
     for (var key in song.parts) {
       out.push({
+        index,
         key,
         part: song.parts[key].part,
         sub: song.parts[key].sub,
         channel: song.parts[key].channel
       });
+      index ++;
     }
     return out;
 
@@ -95,84 +86,34 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   }
 
 
-
-  //var logger = new InfoLogger(onLogInfo);
-
-  vm.sequencer = new Sequencer();
-  vm.sequencer.subscribe(handleEvent);
-  vm.sequencer.init(function (output) {
-    console.log('output', output);
-  });
-
+  
   function handleEvent(e) {
     if (e.type === 'end') {
       vm.stop();
     }
-  }
-
-  vm.play = function (song) {
-    var tracks;
-    if (song) {
-      tracks = song.parts;
-    } else {
-      tracks = songFromArray(vm.tracks);
+    /*
+    if (e.type === 'info') {
+      $mdToast.show(
+        $mdToast.simple()
+          .textContent(e.info)
+          .position('bottom right')
+          .hideDelay(3000)
+      );
     }
-    vm.info = [];
-    vm.pianoRoll = [];
-    startScrollLogWindow();
-    vm.sequencer.load(tracks).start();
-    vm.playing = true;
+    */
   }
 
-  $scope.$on('play', function (event, song) {
-    vm.play(song);
-  });
-  $scope.$on('stop', function () {
-    vm.stop();
-  });
+  vm.play = function () {
+    vm.sequencer.start();
+  }
 
-  vm.playing = false;
 
   vm.togglePause = function () {
-    if (vm.sequencer.paused) {
-      startScrollLogWindow();
-      vm.playing = true;
-    } else {
-      stopScrollLogWindow();
-      vm.playing = false;
-    }
     vm.sequencer.togglePause();
   }
 
   vm.stop = function () {
-    $timeout(function () {
-      $scope.$apply(function () {
-        stopScrollLogWindow();
-        vm.sequencer.stop();
-        vm.playing = false;
-        /*
-        vm.pianoRoll = [];
-        vm.info = [];
-        */
-      });
-    });
-
+    vm.sequencer.stop();
   }
-
-
-
-  vm.info = [];
-
-  function onLogInfo(e) {
-    handleEvent(e);
-    $timeout(function () {
-      $scope.$apply(function () {
-        vm.info.push(e.data);
-      });
-    })
-  }
-
 
 }
-
-

@@ -47,12 +47,7 @@
     </div>
   </div>
 
-  <div id="log" class="panel-footer clearfix fixed-width-font log" ng-class="{'playing':vm.playing}">
-    <piano-roll sequencer="vm.sequencer"></piano-roll>
-    <div ng-repeat="data in vm.logs track by $index" class="row">
-      <div ng-repeat="item in data track by $index" class="col-xs-1">{{item}}</div>
-    </div>
-  </div>
+  <piano-roll-horiz sequencer="vm.sequencer"></piano-roll-horiz>
 
   <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="right">
     <store></store>

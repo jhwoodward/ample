@@ -21,7 +21,7 @@ module.exports = function (ngModule) {
       vm.songs = songs;
     });
     vm.load = function (song) {
-      $state.go('root', { key: song.key });
+      $state.go('root.main', { key: song.key });
     }
     vm.close = function () {
       $mdSidenav('right').close()

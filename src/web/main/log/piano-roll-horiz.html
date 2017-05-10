@@ -1,0 +1,16 @@
+<div class="log piano-roll-horiz" style="position:relative" ng-class="{ 'playing': vm.sequencer.playing }">
+    <div 
+    ng-repeat="beat in vm.beats"
+    ng-class="{'active': beat.active}"
+    ng-if="beat.count > 0"
+    class="beat"
+    style="left:{{$index*48}}px;top:5px;">{{beat.count}}</div>
+
+    <div ng-repeat="note in vm.data track by $index" 
+      ng-class="{'active': note.active}"
+      ng-mouseover="vm.hoverNote(note)"
+      class="note track{{note.track}}" 
+      style="left:{{note.on}}px;width:{{note.width}}px;top:{{note.top}}px;height:{{note.height}}px">
+    </div>
+
+</div>

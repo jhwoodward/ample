@@ -1,0 +1,8 @@
+<div class="log" ng-class="{ 'playing': vm.sequencer.playing }">
+  <div class="piano-roll">
+    <div ng-repeat="row in vm.data track by $index" class="piano-roll-row clearfix">
+      <div class="beat">{{row.beat || '&nbsp;'}}</div>
+      <div class="pitch" ng-bind-html="row.pitch"></div>
+    </div>
+  </div>
+</div>

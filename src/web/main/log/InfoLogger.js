@@ -1,4 +1,4 @@
-var eventType = require('../interpreter/constants').eventType;
+var eventType = require('../../../interpreter/constants').eventType;
 
 function Logger(onLog) {
 

@@ -1,28 +1,24 @@
 var eventType = require('../../interpreter/constants').eventType;
 var utils = require('../../interpreter/utils');
 var Interpreter = require('../../interpreter/Interpreter');
-var webmidi = require('webmidi');
 
-function Sequencer() {
+function Sequencer(output) {
   this.stopped = false;
   this.paused = false;
   this.interval = 10;
   this.tick = -1;
   this.onTick = this.onTick.bind(this);
+  this.output = output;
   this.listeners = [];
   this.muted = [];
   this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
 }
 
-function preptracks(tracks) {
-  for (var key in tracks) {
-    var track = tracks[key];
-    if (track.annotations && track.annotations.name) {
-      delete track.annotations.name;
-    }
-    track.macros = utils.combineMacros(track);
+function preptrack(track) {
+  if (track.annotations && track.annotations.name) {
+    delete track.annotations.name;
   }
-  return tracks;
+  track.macros = utils.combineMacros(track);
 }
 
 function getMarkers(master) {
@@ -38,15 +34,8 @@ function getMarkers(master) {
   return markers;
 }
 
+
 Sequencer.prototype = {
-  init: function (cb) {
-    webmidi.enable(function (err) {
-      console.log(webmidi.inputs);
-      console.log(webmidi.outputs);
-      this.output = webmidi.outputs[0];
-      cb(this.output);
-    }.bind(this));
-  },
   subscribe: function (listener) {
     this.listeners.push(listener);
   },
@@ -55,42 +44,46 @@ Sequencer.prototype = {
       listener(e);
     });
   },
-  load: function (tracks) {
-    tracks = preptracks(tracks);
-    var track1 = tracks[Object.keys(tracks)[1]];
-    var master = new Interpreter(track1.macros, track1.master).master;
-    this.markers = getMarkers(master);
+  interpret: function (track) {
+    this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key })
+    var interpreter = new Interpreter(track.macros, track.master);
+    track.interpreted = interpreter.interpret(track.part);
+    track.interpreted.events.forEach(e => {
+      e.track = track;
+    });
+  },
+  update: function (updatedTrack) {
+    if (!this.tracks) return;
+    preptrack(updatedTrack);
     var events = [];
-    var interpreter;
-    var trackIndex = 0;
-    for (var key in tracks) {
-      console.log('Interpreting ' + key);
-      interpreter = new Interpreter(tracks[key].macros, tracks[key].master);
-      tracks[key].interpreted = interpreter.interpret(tracks[key].part);
-      tracks[key].interpreted.events.forEach(e => {
-        e.channel = tracks[key].channel;
-        e.track = key;
-        e.trackIndex = trackIndex;
-      });
-      trackIndex ++;
-      events = events.concat(tracks[key].interpreted.events);
-    }
-    this.tracks = tracks;
-
+    this.tracks.forEach((track, i) => {
+      if (track.key === updatedTrack.key) {
+        track = updatedTrack;
+        this.tracks[i] = updatedTrack;
+        this.interpret(updatedTrack);
+      }
+      events = events.concat(track.interpreted.events);
+    });
+    this.raiseEvent({ type: 'ready', tracks: this.tracks })
+    this.validate(events);
+    this.index(events);
+    return this;
+  },
+  validate: function (events) {
     var errors = events.filter(e => {
       return e.tick === undefined || isNaN(e.tick);
     });
-
     if (errors.length) {
       throw (new Error('Missing tick', errors.length));
     }
-
+  },
+  index: function (events) {
+    if (!events.length) return;
+    this.raiseEvent({ type: 'info', info: 'indexing...' })
     events.sort(function (a, b) {
       if (a.tick === b.tick) return 0;
       return a.tick > b.tick ? 1 : -1;
     });
-
-    console.log('indexing...')
     this.maxTick = events[events.length - 1].tick;
     this.events = {};
     for (var i = 0; i <= this.maxTick; i++) {
@@ -98,6 +91,21 @@ Sequencer.prototype = {
         return e.tick === i;
       });
     }
+  },
+  load: function (tracks) {
+    tracks.forEach(preptrack);
+    var track1 = tracks[0];
+    var master = new Interpreter(track1.macros, track1.master).master;
+    this.markers = getMarkers(master);
+    var events = [];
+    tracks.forEach(track => {
+      this.interpret(track);
+      events = events.concat(track.interpreted.events);
+    });
+    this.tracks = tracks;
+    this.raiseEvent({ type: 'ready', tracks: this.tracks })
+    this.validate(events);
+    this.index(events);
     return this;
   },
   start: function (options) {
@@ -165,20 +173,21 @@ Sequencer.prototype = {
       this.solo = undefined;
     } else {
       this.solo = track.key;
-      for (var trackKey in this.tracks) {
-        if (trackKey !== this.solo) {
-          for (var key in this.noteState[trackKey]) {
-            this.output.stopNote(key, this.tracks[trackKey].channel + 1);
+      this.tracks.forEach(t => {
+        if (t.key !== this.solo) {
+          for (var key in this.noteState[t.key]) {
+            this.output.stopNote(key, t.channel + 1);
             delete this.noteState[trackKey][key];
           }
         }
-      }
+      });
     }
-
+    this.raiseEvent({ type: 'solo', tracks: this.tracks });
   },
   play: function () {
     this.raiseEvent({ type: 'start' });
     this.timer = window.setInterval(this.onTick, this.interval);
+    this.playing = true;
   },
   fastForward: function () {
     this.ffendTick = this.endTick;
@@ -210,6 +219,7 @@ Sequencer.prototype = {
   stop: function () {
     this.switchOffAllTheShit();
     this.raiseEvent({ type: 'stop' });
+    this.playing = false;
   },
   end: function () {
     this.switchOffAllTheShit();
@@ -217,6 +227,7 @@ Sequencer.prototype = {
   },
   togglePause: function () {
     this.paused = !this.paused;
+    this.playing = !this.paused;
     if (this.paused) {
       window.clearInterval(this.timer);
       this.allNotesOff();
@@ -224,6 +235,7 @@ Sequencer.prototype = {
     } else {
       this.timer = window.setInterval(this.onTick, this.interval);
       this.raiseEvent({ type: 'continue' });
+
     }
   },
   onTick: function () {
@@ -249,9 +261,9 @@ Sequencer.prototype = {
 
     var events;
     if (this.solo) {
-      events = this.events[this.tick].filter(e => e.track === this.solo);
+      events = this.events[this.tick].filter(e => e.track.key === this.solo);
     } else {
-      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track) === -1);
+      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track.key) === -1);
     }
 
     events.forEach(function (e) {
@@ -266,15 +278,15 @@ Sequencer.prototype = {
           }
           break;
         case eventType.controller:
-          this.output.sendControlChange(e.controller, e.value, e.channel + 1);
+          this.output.sendControlChange(e.controller, e.value, e.track.channel + 1);
           break;
         case eventType.pitchbend:
           var val = (e.value - 8192) / 8192;
-          this.output.sendPitchBend(val, e.channel + 1); //value needs to be between -1 and 1 for webmidi
+          this.output.sendPitchBend(val, e.track.channel + 1); //value needs to be between -1 and 1 for webmidi
           break;
         case eventType.noteon:
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.playNote(e.pitch.value, e.channel + 1,
+            this.output.playNote(e.pitch.value, e.track.channel + 1,
               {
                 rawVelocity: true,
                 velocity: e.velocity || 80
@@ -285,7 +297,7 @@ Sequencer.prototype = {
           break;
         case eventType.noteoff:
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.stopNote(e.pitch.value, e.channel + 1);
+            this.output.stopNote(e.pitch.value, e.track.channel + 1);
             delete this.noteState[e.track][e.pitch.value];
           }
           break;
@@ -319,6 +331,28 @@ Sequencer.prototype = {
     }
 
     this.tick++;
+
+  },
+  trigger: function (e) {
+
+    switch (e.type) {
+      case eventType.noteon:
+        this.output.playNote(e.pitch.value, e.track.channel + 1,
+          {
+            rawVelocity: true,
+            velocity: e.velocity || 80
+          });
+        break;
+      case eventType.noteoff:
+        this.output.stopNote(e.pitch.value, e.track.channel + 1);
+        break;
+    }
+
+    this.raiseEvent({
+      type: 'tick',
+      tick: 0,
+      events: [e]
+    });
 
   }
 

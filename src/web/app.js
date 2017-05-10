@@ -12,11 +12,13 @@ require('angular-material/angular-material.css');
 // Icons
 //require('font-awesome/css/font-awesome.css');
 
-
 let mainModule = angular.module('mainModule', []);
 require('./main/main.controller')(mainModule);
-require('./main/piano-roll')(mainModule);
+require('./main/log/piano-roll')(mainModule);
+require('./main/log/piano-roll-horiz')(mainModule);
+require('./main/log/info-log')(mainModule);
 require('./main/track')(mainModule);
+require('./main/webmidi.service')(mainModule);
 
 let storeModule = angular.module('storeModule', []);
 require('./store/store.service')(storeModule);
@@ -40,10 +42,23 @@ app.config(['$stateProvider', '$urlRouterProvider',
   function ($stateProvider, $urlRouterProvider) {
     $stateProvider
       .state('root', {
-        url: '/:key',
-        template: require('./main/main.html'),
-        controller: 'mainController',
-        controllerAs: 'vm',
+        url: '',
+        abstract:true,
+        resolve: {
+          webmidi: function (webMidiService) {
+            return webMidiService.enable();
+          }
+        }
+      })
+      .state('root.main', {
+        url: '/main/:key',
+        views: {
+          'app@': {
+            template: require('./main/main.html'),
+            controller: 'mainController',
+            controllerAs: 'vm',
+          }
+        },
         params: {
           key: null
         },
@@ -59,7 +74,8 @@ app.config(['$stateProvider', '$urlRouterProvider',
           }
         }
       });
-      $urlRouterProvider.otherwise('/');
+
+    $urlRouterProvider.otherwise('/main/');
   }]);
 
 require('./css/site.css');

@@ -2,6 +2,16 @@
   body, .track-row,.channel-menu-content,.channel-menu-item {
      background-color: #3e5569;
     }
+
+   .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+}
+h4 {
+  font-size: 16px;
+}
   
   .main-toolbar {
     background-color: rgb(67, 106, 125) !important;
@@ -37,6 +47,7 @@
     .CodeMirror pre > * { text-indent: 0px; }
     
     .log {
+      font-family: monospace;
       height: calc(100vh - 519px);
       overflow:auto;
       white-space: nowrap;
@@ -111,10 +122,15 @@
     transition: all .1s cubic-bezier(.55,0,.55,.2);
     -webkit-transition:  all .1s cubic-bezier(.55,0,.55,.2);
     margin-left: 2px;
+    box-shadow: none;
+}
+.track-toolbar .md-button.md-fab.mute.md-micro.active {
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
 .track-toolbar .md-button.md-fab.mute.md-micro:hover {
   color: #d62222; 
   background-color: transparent;
+  
 }
 .track-toolbar .md-button.md-fab.mute.md-micro.active {
   background-color: #d62222 !important;
@@ -134,12 +150,33 @@
 }
 
 .track {
-  min-width:300px !important;
+  min-width:250px !important;
   border-radius: 10px;
   margin: 5px;
 }
 
-.track1 .track-toolbar .track-key {
+.piano-roll-horiz {
+  cursor: pointer;
+}
+.piano-roll-horiz .note {
+  border-radius: 10px;
+  position:absolute;
+}
+.piano-roll-horiz .note.active {
+  background-color: white !important;
+ box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
+}
+
+.piano-roll-horiz .beat {
+  position:absolute;
+  color: #3e5569;
+}
+
+
+
+
+
+.track1 .track-toolbar .track-key, .note.track1 {
   background-color: #d83e00;
 }
    .piano-roll .pitch .track1 {
@@ -147,23 +184,23 @@
      }
   
 .track-toolbar .track-key {
-    padding: 3px 9px;
+       padding: 3px 9px 5px;
     border-radius: 20px;
   }
-.track2 .track-toolbar .track-key {
+.track2 .track-toolbar .track-key, .note.track2 {
   background-color: #8e8b00;
 }
    .piano-roll .pitch .track2 {
        color: #8e8b00;
      }
 
-.track3 .track-toolbar .track-key {
+.track3 .track-toolbar .track-key, .note.track3 {
   background-color: #0079b5;
 }  
 .piano-roll .pitch .track3 {
        color: #0079b5;
     }
-.track4 .track-toolbar .track-key {
+.track4 .track-toolbar .track-key, .note.track4 {
   background-color: #2e8c73;
 }
   .piano-roll .pitch .track4 {
@@ -172,7 +209,7 @@
 
 
   .channel-menu > .md-fab {
-      margin-top: -4px !important;
+      margin-top: -2px !important;
     }
 .channel-menu-content {
   max-height:150px;
@@ -220,7 +257,7 @@ margin-left: -15px;
     margin-top: -4px;
 }
 
-.track-led.active {
+.track-led.active, .piano-roll-horiz .active  {
   color: white !important;
    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
 }
@@ -237,22 +274,21 @@ margin-left: -15px;
  
 }
 .sub-highlight {
-  background-color: #fffdaf; color: black !important;
+  background-color: white; color: black !important;
 }
 
     .piano-roll .beat {
       width:50px;
       float:left;
       font-size: 16px;
+      text-align:right;
     }
 
     .piano-roll-row {
       width:100%;
     }
 
-    .fixed-width-font {
-      font-family: monospace;
-    }
+   
 
     .panel-body .btn-group {
       font-size:68px;

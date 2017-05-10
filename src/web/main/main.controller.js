@@ -107,6 +107,32 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     vm.sequencer.start();
   }
 
+  vm.brand = 's c r i p t o p h o n i c s'.split(' ').map(l => {
+    return {
+      letter: l
+    };
+  });
+
+  var animating = false;
+  vm.animateLogo = function() {
+    if (animating) return;
+    animating = true;
+    var speed = 50;
+    vm.brand.forEach((l,i) => {
+      $timeout(function() {
+        l.active = true;
+        if (i > 0) {
+          vm.brand[i-1].active = false;
+        }
+      },speed * i);
+    });
+    $timeout(function() {
+      vm.brand[vm.brand.length-1].active = false;
+      animating = false;
+        
+      },speed * vm.brand.length);
+  }
+
 
   vm.togglePause = function () {
     vm.sequencer.togglePause();

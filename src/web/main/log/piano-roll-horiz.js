@@ -30,6 +30,11 @@ module.exports = function (ngModule) {
           handleReady(event);
         }
 
+        if (event.type==='start') {
+          width = el[0].offsetWidth - 100;
+          el[0].scrollLeft = 0;
+        }
+
         if (event.type === 'stop') {
           vm.data.filter(e => e.active = false);
           vm.beats.forEach(beat => beat.active = false);

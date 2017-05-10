@@ -1,6 +1,12 @@
 
-  body, .track-row,.channel-menu-content,.channel-menu-item {
+  body, md-toolbar, md-toolbar input , #song-name, .track-row,.channel-menu-content,.channel-menu-item {
      background-color: #3e5569;
+     color:  #f9ffd0 !important;
+    }
+
+    md-toolbar md-input-container .md-input {
+      text-align: right;
+      margin-top: 22px;
     }
 
    .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
@@ -15,6 +21,13 @@ h4 {
   
   .main-toolbar {
     background-color: rgb(67, 106, 125) !important;
+  }
+
+  .brand {
+    font-family: monospace;
+    font-weight: 700 !important;
+    font-size: 30px !important;
+    color: #809296 !important;
   }
    
 
@@ -93,15 +106,15 @@ h4 {
       background-color: #0C1021
     }
 
+    .CodeMirror-scroll {
+      border-radius: 10px;
+    }
+
    
     .log {
     background-color: #23313e;
     }
-    #songName {
-      color: white;
-      text-align: right;
-      margin-top: 22px;
-    }
+ 
 
   
 
@@ -111,6 +124,10 @@ h4 {
 
 .md-toolbar-tools .md-button {
     margin: 0;
+}
+
+.track-container {
+  overflow-x: auto;
 }
 
 .track-toolbar .md-button.md-fab.md-micro {
@@ -260,6 +277,11 @@ margin-left: -15px;
 .track-led.active, .piano-roll-horiz .active  {
   color: white !important;
    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
+}
+
+ .brand-letter.active  {
+  color:  #f9ffd0 !important;
+     
 }
 
 .highlight {

@@ -11,8 +11,19 @@ var prototype = {
   },
   mutateState: function (state) {
   },
-  next:function(next) {
-     next.time.tick += next.time.step;
+  getEvents: function (state, prev, events) {
+    var out = [];
+
+    out.push({
+      tick: state.time.tick,
+      type: 'sustain',
+      origin: this.origin //ref to string position
+    });
+    return out;
+
+  },
+  next: function (next) {
+    next.time.tick += next.time.step;
   },
 }
 SustainParser.prototype = _.extend({}, parser, prototype);

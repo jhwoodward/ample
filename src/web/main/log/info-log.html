@@ -1,0 +1,5 @@
+<div class="log" ng-class="{ 'playing': vm.sequencer.playing }">
+  <div ng-repeat="row in vm.data track by $index" class="row">
+    <div ng-repeat="item in row track by $index" class="col-xs-1">{{item}}</div>
+  </div>
+</div>

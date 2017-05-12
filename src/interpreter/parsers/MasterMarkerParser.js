@@ -5,6 +5,7 @@ var utils = require('../parserUtils');
 
 function MasterMarkerParser() {
   this.type = 'MasterMarker';
+  this.master = true;
   this.test = /^\$\w+/;
 }
 
@@ -14,9 +15,7 @@ var prototype = {
     return markerName;
   },
   mutateState: function (state, interpreter) {
-    if (interpreter.isMaster) {
-      state.marker = this.parsed;
-    } 
+    state.marker = this.parsed;
   },
   next:function(next) {
     delete next.marker;

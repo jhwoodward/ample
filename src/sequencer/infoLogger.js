@@ -1,6 +1,5 @@
 var eventType = require('../interpreter/constants').eventType;
 var colors = require('colors');
-var eventType = require('../interpreter/constants').eventType;
 var pad = require('pad');
 
 function eventTypeColor(e) {

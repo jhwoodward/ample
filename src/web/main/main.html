@@ -1,0 +1,60 @@
+<md-toolbar class="main-toolbar">
+  <div class="md-toolbar-tools main">
+
+    <h2 flex md-truncate class="brand" >
+      <span ng-repeat="l in vm.brand" 
+      ng-mouseover="vm.animateLogo()"
+      class="brand-letter" 
+      ng-class="{'active':l.active}">{{l.letter}}</span>
+      </h2>
+    <md-input-container>
+      <label >Song name</label>
+      <input type="text" ng-model="vm.song.name" />
+    </md-input-container>
+
+    <md-button class="md-icon-button ion-play" ng-click="vm.play()">
+    </md-button>
+    <md-button class="md-icon-button ion-pause" ng-click="vm.togglePause()">
+    </md-button>
+    <md-button class="md-icon-button ion-stop" ng-click="vm.stop()">
+    </md-button>
+
+    <md-button ng-click="vm.save()" class="md-default">
+      Save
+    </md-button>
+    <md-button ng-click="vm.clone()" class="md-default">
+      Clone
+    </md-button>
+    <md-button ng-click="vm.delete()" ng-if="vm.song.created" class="md-default">
+      Delete
+    </md-button>
+    <md-button ng-click="vm.new()" class="md-default">
+      New
+    </md-button>
+    <md-button ng-click="vm.toggleRight()" class="md-default">
+      Load
+    </md-button>
+
+  </div>
+</md-toolbar>
+
+
+<section>
+  <div layout="column" class="track-container">
+    <div layout="row" class="track-row" flex>
+      <track 
+        flex 
+        ng-repeat="track in vm.tracks" 
+        track="track"
+        sequencer="vm.sequencer">
+      </track>
+    </div>
+  </div>
+
+  <piano-roll-horiz sequencer="vm.sequencer"></piano-roll-horiz>
+
+  <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="right">
+    <store></store>
+  </md-sidenav>
+
+</section>

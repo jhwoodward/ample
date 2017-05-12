@@ -5,6 +5,7 @@ var AnimationParser = require('../../src/interpreter/parsers/AnimationParser');
 var State = require('../../src/interpreter/State');
 var Interpreter = require('../../src/interpreter/Interpreter');
 var parse = require('../../src/interpreter/parse');
+var parsers = require('../../src/interpreter/parsers').main;
 
 describe('AnimationParser', function () {
   var macros = [
@@ -23,7 +24,7 @@ describe('AnimationParser', function () {
   var start = '<swell';
   var end = 'swell>';
 
-  var tune = parse('48,0:cDEFG');
+  var tune = parse(parsers, '48,0:cDEFG');
 
   it('should parse', function () {
   

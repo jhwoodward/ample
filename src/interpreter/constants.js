@@ -4,7 +4,10 @@ module.exports = {
     noteoff: 'noteoff',
     controller: 'cc',
     tempo: 'tempo',
-    pitchbend: 'pitch'
+    pitchbend: 'pitch',
+    substitution: 'substitution',
+    substitutionEnd: 'substitutionEnd',
+    sustain: 'sustain'
   },
   macroType: {
     annotation: 'annotation',

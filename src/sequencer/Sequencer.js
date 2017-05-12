@@ -30,7 +30,10 @@ function Sequencer() {
 function prepPlayers(players) {
   for (var key in players) {
     var player = players[key];
-    delete player.annotations.name;
+    if (player.annotations && player.annotations.name) {
+      delete player.annotations.name;
+    }
+    
     player.macros = utils.combineMacros(player);
   }
   return players;

@@ -17,10 +17,6 @@ var prototype = {
     });
   },
   getEvents: function(state, prev, events) {
-    /*
-    if (prev.articulations.filter(a=> a.key === this.key).length) {
-      return [];
-    }*/
     var out = this.parsed.reduce(function(acc, parser) {
       if (!parser.getEvents) return acc;
       acc = acc.concat(parser.getEvents(state, prev, events));

@@ -11,15 +11,17 @@ var api = {
       return { value };
     }
   },
-  getBracketed: (s, startIndex) => {
+  getBracketed: (s, startIndex, open, close) => {
+    open = open || '(';
+    close = close || ')';
     var nest = 1;//assumption is that we are starting already inside the brackets
     var c = startIndex;
     while (nest > 0 && c < s.length) {
       var char = s.substring(c, c + 1);
-      if (char === '(') {
+      if (char === open) {
         nest++;
       }
-      if (char === ')') {
+      if (char === close) {
         nest--;
       }
       c++;

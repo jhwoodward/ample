@@ -5,39 +5,12 @@ var State = require('./State');
 var macroType = require('./constants').macroType;
 var eventType = require('./constants').eventType;
 var _ = require('lodash');
+var parsers = require('./parsers');
 
 function Interpreter(macros, master) {
   this.macros = macros || [];
-  this.macros.filter(macro => {
-    return macro.type === macroType.annotation ||
-      macro.type === macroType.substitution ||
-      macro.type === macroType.articulation;
-  }).forEach(macro => {
-    macro.parsed = parse(macro.value, this.macros);
-  });
-  
-
-  this.animations = {};
-  this.macros.filter(macro => {
-    return macro.type === macroType.animation;
-  }).forEach(animation => {
-    this.animations[animation.key] = [];
-    for (var key in animation.values) {
-      this.animations[animation.key].push({
-        key: animation.key,
-        percent: parseInt(key, 10),
-        parsers: parse(animation.values[key])
-      });
-    }
-    this.animations[animation.key].sort((a, b) => {
-      return a.percent > b.percent ? 1 : -1;
-    });
-  });
-
-  this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
 
   this.master = { states: [], marker: {} };
-
   if (master) {
     if (!master.states) {
       this.master = this.interpretMaster(master);
@@ -47,13 +20,14 @@ function Interpreter(macros, master) {
   }
 }
 
-Interpreter.prototype.interpretMaster = function (master) {
+
+
+Interpreter.prototype.interpretMaster = function (part) {
   var state = new State();
-  this.isMaster = true; //to set markers instead of read them
   this.states = [state];
   this.next = undefined;
   this.events = [];
-  this.generateState(this.parse(master));
+  this.generateState(parse(parsers.master, part));
 
   //take only the final state for each tick;
   var states = this.states.reduce((acc, s) => {
@@ -86,16 +60,21 @@ Interpreter.prototype.interpretMaster = function (master) {
   return { states, marker };
 }
 
-Interpreter.prototype.parse = function (part) {
-  return parse(part, this.macros);
+Interpreter.prototype.parse = function (part, cursor) {
+  return parse(parsers.main, part, this.macros, cursor);
 }
 
 Interpreter.prototype.generateState = function (parsers) {
   for (var i = 0; i < parsers.length; i++) {
     var parser = parsers[i];
     var state = this.next || this.getNextState();
+
     state.mutate(parser, this);
+   
     if (parser.continue) {
+      if (parser.getEvents) {
+        this.statelessEvents = this.statelessEvents.concat(parser.getEvents());
+      }
       continue;
     }
     this.states.push(state);
@@ -187,6 +166,8 @@ Interpreter.prototype.getEvents = function () {
     return acc;
   }, []);
 
+  events = events.concat(this.statelessEvents);
+
   animation.forEach(a => {
     events = events.concat(a.events);
   })
@@ -240,21 +221,76 @@ Interpreter.prototype.getEvents = function () {
 
 }
 
+Interpreter.prototype.setMacro = function (macro) {
+  utils.mergeMacros(this.macros, [macro]);
+}
+
+Interpreter.prototype.parseMacros = function (part) {
+
+  //macros can be either passed into the ctor or inline following the setter syntax
+
+  //macro setter pass
+  var state = new State();
+  this.states = [state];
+  this.next = undefined;
+  this.events = [];
+  this.generateState(parse(parsers.setter, part));
+
+  this.macros.filter(macro => {
+    return macro.type === macroType.annotation ||
+      macro.type === macroType.substitution ||
+      macro.type === macroType.articulation;
+  }).forEach(macro => {
+    macro.parsed = parse(parsers.main, macro.value, this.macros, macro.definitionStart);
+  });
+
+  this.animations = {};
+  this.macros.filter(macro => {
+    return macro.type === macroType.animation;
+  }).forEach(animation => {
+    this.animations[animation.key] = [];
+    for (var key in animation.values) {
+      this.animations[animation.key].push({
+        key: animation.key,
+        percent: parseInt(key, 10),
+        parsers: parse(parsers.main, animation.values[key])
+      });
+    }
+    this.animations[animation.key].sort((a, b) => {
+      return a.percent > b.percent ? 1 : -1;
+    });
+  });
+}
+
 Interpreter.prototype.interpret = function (part) {
 
-  this.isMaster = false;
+  this.parseMacros(part);
+
+  this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
+
   this.master.states.forEach(s => s.applied = false);
- 
+  this.statelessEvents = [];
   var initState = new State(this.defaultPhraseParser);
   this.states = [initState];
   this.next = undefined;
 
   this.generateState(this.parse(part));
 
-  return {
+  var out = {
     states: this.states,
     events: this.getEvents()
   };
+  /*
+  out.events.sort(function (a, b) {
+      if (a.tick === b.tick) return 0;
+      return a.tick > b.tick ? 1 : -1;
+    })
+  console.log(out);
+  var subEvents = out.events.filter(e => e.type === eventType.substitution);
+  debugger;
+  */
+  return out;
+ 
 }
 
 module.exports = Interpreter;

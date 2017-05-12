@@ -1,6 +1,6 @@
 var parse = require('./parse');
 var AnnotationParser = require('./parsers/AnnotationParser');
-
+var parsers = require('./parsers').main;
 
 var api = {
   getDefaultPhraseParser: function (macros) {
@@ -15,7 +15,7 @@ var api = {
         type: 'annotation',
         key: 'default',
         value: defaultPhrase,
-        parsed: parse(defaultPhrase)
+        parsed: parse(parsers, defaultPhrase)
       };
       //add to macros for future use... impure
       macros.push(parsed);

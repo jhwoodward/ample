@@ -1,8 +1,16 @@
 var macroType = require('./constants').macroType;
 var parserUtils = require('./parserUtils');
+var _ = require('lodash');
 
 var api = {
   combineMacros: function (player) {
+
+    player.annotations = _.extend({
+      accent: '120=V'
+    },
+    player.annotations);
+    player.substitutions = player.sub || player.substitutions;
+
     return api.buildMacros(
       player.substitutions, 
       player.annotations, 
@@ -69,6 +77,30 @@ var api = {
   
     return macros;
 
+  },
+  mergeMacros: function(existing, add) {
+    add.forEach(a => {
+      var replaced = false;
+      existing.filter(x => x.type === a.type).forEach(x => {
+        if (x.key === a.key) {
+          if (x.value) {
+            x.value = a.value;
+          }
+          if (x.values) {
+            x.values = a.values;
+          }
+          if (x.parsed) {
+            x.parsed = a.parsed;
+          }
+          x.definitionStart = a.definitionStart;
+          replaced = true;
+        }
+      });
+      if (!replaced) {
+        existing.push(a);
+      }
+    });
+    return existing;
   },
   eventsFromStates: function (states) {
     return states.reduce(function (acc, item) {

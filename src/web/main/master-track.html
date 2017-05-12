@@ -1,0 +1,17 @@
+<div class="track master">
+  <md-toolbar class="track-toolbar">
+    <div class="md-toolbar-tools">
+
+      <h4 class="track-key">
+        <span>Master</span>
+      </h4>
+      <span flex class="flex"></span>
+     
+    </div>
+  </md-toolbar>
+  <md-content class="track-content" flex>
+    <textarea ui-codemirror="{ onLoad : vm.codemirrorLoaded }" ui-codemirror-opts="{{vm.options}}" ng-model="vm.master.part">
+    </textarea>
+  </md-content>
+
+</div>

@@ -18,6 +18,7 @@ require('./main/log/piano-roll')(mainModule);
 require('./main/log/piano-roll-horiz')(mainModule);
 require('./main/log/info-log')(mainModule);
 require('./main/track')(mainModule);
+require('./main/master-track')(mainModule);
 require('./main/webmidi.service')(mainModule);
 
 let storeModule = angular.module('storeModule', []);

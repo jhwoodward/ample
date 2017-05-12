@@ -14,12 +14,7 @@ function Sequencer(output) {
   this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
 }
 
-function preptrack(track) {
-  if (track.annotations && track.annotations.name) {
-    delete track.annotations.name;
-  }
-  track.macros = utils.combineMacros(track);
-}
+
 
 function getMarkers(master) {
   var markers = [];
@@ -44,17 +39,33 @@ Sequencer.prototype = {
       listener(e);
     });
   },
+  preptrack: function (track) {
+    if (track.annotations && track.annotations.name) {
+      delete track.annotations.name;
+    }
+    track.macros = utils.combineMacros(track);
+  },
   interpret: function (track) {
     this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key })
-    var interpreter = new Interpreter(track.macros, track.master);
+    var interpreter = new Interpreter(track.macros, this.master.interpreted || this.master.part);
     track.interpreted = interpreter.interpret(track.part);
     track.interpreted.events.forEach(e => {
       e.track = track;
     });
   },
+  updateMaster: function (master) {
+
+    this.master = master;
+    //TODO: store the interrpeted master instead of reinterpreting it for each trak
+    this.master.interpreted = new Interpreter(master.macros, master.part).master;
+    if (!this.master.interpreted.states.length) return;
+    this.markers = getMarkers(this.master.interpreted);
+    var endTick = this.master.interpreted.states[this.master.interpreted.states.length - 1].tick;
+    this.raiseEvent({ type: 'markers', markers: this.markers, end: endTick });
+  },
   update: function (updatedTrack) {
     if (!this.tracks) return;
-    preptrack(updatedTrack);
+    this.preptrack(updatedTrack);
     var events = [];
     this.tracks.forEach((track, i) => {
       if (track.key === updatedTrack.key) {
@@ -64,9 +75,10 @@ Sequencer.prototype = {
       }
       events = events.concat(track.interpreted.events);
     });
-    this.raiseEvent({ type: 'ready', tracks: this.tracks })
+
     this.validate(events);
     this.index(events);
+    this.raiseEvent({ type: 'ready', tracks: this.tracks })
     return this;
   },
   validate: function (events) {
@@ -92,24 +104,23 @@ Sequencer.prototype = {
       });
     }
   },
-  load: function (tracks) {
-    tracks.forEach(preptrack);
-    var track1 = tracks[0];
-    var master = new Interpreter(track1.macros, track1.master).master;
-    this.markers = getMarkers(master);
+  load: function (tracks, master) {
+    tracks.forEach(this.preptrack.bind(this));
+    this.updateMaster(master);
     var events = [];
     tracks.forEach(track => {
       this.interpret(track);
       events = events.concat(track.interpreted.events);
     });
     this.tracks = tracks;
-    this.raiseEvent({ type: 'ready', tracks: this.tracks })
     this.validate(events);
     this.index(events);
+    this.raiseEvent({ type: 'ready', tracks: this.tracks })
     return this;
   },
   start: function (options) {
-    this.allNotesOff();
+
+    //  this.allNotesOff();
     options = options || {};
 
     if (!this.events) {
@@ -276,8 +287,10 @@ Sequencer.prototype = {
           var newInterval = Math.round(1000 / (e.value * 0.8));
           if (newInterval !== this.interval) {
             this.interval = newInterval;
-            window.clearInterval(this.timer);
-            this.timer = windows.setInterval(this.onTick, this.interval);
+            window.clearTimeout(this.timer);
+            this.timer = window.setTimeout(this.onTick, this.interval);
+            // window.clearInterval(this.timer);
+            //this.timer = windows.setInterval(this.onTick, this.interval);
           }
           break;
         case eventType.controller:
@@ -297,12 +310,14 @@ Sequencer.prototype = {
             this.noteState[e.track] = this.noteState[e.track] || {};
             this.noteState[e.track][e.pitch.value] = 1;
           }
+          this.raiseEvent(e);
           break;
         case eventType.noteoff:
           if (!this.fastForwarding || e.keyswitch) {
             this.output.stopNote(e.pitch.value, e.track.channel + 1);
             delete this.noteState[e.track][e.pitch.value];
           }
+          this.raiseEvent(e);
           break;
         case eventType.substitution:
           //
@@ -316,28 +331,20 @@ Sequencer.prototype = {
 
     if (!this.fastForwarding) {
 
-      this.markers.forEach(m => {
-        if (this.tick >= m.tick && !m.logged) {
-          this.raiseEvent({
-            type: 'marker',
-            value: m.key
-          });
-          m.logged = true;
-        }
-      });
-
       this.raiseEvent({
-        type: 'tick',
-        tick: this.tick,
-        events: events
-      });
+          type: 'tick',
+          tick: this.tick,
+          events: events
+        }); 
+
     }
 
     var actualTime = this.time + this.interval;
     this.time = new Date().getTime();
     var timeDiff = this.time - actualTime;
     this.tick++;
-    this.timer = window.setTimeout(this.onTick, this.interval - timeDiff);
+    var adjustedInterval = this.interval - timeDiff;
+    this.timer = window.setTimeout(this.onTick, adjustedInterval);
 
   },
   trigger: function (e) {

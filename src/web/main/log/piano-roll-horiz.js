@@ -30,7 +30,7 @@ module.exports = function (ngModule) {
           handleReady(event);
         }
 
-        if (event.type==='start') {
+        if (event.type === 'start') {
           width = el[0].offsetWidth - 100;
           el[0].scrollLeft = 0;
         }
@@ -40,8 +40,8 @@ module.exports = function (ngModule) {
           vm.beats.forEach(beat => beat.active = false);
         }
 
-        if (event.type === 'tick') {
-          if (event.tick > width) {
+        if (event.type === 'tick' ) {
+          if (event.tick % 48 === 0 && event.tick > width && event.tick > width) {
             el[0].scrollLeft = event.tick - width;
           }
           $timeout(function () {
@@ -55,10 +55,38 @@ module.exports = function (ngModule) {
           });
         }
 
+        if (event.type === 'markers') {
+          updateMarkers(event);
+        }
+
+
+      }
+
+      function updateMarkers(event) {
+
+        $timeout(function () {
+          scope.$apply(function () {
+            vm.markers = event.markers;
+            if (!vm.beats) {
+              var beats = [];
+              var beatCount = -1;
+              for (var tick = 0; tick <= event.end; tick++) {
+                if (tick % 48 === 0) {
+                  beatCount++;
+                  beats.push({ count: beatCount });
+                }
+              }
+              vm.beats = beats;
+            }
+
+          });
+        });
 
       }
 
       function handleReady(event) {
+
+        console.time('piano roll render');
 
         var data = [];
 
@@ -109,7 +137,7 @@ module.exports = function (ngModule) {
           return note;
         });
 
-        vm.data = data;
+
 
         var beats = [];
         var beatCount = -1;
@@ -119,32 +147,15 @@ module.exports = function (ngModule) {
             beats.push({ count: beatCount });
           }
         }
-        vm.beats = beats;
 
-        /*
-                vm.data.sort(function (a, b) {
-                  if (a.on === b.on) return 0;
-                  return a.on > b.on ? 1 : -1;
-                });
-                var maxTick = vm.data[vm.data.length - 1].on;
-                index = {};
-                for (var i = 0; i <= maxTick; i++) {
-                  var notes = vm.data.filter(function (e) {
-                    return e.on === i;
-                  });
-                  if (notes && notes.length) {
-                    index[i] = notes;
-                  }
-                }
-                */
-        //add any unmatched ons
-        /*
-                $timeout(function () {
-                  var scrollTop = (127 - highestPitch) * 5;
-                  el[0].scrollTop = scrollTop;
-                  console.log(scrollTop);
-                });
-        */
+        $timeout(function () {
+          scope.$apply(function () {
+            vm.data = data;
+            vm.beats = beats;
+          });
+        });
+
+        console.timeEnd('piano roll render');
 
       }
     }

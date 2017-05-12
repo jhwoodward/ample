@@ -20,7 +20,7 @@ var prototype = {
       type: /(6|7|9|mj7|m6|m7|dim7|maj|min|sus2|sus4)/.exec(s)[0]
     };
     //work off C and transpose accordingly
-    var chordString;
+    var chordString, scaleString;
     switch (parsed.type) {
       case 'maj':
         chordString = 'CEG';
@@ -99,7 +99,10 @@ var prototype = {
   },
   mutateState: function (state, interpreter) {
     state.scale = this.parsed;
-  }
+  },
+  next: function (next) {
+    next.time.tick += next.time.step;
+  },
 }
 
 MasterScaleParser.prototype = _.extend({}, parser, prototype);

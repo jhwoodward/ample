@@ -1,4 +1,4 @@
-var parsers = [
+var main = [
   require('./parsers/ScaleParser'),
   require('./parsers/KeyParser'),
   require('./parsers/BassConstraintParser'),
@@ -29,18 +29,21 @@ var parsers = [
   require('./parsers/OffParser'),
   require('./parsers/VelocityParser')
 ];
-var setterParsers = [
+var setter = [
   require('./parsers/SubstitutionSetterParser'),
   require('./parsers/AnnotationSetterParser')
 ];
-var masterParsers = [
+
+var master = [
+  require('./parsers/IgnoreSubstitutionSetterParser'),
+  require('./parsers/SubstitutionParser'),
+  require('./parsers/TempoParser'),
+  require('./parsers/DurationParser'),
+  require('./parsers/RestParser'),
+  require('./parsers/SustainParser'),
   require('./parsers/MasterScaleParser'),
   require('./parsers/MasterBassParser'),
   require('./parsers/MasterMarkerParser')
 ]
 
-module.exports = {
-  main: parsers,
-  setter: setterParsers,
-  master: masterParsers
-};
+module.exports = { main, setter, master };

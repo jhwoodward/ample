@@ -23,11 +23,15 @@ function Interpreter(macros, master) {
 
 
 Interpreter.prototype.interpretMaster = function (part) {
+
+  this.parseMacros(part, parsers.master);
+
   var state = new State();
   this.states = [state];
+  this.statelessEvents = [];
   this.next = undefined;
   this.events = [];
-  this.generateState(parse(parsers.master, part));
+  this.generateState(parse(parsers.master, part, this.macros));
 
   //take only the final state for each tick;
   var states = this.states.reduce((acc, s) => {
@@ -225,7 +229,7 @@ Interpreter.prototype.setMacro = function (macro) {
   utils.mergeMacros(this.macros, [macro]);
 }
 
-Interpreter.prototype.parseMacros = function (part) {
+Interpreter.prototype.parseMacros = function (part, macroParsers) {
 
   //macros can be either passed into the ctor or inline following the setter syntax
 
@@ -241,7 +245,7 @@ Interpreter.prototype.parseMacros = function (part) {
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation;
   }).forEach(macro => {
-    macro.parsed = parse(parsers.main, macro.value, this.macros, macro.definitionStart);
+    macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart);
   });
 
   this.animations = {};
@@ -264,7 +268,7 @@ Interpreter.prototype.parseMacros = function (part) {
 
 Interpreter.prototype.interpret = function (part) {
 
-  this.parseMacros(part);
+  this.parseMacros(part, parsers.main);
 
   this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
 

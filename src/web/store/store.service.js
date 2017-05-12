@@ -17,8 +17,7 @@ module.exports = function (ngModule) {
           name: 'new song',
           description: '',
           master: {
-            part: ``,
-            isMaster: true
+            part: ''
           },
           parts: {
             part1: {

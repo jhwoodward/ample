@@ -24,7 +24,7 @@ var prototype = {
   },
   next: function (next) {
     next.time.tick += next.time.step;
-  },
+  }
 }
 SustainParser.prototype = _.extend({}, parser, prototype);
 module.exports = SustainParser;

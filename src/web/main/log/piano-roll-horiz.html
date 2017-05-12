@@ -5,6 +5,11 @@
     ng-if="beat.count > 0"
     class="beat"
     style="left:{{$index*48}}px;top:5px;">{{beat.count}}</div>
+    <div 
+    ng-repeat="marker in vm.markers"
+    ng-class="{'active': marker.active}"
+    class="beat marker"
+    style="left:{{marker.tick}}px;">{{marker.key}}</div>
 
     <div ng-repeat="note in vm.data track by $index" 
       ng-class="{'active': note.active}"

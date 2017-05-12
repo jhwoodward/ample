@@ -38,6 +38,10 @@ h4 {
     letter-spacing: 0.1em;
   }
    
+   .track.master .track-content, .track.master  .track-content .CodeMirror {
+      background:#23313e;
+      box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+   }
 
   .loading {
       opacity: 0;
@@ -207,6 +211,10 @@ h4 {
 .piano-roll-horiz .beat {
   position:absolute;
   color: #3e5569;
+}
+.piano-roll-horiz .beat.marker {
+  color:yellow;
+  bottom: 3px;
 }
 .piano-roll-horiz .beat.active {
   color:#a2b9ce;

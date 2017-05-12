@@ -42,6 +42,11 @@
 <section>
   <div layout="column" class="track-container">
     <div layout="row" class="track-row" flex>
+      <master-track 
+        flex 
+        master="vm.song.master"
+        sequencer="vm.sequencer">
+      </master-track>
       <track 
         flex 
         ng-repeat="track in vm.tracks" 

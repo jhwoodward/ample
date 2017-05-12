@@ -13,13 +13,22 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   var vm = this;
 
   vm.song = song;
+  if (!vm.song.master) {
+    vm.song.master = {
+      part: ''
+    };
+  }
+
   vm.tracks = songToArray(vm.song);
 
   vm.sequencer = new Sequencer(webMidiService.selectedOutput);
   vm.sequencer.subscribe(handleEvent);
-  vm.sequencer.load(vm.tracks);
+  
 
-  $timeout(function() { vm.animateLogo(); }, 100);
+  $timeout(function() { 
+    vm.animateLogo();
+    vm.sequencer.load(vm.tracks, vm.song.master);
+ }, 100);
 
   vm.save = save;
   vm.delete = del;

@@ -16,6 +16,10 @@ module.exports = function (ngModule) {
         return {
           name: 'new song',
           description: '',
+          master: {
+            part: ``,
+            isMaster: true
+          },
           parts: {
             part1: {
               channel: 0,

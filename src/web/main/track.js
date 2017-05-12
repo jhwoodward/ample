@@ -9,7 +9,6 @@ module.exports = function (ngModule) {
       template: require('./track.html'),
       scope: {
         sequencer: '=',
-        trackIndex: '=',
         track: '='
       },
       bindToController: true,
@@ -102,7 +101,7 @@ module.exports = function (ngModule) {
     }
     vm.options = {
       lineWrapping: true,
-      lineNumbers: true,
+      lineNumbers: false,
       height: '100%',
       mode: {
         name: 'javascript',

@@ -116,7 +116,7 @@ Sequencer.prototype = {
       throw (new Error('No tracks loaded'));
     }
 
-    window.clearInterval(this.timer);
+    //window.clearInterval(this.timer);
 
     this.startTick = 0;
     this.endTick = this.maxTick;
@@ -186,17 +186,19 @@ Sequencer.prototype = {
   },
   play: function () {
     this.raiseEvent({ type: 'start' });
-    this.timer = window.setInterval(this.onTick, this.interval);
+    this.time = new Date().getTime();
+    window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(this.onTick, this.interval);
     this.playing = true;
   },
   fastForward: function () {
     this.ffendTick = this.endTick;
     this.endTick = this.startTick - 1;
     this.fastForwarding = true;
-    this.timer = windows.setInterval(this.onTick, 1);
+    this.timer = window.setInterval(this.onTick, 1);
   },
   onFastForwardCompleted: function () {
-    window.clearInterval(this.timer);
+    //window.clearInterval(this.timer);
     this.endTick = this.ffendTick;
     this.fastForwarding = false;
     this.play();
@@ -212,7 +214,7 @@ Sequencer.prototype = {
     }
   },
   switchOffAllTheShit: function () {
-    window.clearInterval(this.timer);
+    //window.clearInterval(this.timer);
     this.stopped = true;
     this.allNotesOff();
   },
@@ -220,6 +222,7 @@ Sequencer.prototype = {
     this.switchOffAllTheShit();
     this.raiseEvent({ type: 'stop' });
     this.playing = false;
+    window.clearTimeout(this.timer);
   },
   end: function () {
     this.switchOffAllTheShit();
@@ -229,11 +232,11 @@ Sequencer.prototype = {
     this.paused = !this.paused;
     this.playing = !this.paused;
     if (this.paused) {
-      window.clearInterval(this.timer);
+      window.clearTimeout(this.timer);
       this.allNotesOff();
       this.raiseEvent({ type: 'pause' });
     } else {
-      this.timer = window.setInterval(this.onTick, this.interval);
+      this.timer = window.setTimeout(this.onTick, this.interval);
       this.raiseEvent({ type: 'continue' });
 
     }
@@ -247,7 +250,7 @@ Sequencer.prototype = {
       }
       if (this.loop) {
         this.tick = 0;
-        window.clearInterval(this.timer);
+        //window.clearInterval(this.timer);
         if (this.startTick > 0) {
           this.fastForward();
         } else {
@@ -330,7 +333,11 @@ Sequencer.prototype = {
       });
     }
 
+    var actualTime = this.time + this.interval;
+    this.time = new Date().getTime();
+    var timeDiff = this.time - actualTime;
     this.tick++;
+    this.timer = window.setTimeout(this.onTick, this.interval - timeDiff);
 
   },
   trigger: function (e) {

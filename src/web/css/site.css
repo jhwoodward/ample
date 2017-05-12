@@ -1,12 +1,14 @@
 
   body, md-toolbar, md-toolbar input , #song-name, .track-row,.channel-menu-content,.channel-menu-item {
      background-color: #3e5569;
-     color:  #f9ffd0 !important;
+     color:  #d9dcc1  !important;
     }
+    
 
-    md-toolbar md-input-container .md-input {
+  .main-toolbar  md-toolbar md-input-container .md-input {
       text-align: right;
       margin-top: 22px;
+      border-bottom: none;
     }
 
    .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
@@ -20,14 +22,20 @@ h4 {
 }
   
   .main-toolbar {
-    background-color: rgb(67, 106, 125) !important;
+    background-color: #304354 !important;
   }
 
   .brand {
+    /*
     font-family: monospace;
     font-weight: 700 !important;
     font-size: 30px !important;
     color: #809296 !important;
+    */
+    font-size: 14px !important;
+    color: #809296 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
   }
    
 
@@ -60,7 +68,6 @@ h4 {
     .CodeMirror pre > * { text-indent: 0px; }
     
     .log {
-      font-family: monospace;
       height: calc(100vh - 519px);
       overflow:auto;
       white-space: nowrap;
@@ -122,8 +129,9 @@ h4 {
   border-radius: 10px;
 }
 
-.md-toolbar-tools .md-button {
-    margin: 0;
+.main-toolbar .md-toolbar-tools .md-button {
+    margin: 0;    color: #809296 !important;
+    font-weight: normal;
 }
 
 .track-container {
@@ -179,14 +187,29 @@ h4 {
   border-radius: 10px;
   position:absolute;
 }
-.piano-roll-horiz .note.active {
+.piano-roll-horiz .note.active, .track-led.active {
   background-color: white !important;
- box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
 }
+.piano-roll-horiz .note.track1.active, .track1 .track-toolbar .track-led.active {
+ box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #d83e00, 0 0 35px #d83e00, 0 0 40px #d83e00, 0 0 50px #d83e00, 0 0 75px #d83e00;
+}
+.piano-roll-horiz .note.track2.active, .track2 .track-toolbar .track-led.active {
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #8e8b00, 0 0 35px #8e8b00, 0 0 40px #8e8b00, 0 0 50px #8e8b00, 0 0 75px #8e8b00;
+}
+.piano-roll-horiz .note.track3.active, .track3 .track-toolbar .track-led.active {
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #0079b5, 0 0 35px #0079b5, 0 0 40px #0079b5, 0 0 50px #0079b5, 0 0 75px #0079b5;
+}
+.piano-roll-horiz .note.track4.active, .track4 .track-toolbar .track-led.active {
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73, 0 0 40px #2e8c73, 0 0 50px #2e8c73, 0 0 75px #2e8c73;
+}
+
 
 .piano-roll-horiz .beat {
   position:absolute;
   color: #3e5569;
+}
+.piano-roll-horiz .beat.active {
+  color:#a2b9ce;
 }
 
 
@@ -266,34 +289,33 @@ h4 {
 
 
 .track-led {
- border-radius: 50%;
- width:20px;
- height:20px;
- color: #000;
-margin-left: -15px;
-    margin-top: -4px;
+border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    background-color: #000;
+    margin-left: -15px;
+    margin-top: 1px;
+    margin-right: 10px;
 }
-
+/*
 .track-led.active, .piano-roll-horiz .active  {
   color: white !important;
    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
 }
-
+*/
  .brand-letter.active  {
-  color:  #f9ffd0 !important;
-     
+  color:  #fff !important;
 }
 
-.highlight {
+.track-content .highlight {
   border-bottom:3px solid white;
-    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #FF1177, 0 0 35px #FF1177, 0 0 40px #FF1177, 0 0 50px #FF1177, 0 0 75px #FF1177;
+}
+.highlight  {
+    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px white, 0 0 35px white, 0 0 40px white, 0 0 50px white, 0 0 75px white;
   color: white !important;
- 
 }
 .sustain-highlight {
   border-bottom:3px solid grey;
-   
- 
 }
 .sub-highlight {
   background-color: white; color: black !important;

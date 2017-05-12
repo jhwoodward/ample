@@ -12,13 +12,14 @@ module.exports = function (ngModule) {
 function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService) {
   var vm = this;
 
-  vm.brand = 'Scriptophonics';
   vm.song = song;
   vm.tracks = songToArray(vm.song);
 
   vm.sequencer = new Sequencer(webMidiService.selectedOutput);
   vm.sequencer.subscribe(handleEvent);
   vm.sequencer.load(vm.tracks);
+
+  $timeout(function() { vm.animateLogo(); }, 100);
 
   vm.save = save;
   vm.delete = del;

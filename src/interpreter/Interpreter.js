@@ -241,7 +241,6 @@ Interpreter.prototype.parseMacros = function (part) {
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation;
   }).forEach(macro => {
-    console.log('defstart', macro.definitionStart);
     macro.parsed = parse(parsers.main, macro.value, this.macros, macro.definitionStart);
   });
 

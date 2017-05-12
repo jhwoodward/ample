@@ -1,8 +1,9 @@
 <md-toolbar class="main-toolbar">
   <div class="md-toolbar-tools main">
 
-    <h2 flex md-truncate class="brand" ng-mouseover="vm.animateLogo()">
+    <h2 flex md-truncate class="brand" >
       <span ng-repeat="l in vm.brand" 
+      ng-mouseover="vm.animateLogo()"
       class="brand-letter" 
       ng-class="{'active':l.active}">{{l.letter}}</span>
       </h2>
@@ -45,7 +46,6 @@
         flex 
         ng-repeat="track in vm.tracks" 
         track="track"
-        track-index="$index"
         sequencer="vm.sequencer">
       </track>
     </div>

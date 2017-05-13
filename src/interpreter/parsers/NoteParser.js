@@ -66,7 +66,8 @@ var prototype = {
     }
     state.on = { 
       tick: state.time.tick + onOffset,
-      offset: onOffset 
+      offset: onOffset,
+      origin: this.origin
     };
 
   },
@@ -98,10 +99,12 @@ var prototype = {
         pitch: prev.pitch,
         duration: state.time.tick + offOffset - prev.on.tick,
         annotation: offAnnotation,
-        offset: offOffset
+        offset: offOffset,
+        origin: prev.on.origin
       });
     }
 
+    
     //noteon
     out.push({
       tick: state.time.tick + (state.on.offset || 0),

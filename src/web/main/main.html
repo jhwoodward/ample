@@ -1,24 +1,30 @@
 <md-toolbar class="main-toolbar">
   <div class="md-toolbar-tools main">
 
-    <h2 flex md-truncate class="brand" >
+    <h2  md-truncate class="brand" >
       <span ng-repeat="l in vm.brand" 
       ng-mouseover="vm.animateLogo()"
       class="brand-letter" 
       ng-class="{'active':l.active}">{{l.letter}}</span>
+      - {{vm.song.name}}
       </h2>
+      <!--
     <md-input-container>
       <label >Song name</label>
       <input type="text" ng-model="vm.song.name" />
     </md-input-container>
-
-    <md-button class="md-icon-button ion-play" ng-click="vm.play()">
+-->
+<div style="margin:auto" >
+    <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()"
+    ng-class="{'active':vm.sequencer.playing}"
+    >
     </md-button>
-    <md-button class="md-icon-button ion-pause" ng-click="vm.togglePause()">
+    <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()"
+    ng-class="{'active':vm.sequencer.paused}">
     </md-button>
-    <md-button class="md-icon-button ion-stop" ng-click="vm.stop()">
+    <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
     </md-button>
-
+</div>
     <md-button ng-click="vm.save()" class="md-default">
       Save
     </md-button>

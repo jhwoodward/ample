@@ -34,7 +34,7 @@ var prototype = {
         duration: offTick - prev.on.tick,
         annotation: 'Rest (' + state.phrase.parsed.key + ')',
         offset: offset,
-        origin: this.origin //ref to string position
+        origin: prev.on.origin
       });
 
     }

@@ -1,20 +1,21 @@
 var eventType = require('../../interpreter/constants').eventType;
 var utils = require('../../interpreter/utils');
 var Interpreter = require('../../interpreter/Interpreter');
+require('./WAAClock');
 
 function Sequencer(output) {
+
   this.stopped = false;
   this.paused = false;
-  this.interval = 10;
+  this.interval = 1;
   this.tick = -1;
   this.onTick = this.onTick.bind(this);
   this.output = output;
   this.listeners = [];
   this.muted = [];
   this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
+
 }
-
-
 
 function getMarkers(master) {
   var markers = [];
@@ -120,6 +121,8 @@ Sequencer.prototype = {
   },
   start: function (options) {
 
+
+
     //  this.allNotesOff();
     options = options || {};
 
@@ -161,6 +164,7 @@ Sequencer.prototype = {
     if (this.startTick > 0) {
       this.fastForward();
     } else {
+      this.raiseEvent({ type: 'start' });
       this.play();
     }
   },
@@ -196,11 +200,25 @@ Sequencer.prototype = {
     this.raiseEvent({ type: 'solo', tracks: this.tracks });
   },
   play: function () {
-    this.raiseEvent({ type: 'start' });
-    this.time = new Date().getTime();
-    window.clearTimeout(this.timer);
-    this.timer = window.setTimeout(this.onTick, this.interval);
+
+    //  this.time = new Date().getTime();
+    //  window.clearTimeout(this.timer);
+    // this.timer = this.clock.setTimeout(this.onTick, this.interval);
+    this.stop();
+    if (this.context) {
+      this.context.close();
+    }
+    this.context = new AudioContext();
+    this.clock = new WAAClock(this.context);
+    this.clock.start();
     this.playing = true;
+    this.stopped = false;
+
+    this.scheduled = this.clock.callbackAtTime(this.onTick, 0.01)
+      .repeat(0.01)
+      .tolerance({ late: 100 })
+    // window.setTimeout(this.onTick, this.interval);
+
   },
   fastForward: function () {
     this.ffendTick = this.endTick;
@@ -219,35 +237,36 @@ Sequencer.prototype = {
       for (var c = 0; c < 16; c++) {
         for (var p = 0; p < 128; p++) {
           this.output.stopNote(p, c + 1);
-          this.raiseEvent({ type: 'noteoff', pitch: { value: p } })
+          //   this.raiseEvent({ type: 'noteoff', pitch: { value: p } })
         }
       }
     }
   },
-  switchOffAllTheShit: function () {
-    //window.clearInterval(this.timer);
-    this.stopped = true;
-    this.allNotesOff();
-  },
   stop: function () {
-    this.switchOffAllTheShit();
+  //  if (!this.playing) return;
+    this.stopped = true;
+   // this.allNotesOff();
     this.raiseEvent({ type: 'stop' });
     this.playing = false;
-    window.clearTimeout(this.timer);
+    if (this.clock) {
+       this.clock.stop();
+    }
+   
   },
   end: function () {
-    this.switchOffAllTheShit();
+    this.stopped = true;
+   // this.allNotesOff();
     this.raiseEvent({ type: 'end' });
   },
   togglePause: function () {
     this.paused = !this.paused;
     this.playing = !this.paused;
     if (this.paused) {
-      window.clearTimeout(this.timer);
+      this.clock.stop();
       this.allNotesOff();
       this.raiseEvent({ type: 'pause' });
     } else {
-      this.timer = window.setTimeout(this.onTick, this.interval);
+      this.play();
       this.raiseEvent({ type: 'continue' });
 
     }
@@ -332,19 +351,13 @@ Sequencer.prototype = {
     if (!this.fastForwarding) {
 
       this.raiseEvent({
-          type: 'tick',
-          tick: this.tick,
-          events: events
-        }); 
+        type: 'tick',
+        tick: this.tick,
+        events: events
+      });
 
     }
-
-    var actualTime = this.time + this.interval;
-    this.time = new Date().getTime();
-    var timeDiff = this.time - actualTime;
     this.tick++;
-    var adjustedInterval = this.interval - timeDiff;
-    this.timer = window.setTimeout(this.onTick, adjustedInterval);
 
   },
   trigger: function (e) {

@@ -29,7 +29,7 @@ var prototype = {
     var parsed = {
       count: parseInt(count, 10)
     };
-    var part = bracketed.trim();
+    var part = bracketed;//.trim();
     if (this.substitutions[part]) {
       parsed.key = part;
       parsed.part = this.substitutions[part].value;

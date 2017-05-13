@@ -21,6 +21,7 @@ require('./main/track')(mainModule);
 require('./main/master-track')(mainModule);
 require('./main/webmidi.service')(mainModule);
 
+
 let storeModule = angular.module('storeModule', []);
 require('./store/store.service')(storeModule);
 require('./store/store')(storeModule);

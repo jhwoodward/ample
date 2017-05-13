@@ -16,11 +16,11 @@ var prototype = {
 
     var key = /^\(\w+\)=/.exec(s)[0].replace('(', '').replace(')', '').replace('=', '');
     var bracketed = parserUtils.getBracketed(s, startTest[0].length);
-    var value = bracketed.trim();
+    var value = bracketed;//.trim();
     this.string = startTest[0] + bracketed + ')';
     this.parsed = { 
       type: 'substitution', 
-      definitionStart: startTest[0].length,
+      definitionStart: startTest[0].length,//definition relative to start of token
       key, 
       value 
   };
@@ -28,7 +28,7 @@ var prototype = {
     return true;
   },
   mutateState: function (state, interpreter) {
-    this.parsed.definitionStart += this.origin.start;
+    this.parsed.definitionStart += this.origin.start;//start of token relative to doc
     interpreter.setMacro(this.parsed);
   },
   continue: true

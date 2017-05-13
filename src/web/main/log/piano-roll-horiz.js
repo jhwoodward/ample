@@ -17,6 +17,50 @@ module.exports = function (ngModule) {
 
     function link(scope, el, attr, vm) {
 
+      var currentEvent;
+      var width = el[0].offsetWidth - 100;
+
+      /*
+            var cssTransform = (function () {
+              var prefixes = 'transform webkitTransform mozTransform oTransform msTransform'.split(' ')
+                , el = document.createElement('div')
+                , cssTransform
+                , i = 0
+              while (cssTransform === undefined) {
+                cssTransform = document.createElement('div').style[prefixes[i]] != undefined ? prefixes[i] : undefined
+                i++
+              }
+              return cssTransform
+            })();
+      
+            var p = document.getElementById('pianoroll');
+      
+            function setLeft() {
+              p.style['transition'] = 'transform ' + (480) + 'ms';
+              p.style[cssTransform] = "translate3d(" + (width - currentEvent.tick) + "px, 0 ,0)"
+      
+            }
+      
+          
+            function scroll() {
+              if (currentEvent && currentEvent.tick > width && currentEvent.tick % 48 === 0) {
+                setLeft();
+              }
+            //  window.requestAnimationFrame(scroll);
+            }
+      
+          //  window.requestAnimationFrame(scroll);
+      */
+
+
+      function scroll() {
+        if (currentEvent && currentEvent.tick > width) {
+          el[0].scrollLeft = currentEvent.tick - width;
+        }
+        window.requestAnimationFrame(scroll);
+      }
+
+      window.requestAnimationFrame(scroll);
 
       scope.$watch('vm.sequencer', function (seq) {
         if (seq) {
@@ -24,8 +68,11 @@ module.exports = function (ngModule) {
         }
       });
 
-      var width = el[0].offsetWidth - 100;
+
       function handler(event) {
+        currentEvent = event;
+
+
         if (event.type === 'ready' || event.type === 'solo') {
           handleReady(event);
         }
@@ -40,10 +87,8 @@ module.exports = function (ngModule) {
           vm.beats.forEach(beat => beat.active = false);
         }
 
-        if (event.type === 'tick' ) {
-          if (event.tick % 48 === 0 && event.tick > width && event.tick > width) {
-            el[0].scrollLeft = event.tick - width;
-          }
+        if (event.type === 'tick') {
+          //scroll();
           $timeout(function () {
             scope.$apply(function () {
               vm.data.filter(e => e.on === event.tick).map(n => n.active = true);
@@ -127,7 +172,7 @@ module.exports = function (ngModule) {
         });
 
 
-        var height = el[0].offsetHeight - 100;
+        var height = el[0].offsetHeight - 50;
         var scaleFactor = height / (highestPitch - lowestPitch);
         var offset = ((127 - highestPitch) * scaleFactor) - 40;
         data = data.map(note => {

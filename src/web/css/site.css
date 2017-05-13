@@ -185,7 +185,13 @@ h4 {
 }
 
 .piano-roll-horiz {
+  height: 100%;
   cursor: pointer;
+  z-index: 100;
+  transform: translate3d(0,0,0);
+  -moz-transform: translate3d(0,0,0);
+  -webkit-transform: translate3d(0,0,0);
+  transition: transform 0.2s;
 }
 .piano-roll-horiz .note {
   border-radius: 10px;
@@ -214,7 +220,8 @@ h4 {
 }
 .piano-roll-horiz .beat.marker {
   color:yellow;
-  bottom: 3px;
+  bottom: 5px;
+  
 }
 .piano-roll-horiz .beat.active {
   color:#a2b9ce;

@@ -27,7 +27,7 @@ var prototype = {
     n = n ? parseInt(n[0]) : undefined;
     var parsed = { name, n };
     var bracketed = utils.getBracketed(s, startTest[0].length);
-    var part = bracketed.trim();
+    var part = bracketed;
     if (this.substitutions[part]) {
       parsed.key = part;
       parsed.part = this.substitutions[part].value;
@@ -35,32 +35,35 @@ var prototype = {
       parsed.part = part;
     }
 
+    //TODO: WORK OUT HOW TO DO THIS WHEN YOU HAVE A BRAIN
+    parsed.definitionStart = startTest[0].length;
+
+
     this.string = startTest[0] + bracketed + ')';
     this.parsed = parsed;
-
+   
     return true;
   },
   mutateState: function (state, interpreter) {
-    if (!interpreter.isMaster) {
 
-      var origTick = state.time.tick;
+    this.parsed.definitionStart += this.origin.start;//start of token relative to doc
+    var origTick = state.time.tick;
+    var part = interpreter.parse(this.parsed.part, this.parsed.definitionStart);
 
-      var part = interpreter.parse(this.parsed.part);
+    interpreter.master.marker[this.parsed.name].forEach((tick, i) => {
+      if (!this.parsed.n) {
+        interpreter.next = interpreter.getNextState();
+        interpreter.next.time.tick = tick;
+        interpreter.generateState(part);
+      } else if (i === this.parsed.n - 1) {
+        interpreter.next = interpreter.getNextState();
+        interpreter.next.time.tick = tick;
+        interpreter.generateState(part);
+      }
+    });
 
-      interpreter.master.marker[this.parsed.name].forEach((tick,i) => {
-        if (!this.parsed.n) {
-          interpreter.next = interpreter.getNextState();
-          interpreter.next.time.tick = tick;
-          interpreter.generateState(part);
-        } else if (i === this.parsed.n-1) {
-          interpreter.next = interpreter.getNextState();
-          interpreter.next.time.tick = tick;
-          interpreter.generateState(part);
-        }
-      });
+    state.time.tick = origTick;
 
-      state.time.tick = origTick;
-    }
 
   },
   continue: true

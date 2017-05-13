@@ -8,12 +8,6 @@
       ng-class="{'active':l.active}">{{l.letter}}</span>
       - {{vm.song.name}}
       </h2>
-      <!--
-    <md-input-container>
-      <label >Song name</label>
-      <input type="text" ng-model="vm.song.name" />
-    </md-input-container>
--->
 <div style="margin:auto" >
     <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()"
     ng-class="{'active':vm.sequencer.playing}"
@@ -25,6 +19,9 @@
     <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
     </md-button>
 </div>
+   <md-button ng-click="vm.edit($event)" class="md-default">
+      Edit
+    </md-button>
     <md-button ng-click="vm.save()" class="md-default">
       Save
     </md-button>

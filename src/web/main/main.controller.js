@@ -5,11 +5,11 @@ var Sequencer = require('./Sequencer.js');
 var beautify_js = require('js-beautify').js_beautify
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', controller]);
+  ngModule.controller('mainController', ['$scope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', '$mdDialog', controller]);
 }
 
 
-function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService) {
+function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService, $mdDialog) {
   var vm = this;
 
   vm.song = song;
@@ -41,6 +41,33 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
       $state.go('root.main', { key: undefined });
     }
   }
+
+  vm.edit = function(ev) {
+    $mdDialog.show({
+      controller: 'editController',
+      controllerAs: 'vm',
+      template: require('./edit.html'),
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose: false,
+      fullscreen: false,
+      resolve: {
+        song: function() {
+          return vm.song;
+        },
+        tracks: function() {
+          return vm.tracks;
+        },
+      }
+    })
+    .then(function(answer) {
+      $scope.status = 'You said the information was "' + answer + '".';
+    }, function() {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+
   vm.toggleRight = function () {
     $mdSidenav('right').toggle();
   }

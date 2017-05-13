@@ -146,16 +146,19 @@ h4 {
   overflow-x: auto;
 }
 
-.track-toolbar .md-button.md-fab.md-micro {
+ .md-button.md-fab.md-micro {
     line-height: 28px;
     width: 28px;
     height: 28px;
     min-height: 28px;
-    background-color: transparent;
+
     transition: all .1s cubic-bezier(.55,0,.55,.2);
     -webkit-transition:  all .1s cubic-bezier(.55,0,.55,.2);
     margin-left: 2px;
     box-shadow: none;
+}
+.track-toolbar .md-button.md-fab.md-micro {
+    background-color: transparent;
 }
 .track-toolbar .md-button.md-fab.mute.md-micro.active {
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
@@ -312,10 +315,41 @@ border-radius: 50%;
     margin-right: 10px;
 }
 
+.modal-header {
+  background-color: #d83e00;
+}
+.btn-remove-tag {
+    position: relative;
+    height: 24px;
+    width: 24px;
+    text-align: center;
+    border-radius: 50%;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    transition: background 0.15s linear;
+    display: block;
 
+}
+.md-chips md-chip .md-chip-remove-container {
+  top: 4px;
+  right: 4px;
+}
+.md-chips.md-removable md-chip {
+    padding-right: 28px;
+}
+
+md-input-container .md-errors-spacer {
+  min-height:0;
+  min-width: 0;
+}
 
  .brand-letter.active  {
   color:  #fff !important;
+}
+
+.edit-song {
+  width: 500px;
 }
 
 .track-content .highlight {

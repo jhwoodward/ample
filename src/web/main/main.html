@@ -52,8 +52,9 @@
       </master-track>
       <track 
         flex 
-        ng-repeat="track in vm.tracks" 
+        ng-repeat="track in vm.song.tracks" 
         track="track"
+        track-index="$index"
         sequencer="vm.sequencer">
       </track>
     </div>

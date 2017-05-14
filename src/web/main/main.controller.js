@@ -18,8 +18,13 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
       part: ''
     };
   }
+  console.log(vm.song);
 
-  vm.tracks = songToArray(vm.song);
+  if (!vm.song.tracks) {
+    vm.song.tracks = songToArray(vm.song);
+    delete vm.song.parts;
+  }
+  //
 
   vm.sequencer = new Sequencer(webMidiService.selectedOutput);
   vm.sequencer.subscribe(handleEvent);
@@ -27,7 +32,7 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
 
   $timeout(function() { 
     vm.animateLogo();
-    vm.sequencer.load(vm.tracks, vm.song.master);
+    vm.sequencer.load(vm.song.tracks, vm.song.master);
  }, 100);
 
   vm.save = save;
@@ -35,8 +40,8 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   vm.new = function () {
     if (!vm.song.created) {
       vm.song = storeService.new();
-      vm.tracks = songToArray(vm.song);
-      vm.sequencer.load(vm.tracks);
+     // vm.tracks = songToArray(vm.song);
+      vm.sequencer.load(vm.song.tracks);
     } else {
       $state.go('root.main', { key: undefined });
     }
@@ -52,12 +57,12 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
       clickOutsideToClose: false,
       fullscreen: false,
       resolve: {
+        sequencer: function() {
+          return vm.sequencer;
+        },
         song: function() {
           return vm.song;
-        },
-        tracks: function() {
-          return vm.tracks;
-        },
+        }
       }
     })
     .then(function(answer) {
@@ -76,8 +81,8 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   };
 
   function save() {
-    vm.song.parts = songFromArray(vm.tracks);
-    storeService.save(vm.song).then(function (result) {
+    var payload = _.cloneDeep(vm.song);
+    storeService.save(payload).then(function (result) {
       console.log(result);
     });
   }

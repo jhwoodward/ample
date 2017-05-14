@@ -145,7 +145,9 @@ h4 {
 .track-container {
   overflow-x: auto;
 }
-
+.md-icon-button {
+  font-size:24px;
+}
  .md-button.md-fab.md-micro {
     line-height: 28px;
     width: 28px;
@@ -344,13 +346,41 @@ md-input-container .md-errors-spacer {
   min-width: 0;
 }
 
+md-tabs, md-tabs md-content {
+  height: 100%;
+}
+
  .brand-letter.active  {
   color:  #fff !important;
 }
 
-.edit-song {
+
+.edit-song-dialog md-dialog-content{
   width: 500px;
+  height: 400px;
 }
+.edit-song-dialog md-list-item {
+  padding:0;
+}
+
+
+
+md-list[dnd-list] {
+    min-height: 60px;
+    padding-left: 0px;
+}
+md-list[dnd-list] .dndDraggingSource {
+    display: none;
+}
+ md-list[dnd-list] .dndPlaceholder {
+  
+    border-top: 1px dotted #ccc;
+    border-bottom: 1px solid #ccc;
+    display: block;
+    min-height: 60px;
+}
+
+
 
 .track-content .highlight {
   border-bottom:3px solid white;

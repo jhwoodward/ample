@@ -138,11 +138,15 @@ module.exports = function (ngModule) {
         var highestPitch = 0;
         var lowestPitch = 127;
 
-        event.tracks.forEach(track => {
+        event.tracks.forEach((track,i) => {
+
+          var interpreted = event.interpreted[i];
+          if (!interpreted) return;
+
           if (vm.sequencer.solo && vm.sequencer.solo !== track.key) return;
 
-          var noteons = track.interpreted.events.filter(e => e.type === 'noteon');
-          var noteoffs = track.interpreted.events.filter(e => e.type === 'noteoff');
+          var noteons = interpreted.events.filter(e => e.type === 'noteon');
+          var noteoffs = interpreted.events.filter(e => e.type === 'noteoff');
 
           noteons.forEach(on => {
 
@@ -156,7 +160,7 @@ module.exports = function (ngModule) {
                   lowestPitch = on.pitch.value;
                 }
                 data.push({
-                  track: on.track.index + 1,
+                  track: on.trackIndex + 1,
                   pitch: 127 - on.pitch.value,
                   on: on.tick,
                   off: off.tick,

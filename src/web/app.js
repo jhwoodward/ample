@@ -5,7 +5,7 @@ require('angular-sanitize');
 require('@uirouter/angularjs');
 require('angular-aria');
 require('angular-material');
-
+require('angular-drag-and-drop-lists');
 require('angular-ui-codemirror');
 
 require('angular-material/angular-material.css');
@@ -39,7 +39,7 @@ sharedModule.directive('unload', ['$timeout', function ($timeout) {
   }
 }]);
 
-let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'ui.router', 'ui.codemirror', 'sharedModule', 'storeModule', 'mainModule']);
+let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial',  'dndLists','ui.router', 'ui.codemirror', 'sharedModule', 'storeModule', 'mainModule']);
 
 app.config(['$stateProvider', '$urlRouterProvider',
   function ($stateProvider, $urlRouterProvider) {

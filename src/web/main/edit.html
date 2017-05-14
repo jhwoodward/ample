@@ -1,4 +1,4 @@
-<md-dialog aria-label="Edit">
+<md-dialog aria-label="Edit" class="edit-song-dialog">
   <form ng-cloak>
     <md-toolbar>
       <div class="md-toolbar-tools modal-header">
@@ -11,42 +11,62 @@
     </md-toolbar>
 
     <md-dialog-content>
-      <div class="md-dialog-content edit-song">
-        <div layout="column">
-          <md-input-container>
-            <label>Name</label>
-            <input type="text" ng-model="vm.song.name" />
-          </md-input-container>
 
-          <md-input-container>
-            <label>Tags</label>
-            <md-chips ng-model="vm.song.tags" md-removable="true" placeholder="Enter a tag" delete-button-label="Remove Tag" delete-hint="Press delete to remove tag"
-              secondary-placeholder="+Tag">
+      <md-tabs md-border-bottom>
+        <md-tab id="tab1">
+          <md-tab-label>About</md-tab-label>
+          <md-tab-body>
+            <md-content class="md-padding" layout="column">
+              <md-input-container>
+                <label>Name</label>
+                <input type="text" ng-model="vm.song.name" />
+              </md-input-container>
 
-              <button md-chip-remove class="md-primary btn-remove-tag">
+              <md-input-container>
+                <label>Tags</label>
+                <md-chips ng-model="vm.song.tags" md-removable="true" placeholder="Enter a tag" delete-button-label="Remove Tag" delete-hint="Press delete to remove tag"
+                  secondary-placeholder="+Tag">
+
+                  <button md-chip-remove class="md-primary btn-remove-tag">
               <span class="ion-close"></span>
             </button>
-            </md-chips>
-          </md-input-container>
-          <md-list>
-            <md-subheader class="md-no-sticky">Tracks</md-subheader>
-            <md-list-item ng-repeat="track in vm.tracks track by $index">
-              <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
-              <md-input-container flex>
-                <label>Name</label>
-                <input type="text" ng-model="track.key" />
+                </md-chips>
               </md-input-container>
-              <md-button class="md-warn">Delete</md-button>
-            </md-list-item>
-          </md-list>
+
+              <md-input-container class="md-block">
+                <label>Description</label>
+                <textarea ng-model="vm.song.description" md-maxlength="150" rows="5" md-select-on-focus></textarea>
+
+              </md-input-container>
+            </md-content>
+
+          </md-tab-body>
+        </md-tab>
+        <md-tab id="tab2">
+          <md-tab-label>Tracks</md-tab-label>
+          <md-tab-body>
+            <md-content class="md-padding">
+              <md-list dnd-list="vm.tracks">
+                <md-list-item ng-repeat="track in vm.tracks" dnd-draggable="track" 
+                  dnd-effect-allowed="move"
+                   dnd-moved="vm.moved($index)">
+                  <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
+                  <md-input-container flex>
+                    <label>Name</label>
+                    <input type="text" ng-model="track.key" />
+                  </md-input-container>
+                  <md-button ng-click="vm.deleteTrack($index)" class="md-icon-button md-warn"><span class="ion-trash-a"></span></md-button>
+                </md-list-item>
+              </md-list>
+            </md-content>
+          </md-tab-body>
+        </md-tab>
+      </md-tabs>
 
 
-
-        </div>
-      </div>
     </md-dialog-content>
 
-    <md-dialog-actions layout=" row ">
+    <md-dialog-actions layout="row">
 
       <span flex></span>
       <md-button ng-click="vm.save() ">

@@ -49,10 +49,28 @@ Sequencer.prototype = {
   interpret: function (track) {
     this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key })
     var interpreter = new Interpreter(track.macros, this.master.interpreted || this.master.part);
-    track.interpreted = interpreter.interpret(track.part);
-    track.interpreted.events.forEach(e => {
+    var interpreted = interpreter.interpret(track.part);
+    interpreted.events.forEach(e => {
       e.track = track;
     });
+    return interpreted;
+  },
+  reorder: function (tracks) {
+    if (tracks) {
+      this.tracks = tracks;
+    }
+    var interpreted = [];
+    this.tracks.forEach((track, i) => {
+      var index = track.originalIndex === undefined ? i : track.originalIndex;
+      if (!this.interpreted[index]) return;
+      interpreted[i] = this.interpreted[index];
+      interpreted[i].events.forEach(e => {
+        e.trackIndex = i;
+      });
+      track.originalIndex = i;
+    });
+    this.interpreted = interpreted;
+    this.raiseEvent({ type: 'ready', tracks: this.tracks, interpreted: this.interpreted })
   },
   updateMaster: function (master) {
 
@@ -72,14 +90,15 @@ Sequencer.prototype = {
       if (track.key === updatedTrack.key) {
         track = updatedTrack;
         this.tracks[i] = updatedTrack;
-        this.interpret(updatedTrack);
+        this.interpreted[i] = this.interpret(updatedTrack);
       }
-      events = events.concat(track.interpreted.events);
+      events = events.concat(this.interpreted[i].events);
     });
 
     this.validate(events);
     this.index(events);
-    this.raiseEvent({ type: 'ready', tracks: this.tracks })
+    this.reorder();
+    this.raiseEvent({ type: 'ready', tracks: this.tracks, interpreted: this.interpreted })
     return this;
   },
   validate: function (events) {
@@ -106,17 +125,19 @@ Sequencer.prototype = {
     }
   },
   load: function (tracks, master) {
+    this.interpreted = [];
     tracks.forEach(this.preptrack.bind(this));
     this.updateMaster(master);
     var events = [];
-    tracks.forEach(track => {
-      this.interpret(track);
-      events = events.concat(track.interpreted.events);
+    tracks.forEach((track,i) => {
+      this.interpreted[i] = this.interpret(track);
+      events = events.concat(this.interpreted[i].events);
     });
     this.tracks = tracks;
     this.validate(events);
     this.index(events);
-    this.raiseEvent({ type: 'ready', tracks: this.tracks })
+    this.reorder();
+    this.raiseEvent({ type: 'ready', interpreted: this.interpreted, tracks: this.tracks })
     return this;
   },
   start: function (options) {
@@ -192,7 +213,7 @@ Sequencer.prototype = {
         if (t.key !== this.solo) {
           for (var key in this.noteState[t.key]) {
             this.output.stopNote(key, t.channel + 1);
-            delete this.noteState[trackKey][key];
+            delete this.noteState[track.key][key];
           }
         }
       });
@@ -243,19 +264,19 @@ Sequencer.prototype = {
     }
   },
   stop: function () {
-  //  if (!this.playing) return;
+    //  if (!this.playing) return;
     this.stopped = true;
-   // this.allNotesOff();
+    // this.allNotesOff();
     this.raiseEvent({ type: 'stop' });
     this.playing = false;
     if (this.clock) {
-       this.clock.stop();
+      this.clock.stop();
     }
-   
+
   },
   end: function () {
     this.stopped = true;
-   // this.allNotesOff();
+    // this.allNotesOff();
     this.raiseEvent({ type: 'end' });
   },
   togglePause: function () {

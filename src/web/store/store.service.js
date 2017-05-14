@@ -6,7 +6,7 @@ module.exports = function (ngModule) {
   ngModule.service('storeService', ['$http', function ($http) {
 
     var root = config.store;
-   
+
     function Store(type) {
       this.type = type;
     }
@@ -19,24 +19,27 @@ module.exports = function (ngModule) {
           master: {
             part: ''
           },
-          parts: {
-            part1: {
+          parts: [
+            {
+              key: 'part1',
               channel: 0,
-              part: ``
+              part: ''
             },
-            part2: {
-              channel: 1,
-              part: ``
+            {
+              key: 'part2',
+              channel: 0,
+              part: ''
+            }, {
+              key: 'part3',
+              channel: 0,
+              part: ''
             },
-            part3: {
-              channel: 2,
-              part: ``
-            },
-            part4: {
-              channel: 3,
-              part: ``
+            {
+              key: 'part4',
+              channel: 0,
+              part: ''
             }
-          }
+          ]
         };
       },
       save: function (item) {

@@ -20,6 +20,11 @@ module.exports = function (ngModule) {
   function controller($scope, $timeout) {
     var vm = this;
 
+    var scaleMarker;
+    var markerMarker;
+    var subMarker;
+    var sustainMarker;
+
 
     $scope.$watch('vm.sequencer', function (seq) {
       if (seq) {
@@ -27,7 +32,57 @@ module.exports = function (ngModule) {
       }
     });
 
+    function clearAllMarkers() {
+      if (subMarker) { subMarker.clear(); }
+      if (sustainMarker) { sustainMarker.clear(); }
+      if (markerMarker) { markerMarker.clear(); }
+      if (scaleMarker) { scaleMarker.clear(); }
+    }
+
     function handler(event) {
+      if (event.type === 'stop') {
+        clearAllMarkers();
+        return;
+      }
+
+      if (event.type !== 'tick') return;
+
+      event.events.forEach(e => {
+        if (!e.isMaster) return;
+        console.log('master event');
+
+        if (e.origin) {
+          var start = editor.posFromIndex(e.origin.start);
+          var end = editor.posFromIndex(e.origin.end);
+        }
+
+        switch (e.type) {
+          case eventType.substitution:
+            if (subMarker) { subMarker.clear(); }
+            subMarker = editor.markText(start, end, { className: 'sub-highlight' });
+            break;
+          case eventType.substitutionEnd:
+            if (subMarker) { subMarker.clear(); }
+            break;
+          case eventType.sustain:
+            if (sustainMarker) { sustainMarker.clear(); }
+            sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
+            break;
+          case eventType.scale:
+            if (scaleMarker) { scaleMarker.clear(); }
+            scaleMarker = editor.markText(start, end, { className: 'highlight' });
+
+            break;
+          case eventType.marker:
+            if (markerMarker) { markerMarker.clear(); }
+            markerMarker = editor.markText(start, end, { className: 'sub-highlight' });
+
+            break;
+
+        }
+      });
+
+
 
     }
 
@@ -59,11 +114,12 @@ module.exports = function (ngModule) {
 
     };
 
-    $scope.$watch('vm.master.part', function (val, old) {
+    $scope.$watch('vm.master.part', _.debounce(function (val, old) {
       if (val && old && val !== old) {
         vm.sequencer.updateMaster(vm.master);
       }
-    });
+    }, 1000));
+
 
   }
 

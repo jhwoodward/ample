@@ -5,6 +5,7 @@ var pitchUtils = require('../pitchUtils');
 var key = require('./_key');
 var modifierType = require('../constants').modifierType;
 var utils = require('../utils');
+var eventType = require('../constants').eventType;
 
 function MasterScaleParser() {
   this.type = 'MasterScale';
@@ -99,6 +100,16 @@ var prototype = {
   },
   mutateState: function (state, interpreter) {
     state.scale = this.parsed;
+  },
+   getEvents: function (state) {
+    return [
+      {
+        tick: state.time.tick,
+        type: eventType.scale,
+        constraint: this.parsed,
+        origin: this.origin //ref to string position
+      }
+    ];
   },
   next: function (next) {
     next.time.tick += next.time.step;

@@ -7,7 +7,9 @@ module.exports = {
     pitchbend: 'pitch',
     substitution: 'substitution',
     substitutionEnd: 'substitutionEnd',
-    sustain: 'sustain'
+    sustain: 'sustain',
+    scale: 'scale',
+    marker: 'marker'
   },
   macroType: {
     annotation: 'annotation',

@@ -17,18 +17,7 @@ function Sequencer(output) {
 
 }
 
-function getMarkers(master) {
-  var markers = [];
-  for (var key in master.marker) {
-    master.marker[key].forEach((tick, i) => {
-      markers.push({ tick, key: key + (i + 1).toString() });
-    });
-  }
-  markers.sort((a, b) => {
-    return a.tick > b.tick ? 1 : -1;
-  });
-  return markers;
-}
+
 
 
 Sequencer.prototype = {
@@ -48,7 +37,7 @@ Sequencer.prototype = {
   },
   interpret: function (track) {
     this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key })
-    var interpreter = new Interpreter(track.macros, this.master.interpreted || this.master.part);
+    var interpreter = new Interpreter(track.macros, this.interpretedMaster || this.master.part);
     var interpreted = interpreter.interpret(track.part);
     interpreted.events.forEach(e => {
       e.track = track;
@@ -75,12 +64,24 @@ Sequencer.prototype = {
   updateMaster: function (master) {
 
     this.master = master;
-    //TODO: store the interrpeted master instead of reinterpreting it for each trak
-    this.master.interpreted = new Interpreter(master.macros, master.part).master;
-    if (!this.master.interpreted.states.length) return;
-    this.markers = getMarkers(this.master.interpreted);
-    var endTick = this.master.interpreted.states[this.master.interpreted.states.length - 1].tick;
-    this.raiseEvent({ type: 'markers', markers: this.markers, end: endTick });
+
+    var interpreted = new Interpreter(master.macros, master.part).master;
+    if (interpreted.states.length) {
+      this.markers = interpreted.markerArray;
+      var endTick = interpreted.states[interpreted.states.length - 1].tick;
+      this.raiseEvent({ type: 'markers', markers: this.markers, end: endTick });
+    }
+    interpreted.events.forEach(e => {
+      e.track = master;
+      e.isMaster = true;
+    });
+    this.interpretedMaster = interpreted;
+
+    if (this.tracks) {
+      return this.interpretAll();
+    }
+    return this;
+
   },
   update: function (updatedTrack) {
     if (!this.tracks) return;
@@ -124,35 +125,36 @@ Sequencer.prototype = {
       });
     }
   },
-  load: function (tracks, master) {
-    this.interpreted = [];
-    tracks.forEach(this.preptrack.bind(this));
-    this.updateMaster(master);
-    var events = [];
-    tracks.forEach((track,i) => {
+  interpretAll: function () {
+
+    var events = this.interpretedMaster.events;
+    this.tracks.forEach((track, i) => {
       this.interpreted[i] = this.interpret(track);
       events = events.concat(this.interpreted[i].events);
     });
-    this.tracks = tracks;
     this.validate(events);
+
+    var masterEvents = events.filter(e=>e.isMaster);
+
     this.index(events);
     this.reorder();
     this.raiseEvent({ type: 'ready', interpreted: this.interpreted, tracks: this.tracks })
     return this;
+
+  },
+  load: function (tracks, master) {
+    this.interpreted = [];
+    this.tracks = tracks;
+    this.tracks.forEach(this.preptrack.bind(this));
+    return this.updateMaster(master);
+
   },
   start: function (options) {
-
-
-
     //  this.allNotesOff();
     options = options || {};
-
     if (!this.events) {
       throw (new Error('No tracks loaded'));
     }
-
-    //window.clearInterval(this.timer);
-
     this.startTick = 0;
     this.endTick = this.maxTick;
     this.loop = options.loop;
@@ -218,7 +220,7 @@ Sequencer.prototype = {
         }
       });
     }
-    this.raiseEvent({ type: 'solo', tracks: this.tracks });
+    this.raiseEvent({ type: 'solo', interpreted: this.interpreted, tracks: this.tracks });
   },
   play: function () {
 

@@ -235,7 +235,7 @@ h4 {
   color:#a2b9ce;
 }
 
-.track1 .track-toolbar .track-key, .note.track1 {
+.track1 .track-toolbar .track-key, .note.track1, .key.active.track1 {
   background-color: #d83e00;
 }
    .piano-roll .pitch .track1 {
@@ -246,20 +246,20 @@ h4 {
        padding: 3px 9px 5px;
     border-radius: 20px;
   }
-.track2 .track-toolbar .track-key, .note.track2 {
+.track2 .track-toolbar .track-key, .note.track2, .key.active.track2 {
   background-color: #8e8b00;
 }
    .piano-roll .pitch .track2 {
        color: #8e8b00;
      }
 
-.track3 .track-toolbar .track-key, .note.track3 {
+.track3 .track-toolbar .track-key, .note.track3, .key.active.track3 {
   background-color: #0079b5;
 }  
 .piano-roll .pitch .track3 {
        color: #0079b5;
     }
-.track4 .track-toolbar .track-key, .note.track4 {
+.track4 .track-toolbar .track-key, .note.track4, .key.active.track4 {
   background-color: #2e8c73;
 }
   .piano-roll .pitch .track4 {
@@ -412,6 +412,30 @@ md-list[dnd-list] .dndDraggingSource {
     .panel-body .btn-group {
       font-size:68px;
     }
+
+
+.key {
+ position: absolute; 
+}
+    .key.white { 
+     background: #a8b4c5; 
+    
+    border-bottom-right-radius: 5px; 
+    border-bottom-left-radius: 5px;  
+    }
+    .key.black {  
+      z-index: 2; 
+      background-color: #304354;
+          border-bottom-right-radius: 7px;
+    border-bottom-left-radius: 7px;
+       }
+    
+    .key-name {
+     
+      font-size:14px;
+      color: #000;
+    }
+
 
 
  

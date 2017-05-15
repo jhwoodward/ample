@@ -19,8 +19,19 @@ function controller($scope, $mdDialog, song, sequencer, storeService) {
     vm.song.tracks = _.cloneDeep(vm.tracks);
   }
 
-  vm.moved = function(index) {
+  vm.moved = function (index) {
     vm.tracks.splice(index, 1);
+    vm.song.tracks = _.cloneDeep(vm.tracks);
+    sequencer.reorder(vm.song.tracks);
+    vm.tracks = _.cloneDeep(vm.song.tracks);
+  }
+
+  vm.addTrack = function () {
+    var newTrack = {
+      part: '',
+      channel: 0
+    };
+    vm.tracks.push(newTrack);
     vm.song.tracks = _.cloneDeep(vm.tracks);
     sequencer.reorder(vm.song.tracks);
     vm.tracks = _.cloneDeep(vm.song.tracks);
@@ -35,6 +46,7 @@ function controller($scope, $mdDialog, song, sequencer, storeService) {
   };
 
   vm.save = function () {
+    vm.song.tracks = vm.tracks;
 
     var payload = {
       tracks: []

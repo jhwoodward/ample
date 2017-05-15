@@ -16,6 +16,7 @@ let mainModule = angular.module('mainModule', []);
 require('./main/main.controller')(mainModule);
 require('./main/edit.controller')(mainModule);
 require('./main/log/piano-roll')(mainModule);
+require('./main/log/piano-keys')(mainModule);
 require('./main/log/piano-roll-horiz')(mainModule);
 require('./main/log/info-log')(mainModule);
 require('./main/track')(mainModule);

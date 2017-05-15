@@ -45,7 +45,7 @@
 <section>
   <div layout="column" class="track-container">
     <div layout="row" class="track-row" flex>
-      <master-track 
+      <master-track ng-if="vm.song.useMaster"
         flex 
         master="vm.song.master"
         sequencer="vm.sequencer">
@@ -57,11 +57,14 @@
         track-index="$index"
         sequencer="vm.sequencer">
       </track>
+     
     </div>
   </div>
 
+ <piano-keys  sequencer="vm.sequencer"></piano-keys>
+ <!--
   <piano-roll-horiz sequencer="vm.sequencer"></piano-roll-horiz>
-
+-->
   <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="right">
     <store></store>
   </md-sidenav>

@@ -10,7 +10,7 @@ var parsers = require('./parsers');
 function Interpreter(macros, master) {
   this.macros = macros || [];
 
-  this.master = { states: [], marker: {} };
+  this.master = { states: [], events: [], markers: {}, markerArray: [] };
   if (master) {
     if (!master.states) {
       this.master = this.interpretMaster(master);
@@ -30,9 +30,10 @@ Interpreter.prototype.interpretMaster = function (part) {
   this.states = [state];
   this.statelessEvents = [];
   this.next = undefined;
-  this.events = [];
+ 
   this.generateState(parse(parsers.master, part, this.macros));
 
+  var events = this.getEvents();
   //take only the final state for each tick;
   var states = this.states.reduce((acc, s) => {
     var tick = s.time.tick;
@@ -53,7 +54,7 @@ Interpreter.prototype.interpretMaster = function (part) {
     return acc;
   }, []);
 
-  var marker = this.states.reduce((acc, s) => {
+  var markers = this.states.reduce((acc, s) => {
     if (s.marker) {
       acc[s.marker] = acc[s.marker] || [];
       acc[s.marker].push(s.time.tick);
@@ -61,7 +62,18 @@ Interpreter.prototype.interpretMaster = function (part) {
     return acc;
   }, {});
 
-  return { states, marker };
+  var markerArray = [];
+  for (var key in markers) {
+    markers[key].forEach((tick, i) => {
+      markerArray.push({ tick, key: key + (i + 1).toString() });
+    });
+  }
+  markerArray.sort((a, b) => {
+    return a.tick > b.tick ? 1 : -1;
+  });
+
+
+  return { states, events, markers, markerArray };
 }
 
 Interpreter.prototype.parse = function (part, cursor) {
@@ -237,7 +249,6 @@ Interpreter.prototype.parseMacros = function (part, macroParsers) {
   var state = new State();
   this.states = [state];
   this.next = undefined;
-  this.events = [];
   this.generateState(parse(parsers.setter, part));
 
   this.macros.filter(macro => {

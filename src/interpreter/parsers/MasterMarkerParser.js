@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var parser = require('./_parser');
 var utils = require('../parserUtils');
-
+var eventType = require('../constants').eventType;
 
 function MasterMarkerParser() {
   this.type = 'MasterMarker';
@@ -16,6 +16,16 @@ var prototype = {
   },
   mutateState: function (state, interpreter) {
     state.marker = this.parsed;
+  }, 
+  getEvents: function (state) {
+    return [
+      {
+        tick: state.time.tick,
+        type: eventType.marker,
+        marker: this.parsed,
+        origin: this.origin //ref to string position
+      }
+    ];
   },
   next:function(next) {
     delete next.marker;

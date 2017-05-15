@@ -49,13 +49,11 @@ module.exports = function (ngModule) {
     var subMarker;
     var sustainMarker;
 
-
     function clearAllMarkers() {
       for (var key in markers) {
         markers[key].clear();
       }
     }
-
 
     function handler(e) {
       if (e.type === 'stop') {
@@ -66,7 +64,7 @@ module.exports = function (ngModule) {
         return;
       }
 
-      if (!e.track || e.track.key !== vm.track.key) return;
+      if (e.isMaster || !e.track || e.track.key !== vm.track.key) return;
 
       if (e.origin) {
         var start = editor.posFromIndex(e.origin.start);

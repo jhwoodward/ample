@@ -50,7 +50,7 @@ var prototype = {
     var origTick = state.time.tick;
     var part = interpreter.parse(this.parsed.part, this.parsed.definitionStart);
 
-    interpreter.master.marker[this.parsed.name].forEach((tick, i) => {
+    interpreter.master.markers[this.parsed.name].forEach((tick, i) => {
       if (!this.parsed.n) {
         interpreter.next = interpreter.getNextState();
         interpreter.next.time.tick = tick;

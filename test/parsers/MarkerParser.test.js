@@ -20,7 +20,7 @@ var Interpreter = require('../../src/interpreter/Interpreter');
       var state = new State();
       var interpreter = new Interpreter();
       interpreter.states = [state];
-      interpreter.master.marker = {
+      interpreter.master.markers = {
         A: [100, 2000, 3000]
       };
       state.mutate(parser, interpreter);

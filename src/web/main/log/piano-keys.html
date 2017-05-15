@@ -1,0 +1,12 @@
+<div class="log keys" style="position:relative">
+  <div ng-repeat="key in vm.keys"
+      ng-class="{
+        'white': key.colour === 1, 
+        'black': key.colour ===0,
+        'active': key.track
+      }" 
+      style="width:{{key.width}}px;left:{{key.left}}px;height:{{key.height}}px"
+      class="key track{{key.track}}"><div class="key-name">{{key.name}}</div>
+  </div>
+
+</div>

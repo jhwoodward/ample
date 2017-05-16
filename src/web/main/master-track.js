@@ -21,7 +21,7 @@ module.exports = function (ngModule) {
     var vm = this;
 
     var scaleMarker;
-    var markerMarker;
+    var markerMarkers = [];
     var subMarker;
     var sustainMarker;
 
@@ -35,9 +35,21 @@ module.exports = function (ngModule) {
     function clearAllMarkers() {
       if (subMarker) { subMarker.clear(); }
       if (sustainMarker) { sustainMarker.clear(); }
-      if (markerMarker) { markerMarker.clear(); }
+      markerMarkers.forEach(m => m.marker.clear());
+      markerMarkers = [];
       if (scaleMarker) { scaleMarker.clear(); }
     }
+
+    function clearMarkerMarkers(tick, i) {
+      markerMarkers.forEach(m => {
+        if (m.tick !== tick) {
+          m.marker.clear();
+         // markerMarkers.splice(i, 1);
+        }
+      });
+    }
+
+
 
     function handler(event) {
       if (event.type === 'stop') {
@@ -46,6 +58,11 @@ module.exports = function (ngModule) {
       }
 
       if (event.type !== 'tick') return;
+
+      event.events.sort(function (a, b) {
+        if (a.type === eventType.substitutionEnd && b.type !== eventType.substitutionEnd) return -1;
+        return 1;
+      });
 
       event.events.forEach(e => {
         if (!e.isMaster) return;
@@ -70,13 +87,13 @@ module.exports = function (ngModule) {
             break;
           case eventType.scale:
             if (scaleMarker) { scaleMarker.clear(); }
-            scaleMarker = editor.markText(start, end, { className: 'highlight' });
+            scaleMarker = editor.markText(start, end, { className: 'sub-highlight' });
 
             break;
           case eventType.marker:
-            if (markerMarker) { markerMarker.clear(); }
-            markerMarker = editor.markText(start, end, { className: 'sub-highlight' });
-
+            clearMarkerMarkers(event.tick);
+            var markerMarker = editor.markText(start, end, { className: 'sub-highlight' });
+            markerMarkers.push({ tick: event.tick, marker: markerMarker });
             break;
 
         }

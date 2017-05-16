@@ -47,8 +47,7 @@ module.exports = function (ngModule) {
       $timeout(function() {
          el[0].scrollLeft = el[0].offsetWidth / 3;
       });
-      
-
+    
 
       scope.$watch('vm.sequencer', function (seq) {
         if (seq) {

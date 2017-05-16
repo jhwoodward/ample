@@ -55,8 +55,8 @@ module.exports = function (ngModule) {
       }
     }
 
-    function handler(e) {
-      if (e.type === 'stop') {
+    function handler(event) {
+      if (event.type === 'stop') {
         clearAllMarkers();
         if (subMarker) { subMarker.clear(); }
         if (sustainMarker) { sustainMarker.clear(); }
@@ -64,38 +64,52 @@ module.exports = function (ngModule) {
         return;
       }
 
-      if (e.isMaster || !e.track || e.track.key !== vm.track.key) return;
+      if (event.type !== 'tick') return;
 
-      if (e.origin) {
-        var start = editor.posFromIndex(e.origin.start);
-        var end = editor.posFromIndex(e.origin.end);
-      }
-      switch (e.type) {
-        case eventType.substitution:
-          if (subMarker) { subMarker.clear(); }
-          subMarker = editor.markText(start, end, { className: 'sub-highlight' });
-          break;
-        case eventType.substitutionEnd:
-          if (subMarker) { subMarker.clear(); }
-          break;
-        case eventType.sustain:
-          if (sustainMarker) { sustainMarker.clear(); }
-          sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
-          break;
-        case eventType.noteon:
-          vm.setActive(true);
-          if (sustainMarker) { sustainMarker.clear(); }
-          markers[e.origin.start] = editor.markText(start, end, { className: 'highlight' });
+      event.events.sort(function (a, b) {
+        if (a.type === eventType.substitutionEnd && b.type !== eventType.substitutionEnd) return -1;
+        return 1;
+      });
 
-          break;
-        case eventType.noteoff:
-          vm.setActive(false);
-          if (markers[e.origin.start]) {
-             markers[e.origin.start].clear(); 
-             delete markers[start];
+      event.events.forEach(e => {
+
+         if (e.isMaster || !e.track || e.track.key !== vm.track.key) return;
+
+        if (e.origin) {
+          var start = editor.posFromIndex(e.origin.start);
+          var end = editor.posFromIndex(e.origin.end);
+        }
+        switch (e.type) {
+          case eventType.substitution:
+            if (subMarker) { subMarker.clear(); }
+            subMarker = editor.markText(start, end, { className: 'sub-highlight' });
+            break;
+          case eventType.substitutionEnd:
+            if (subMarker) { subMarker.clear(); }
+            break;
+          case eventType.sustain:
+            if (sustainMarker) { sustainMarker.clear(); }
+            sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
+            break;
+          case eventType.noteon:
+            vm.setActive(true);
+            if (sustainMarker) { sustainMarker.clear(); }
+            markers[e.origin.start] = editor.markText(start, end, { className: 'highlight' });
+
+            break;
+          case eventType.noteoff:
+            vm.setActive(false);
+            if (markers[e.origin.start]) {
+              markers[e.origin.start].clear();
+              delete markers[start];
             }
-          break;
-      }
+            break;
+        }
+
+
+      });
+
+
 
     }
 

@@ -1,4 +1,4 @@
-var eventType = require('../../interpreter/constants').eventType;
+var eventType = require('../../../interpreter/constants').eventType;
 
 module.exports = function (ngModule) {
 
@@ -86,8 +86,9 @@ module.exports = function (ngModule) {
             sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
             break;
           case eventType.scale:
+            if (sustainMarker) { sustainMarker.clear(); }
             if (scaleMarker) { scaleMarker.clear(); }
-            scaleMarker = editor.markText(start, end, { className: 'sub-highlight' });
+            scaleMarker = editor.markText(start, end, { className: 'scale-highlight' });
 
             break;
           case eventType.marker:
@@ -109,9 +110,7 @@ module.exports = function (ngModule) {
       lineNumbers: false,
       height: '100%',
       mode: {
-        name: 'javascript',
-        statementIndent: 2,
-        json: true,
+        name: 'master-track-script',
         viewportMargin: Infinity
       },
       theme: 'blackboard'
@@ -120,6 +119,7 @@ module.exports = function (ngModule) {
     var editor;
     vm.codemirrorLoaded = function (ed) {
       editor = ed;
+      /*
       var charWidth = editor.defaultCharWidth(), basePadding = 4;
       editor.on("renderLine", function (cm, line, elt) {
         var off = CodeMirror.countColumn(line.text, null, cm.getOption("tabSize")) * charWidth;
@@ -128,12 +128,14 @@ module.exports = function (ngModule) {
       });
       editor.refresh();
       editor.focus();
-
+*/
     };
 
     $scope.$watch('vm.master.part', _.debounce(function (val, old) {
       if (val && old && val !== old) {
-        vm.sequencer.updateMaster(vm.master);
+        $timeout(function() {
+          vm.sequencer.updateMaster(vm.master);
+        });
       }
     }, 1000));
 

@@ -157,7 +157,7 @@ Sequencer.prototype = {
     }
     this.startTick = 0;
     this.endTick = this.maxTick;
-    this.loop = options.loop;
+    this.loop = false;//options.loop;
 
     if (options.startBeat) {
       this.startTick = (parseInt(startBeat, 10) * 48) - 12;
@@ -203,8 +203,12 @@ Sequencer.prototype = {
         this.output.stopNote(key, track.channel + 1);
         delete this.noteState[track.key][key];
       }
-
     }
+    track.hidden = track.isMuted;
+    this.raiseEvent({ type: 'mute', interpreted: this.interpreted, tracks: this.tracks });
+  },
+  isNotSolo: function(track) {
+    return this.solo && this.solo !== track.key;
   },
   toggleSolo: function (track) {
     if (this.solo === track.key) {
@@ -223,10 +227,6 @@ Sequencer.prototype = {
     this.raiseEvent({ type: 'solo', interpreted: this.interpreted, tracks: this.tracks });
   },
   play: function () {
-
-    //  this.time = new Date().getTime();
-    //  window.clearTimeout(this.timer);
-    // this.timer = this.clock.setTimeout(this.onTick, this.interval);
     this.stop();
     if (this.context) {
       this.context.close();
@@ -239,8 +239,7 @@ Sequencer.prototype = {
 
     this.scheduled = this.clock.callbackAtTime(this.onTick, 0.01)
       .repeat(0.01)
-      .tolerance({ late: 100 })
-    // window.setTimeout(this.onTick, this.interval);
+      .tolerance({ late: 50 })
 
   },
   fastForward: function () {
@@ -303,23 +302,19 @@ Sequencer.prototype = {
       }
       if (this.loop) {
         this.tick = 0;
-        //window.clearInterval(this.timer);
-        if (this.startTick > 0) {
-          this.fastForward();
-        } else {
-          this.play();
-        }
+      } else {
+        this.end();
         return;
       }
-      this.end();
-      return;
+     
+     
     }
 
     var events;
     if (this.solo) {
-      events = this.events[this.tick].filter(e => e.track.key === this.solo);
+      events = this.events[this.tick].filter(e => e.track.key === this.solo || e.isMaster);
     } else {
-      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track.key) === -1);
+      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track.key) === -1  || e.isMaster);
     }
 
     events.forEach(function (e) {

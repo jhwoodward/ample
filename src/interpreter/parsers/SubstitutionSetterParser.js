@@ -7,6 +7,9 @@ function SubstitutionSetterParser() {
   this.type = 'SubstitutionSetter';
   this.setter = true;
   this.master = true;
+
+  this.test = /^\(\w+\)=/;///for code highlighting only
+  this.testEnd = /\)/;
 }
 
 var prototype = {

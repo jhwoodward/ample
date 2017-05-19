@@ -7,7 +7,9 @@ require('angular-aria');
 require('angular-material');
 require('angular-drag-and-drop-lists');
 require('angular-ui-codemirror');
-
+require('./main/codemirror/note-script');
+require('./main/codemirror/track-script');
+require('./main/codemirror/master-track-script');
 require('angular-material/angular-material.css');
 // Icons
 //require('font-awesome/css/font-awesome.css');
@@ -19,8 +21,9 @@ require('./main/log/piano-roll')(mainModule);
 require('./main/log/piano-keys')(mainModule);
 require('./main/log/piano-roll-horiz')(mainModule);
 require('./main/log/info-log')(mainModule);
-require('./main/track')(mainModule);
-require('./main/master-track')(mainModule);
+require('./main/track/track')(mainModule);
+require('./main/track/tracks')(mainModule);
+require('./main/track/master-track')(mainModule);
 require('./main/webmidi.service')(mainModule);
 
 
@@ -83,7 +86,6 @@ app.config(['$stateProvider', '$urlRouterProvider',
   }]);
 
 require('./css/site.css');
-require('./css/blackboard.css')
-
+require('./css/track.css')
 
 module.exports = app;

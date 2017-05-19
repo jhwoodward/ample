@@ -1,0 +1,34 @@
+<div class="side-menu tracks">
+  <md-toolbar class="modal-header">
+    <div class="md-toolbar-tools">
+      <h1 flex>Tracks</h1>
+      <md-button ng-click="vm.cancel()" class="md-icon-button ion-close">
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-content class="md-padding">
+    <md-checkbox ng-model="vm.song.useMaster" aria-label="Use Master">
+      Use Master
+    </md-checkbox>
+    <md-button class="md-button md-primary" ng-click="vm.addTrack()">Add Track</md-button>
+  </md-content>
+  <md-list dnd-list="vm.song.tracks">
+    <md-list-item ng-repeat="track in vm.song.tracks" dnd-draggable="track" dnd-effect-allowed="move" dnd-moved="vm.moved($index)">
+      <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
+      <md-input-container flex>
+        <label>Name</label>
+        <input type="text" ng-model="track.key" />
+      </md-input-container>
+      <md-button ng-click="vm.sequencer.toggleMute(track)" class="md-icon-button md-micro mute">M
+          <md-tooltip md-direction="top">Mute</md-tooltip>
+      </md-button>
+      <md-button ng-click="vm.sequencer.toggleSolo(track)" class="md-icon-button md-micro solo">S
+          <md-tooltip md-direction="top">Solo</md-tooltip>
+      </md-button>
+      <md-button ng-click="vm.deleteTrack($index)" class="md-icon-button md-warn"><span class="ion-trash-a"></span>
+        <md-tooltip md-direction="top">Delete</md-tooltip>
+      </md-button>
+    </md-list-item>
+  </md-list>
+
+</div>

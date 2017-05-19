@@ -1,4 +1,4 @@
-<div>
+<div class="side-menu store">
   <md-toolbar class="md-theme-light">
     <div class="md-toolbar-tools">
       <h1 flex>Songs</h1>
@@ -8,8 +8,13 @@
   </md-toolbar>
   <md-content>
     <md-list flex>
+       <md-list-item>
+          <md-button ng-click="vm.new()" class="md-default">
+            New
+          </md-button>
+        </md-list-item>
       <md-list-item class="md-2-line" ng-repeat="song in vm.songs" ng-click="vm.load(song)" >
-        
+          
         <div class="md-list-item-text">
           <h3>{{ song.name }}</h3>
           <p>{{ song.description }}</p>

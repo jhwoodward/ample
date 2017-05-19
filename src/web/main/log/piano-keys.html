@@ -1,4 +1,6 @@
-<div class="log keys" style="position:relative">
+<div class="log keys" 
+ng-show="vm.active"
+style="position:relative">
   <div ng-repeat="key in vm.keys"
       ng-class="{
         'white': key.colour === 1, 

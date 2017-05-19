@@ -48,6 +48,7 @@ State.prototype.clone = function () {
   delete clone.articulation;
   delete clone.animation;
   delete clone.marker;
+  clone.on = this.on; //retain ref to on for updates
   return clone;
 }
 
@@ -55,9 +56,9 @@ State.prototype.mutate = function (parser, interpreter) {
 
   if (interpreter) {
     interpreter.master.states.forEach(function (s) {
-      if (s.tick <= this.time.tick && !s.applied) {
+      if (s.tick === this.time.tick) {
         _.merge(this, s.state);
-        s.applied = true;
+       // s.applied = true;
       }
     }.bind(this));
   }

@@ -6,12 +6,11 @@ var key = require('./_key');
 var modifierType = require('../constants').modifierType;
 var utils = require('../utils');
 
-function BassConstraintParser() {
-  this.type = 'BassConstraint';
-  this.test = /^constrain( ?)bass/;
+function ScaleConstraintParser() {
+  this.type = 'ScaleConstraint';
+  this.test = /^constrain( ?)scale/;
 }
-
-
+ 
 var prototype = {
   parse: function (s) {
     return true;
@@ -20,18 +19,15 @@ var prototype = {
     var modifier = {
       id: this.type,
       type: 'pitch',
-      order: 50,
+      order: 100,
       fn: function constrainPitch(currentState) {
-        if (currentState.bassline) {
-          currentState.pitch.value = pitchUtils.constrain(currentState.pitch.value, currentState.scale.scalePitches[currentState.bassline]);
-          return currentState.scale.name + ' - ' + currentState.bassline;
-        }
+        currentState.pitch.value = pitchUtils.constrain(currentState.pitch.value, currentState.scale.scaleConstraint);
+        return currentState.scale.name;
       }
     };
     utils.addModifier(state, modifier);
-
   }
 }
 
-BassConstraintParser.prototype = _.extend({}, parser, prototype);
-module.exports = BassConstraintParser;
+ScaleConstraintParser.prototype = _.extend({}, parser, prototype);
+module.exports = ScaleConstraintParser;

@@ -10,10 +10,20 @@ var prototype = {
   parse: function (s) {
     return true;
   },
-  mutateState: function (state) {
-    delete state.on.tick;
-    state.off.tick = state.time.tick;
+  mutateState: function (state, interpreter) {
+    var prev = interpreter.getTopState();
+
+    var offset = state.off.offset;
+    if (offset > 0) offset = 0;
+    var offTick = state.time.tick + offset;
+
+    state.off.tick = offTick;
+  
     state.phrase.mutateState(state);
+    if (prev.on.tick && !prev.on.duration) {
+      prev.on.duration =  offTick - prev.on.tick;
+    }
+     delete state.on.tick;
   },
   getEvents: function (state, prev, events) {
     var out = [];
@@ -34,8 +44,11 @@ var prototype = {
         duration: offTick - prev.on.tick,
         annotation: 'Rest (' + state.phrase.parsed.key + ')',
         offset: offset,
-        origin: prev.on.origin
+        origin: this.origin,
+        onOrigin: prev.on.origin
       });
+
+     
 
     }
 

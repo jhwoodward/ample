@@ -1,18 +1,23 @@
-<div class="track track{{vm.trackIndex+1}}">
+<div class="track track{{vm.trackIndex+1}}"
+  ng-class="{
+    'collapsed': (vm.track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(vm.track)
+  }"
+>
   <md-toolbar class="track-toolbar">
-    <div class="md-toolbar-tools">
+    <div class="md-toolbar-tools" >
       <span 
       class="track-led" 
+      ng-hide="(vm.track.isMuted && vm.sequencer.solo !== vm.track.key) || (vm.sequencer.solo && vm.sequencer.solo !== vm.track.key)"
       ng-class="{'active': vm.active && (!vm.sequencer.solo || vm.sequencer.solo === vm.track.key)}"></span>
-      <h4 class="track-key">
+      <h4  class="track-key">
         <span>{{vm.track.key}}</span>
       </h4>
-      <span flex class="flex"></span>
+      <span  flex class="flex"></span>
       <md-button 
         aria-label="Mute" 
         class="md-fab md-micro mute" 
         ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}" 
-        ng-click="vm.toggleMute()">
+        ng-click="vm.sequencer.toggleMute(vm.track)">
         <md-tooltip md-direction="top">Mute</md-tooltip>
         M
       </md-button>

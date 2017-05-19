@@ -8,7 +8,7 @@ var utils = require('../utils');
 
 function ChordConstraintParser() {
   this.type = 'ChordConstraint';
-  this.test = /^constrain:chord/;
+  this.test = /^constrain( ?)chord/;
 }
  
 var prototype = {

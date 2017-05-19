@@ -30,7 +30,7 @@ Interpreter.prototype.interpretMaster = function (part) {
   this.states = [state];
   this.statelessEvents = [];
   this.next = undefined;
- 
+
   this.generateState(parse(parsers.master, part, this.macros));
 
   var events = this.getEvents();
@@ -72,7 +72,6 @@ Interpreter.prototype.interpretMaster = function (part) {
     return a.tick > b.tick ? 1 : -1;
   });
 
-
   return { states, events, markers, markerArray };
 }
 
@@ -84,9 +83,8 @@ Interpreter.prototype.generateState = function (parsers) {
   for (var i = 0; i < parsers.length; i++) {
     var parser = parsers[i];
     var state = this.next || this.getNextState();
-
     state.mutate(parser, this);
-   
+
     if (parser.continue) {
       if (parser.getEvents) {
         this.statelessEvents = this.statelessEvents.concat(parser.getEvents());
@@ -99,6 +97,19 @@ Interpreter.prototype.generateState = function (parsers) {
       parser.next(this.next);
     }
   }
+}
+
+Interpreter.prototype.getStateAt = function (tick) {
+  var out;
+  this.states.forEach(state => {
+    if (state.time.tick <= tick) {
+      out = state;
+    }
+  });
+  return out;
+ // var tickStates = this.states.filter(x => { return x.time.tick === tick; });
+ // if (!tickStates.length) return undefined;
+ // return tickStates[tickStates.length - 1];
 }
 
 Interpreter.prototype.getTopState = function () {
@@ -159,13 +170,14 @@ Interpreter.prototype.getAnimation = function () {
   return out;
 }
 
+
+
 Interpreter.prototype.getEvents = function () {
 
   //add animation events
   var animation = this.getAnimation();
 
   //append state phrase with animation values
-
   this.states.forEach(state => {
     animation.forEach(a => {
       if (state.time.tick >= a.from && state.time.tick < a.to) {
@@ -174,6 +186,7 @@ Interpreter.prototype.getEvents = function () {
     });
   });
 
+  //get parser events
   var events = this.states.reduce((acc, s, i) => {
     if (i > 0 && s.parser.getEvents) {
       var e = s.parser.getEvents(s, this.states[i - 1]);
@@ -305,7 +318,7 @@ Interpreter.prototype.interpret = function (part) {
   debugger;
   */
   return out;
- 
+
 }
 
 module.exports = Interpreter;

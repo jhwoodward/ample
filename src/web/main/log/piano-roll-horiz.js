@@ -1,3 +1,4 @@
+var eventType = require('../../../interpreter/constants').eventType;
 
 module.exports = function (ngModule) {
 
@@ -7,7 +8,8 @@ module.exports = function (ngModule) {
       replace: true,
       template: require('./piano-roll-horiz.html'),
       scope: {
-        sequencer: '='
+        sequencer: '=',
+        active: '='
       },
       bindToController: true,
       controller: ['$scope', '$timeout', controller],
@@ -54,9 +56,12 @@ module.exports = function (ngModule) {
 
 
       function scroll() {
-        if (currentEvent && currentEvent.tick > width) {
-          el[0].scrollLeft = currentEvent.tick - width;
+        if (vm.active) {
+          if (currentEvent && currentEvent.tick > width) {
+            el[0].scrollLeft = currentEvent.tick - width;
+          }
         }
+
         window.requestAnimationFrame(scroll);
       }
 
@@ -69,11 +74,23 @@ module.exports = function (ngModule) {
       });
 
 
+      function off() {
+        vm.data.forEach(e => e.active = false);
+        if (vm.beats) vm.beats.forEach(beat => beat.active = false);
+      }
+
+      scope.$watch('vm.active', function (active) {
+        if (!active) off();
+      });
+
       function handler(event) {
+
         currentEvent = event;
 
+        if (!vm.active) return;
 
-        if (event.type === 'ready' || event.type === 'solo') {
+
+        if (event.type === 'ready' || event.type === 'solo' || event.type === 'mute') {
           handleReady(event);
         }
 
@@ -83,8 +100,7 @@ module.exports = function (ngModule) {
         }
 
         if (event.type === 'stop') {
-          vm.data.filter(e => e.active = false);
-          vm.beats.forEach(beat => beat.active = false);
+          off();
         }
 
         if (event.type === 'tick') {
@@ -138,15 +154,16 @@ module.exports = function (ngModule) {
         var highestPitch = 0;
         var lowestPitch = 127;
 
-        event.tracks.forEach((track,i) => {
+        event.tracks.forEach((track, i) => {
 
           var interpreted = event.interpreted[i];
           if (!interpreted) return;
 
           if (vm.sequencer.solo && vm.sequencer.solo !== track.key) return;
+          if (!vm.sequencer.solo && track.isMuted) return;
 
-          var noteons = interpreted.events.filter(e => e.type === 'noteon');
-          var noteoffs = interpreted.events.filter(e => e.type === 'noteoff');
+          var noteons = interpreted.events.filter(e => e.type === eventType.noteon);
+          var noteoffs = interpreted.events.filter(e => e.type === eventType.noteoff);
 
           noteons.forEach(on => {
 
@@ -164,8 +181,9 @@ module.exports = function (ngModule) {
                   pitch: 127 - on.pitch.value,
                   on: on.tick,
                   off: off.tick,
-                  duration: off.duration,
-                  meta: { on, off }
+                  duration: off.duration || (off.tick - on.tick),
+                  meta: { on, off },
+                  ornament: on.ornament
                 });
                 noteoffs.splice(i, 1);
                 on.matched = true;
@@ -215,14 +233,14 @@ module.exports = function (ngModule) {
   function controller($scope, $timeout) {
     var vm = this;
     vm.data = [];
-
+    vm.beats = [];
     vm.hoverNote = function (note) {
       vm.sequencer.trigger(note.meta.on);
       note.active = true;
       $timeout(function () {
         note.active = false;
         vm.sequencer.trigger(note.meta.off);
-      }, note.meta.off.duration * vm.sequencer.interval);
+      }, note.meta.off.duration * vm.sequencer.interval * 10);
     }
   }
 

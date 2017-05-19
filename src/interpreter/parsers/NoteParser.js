@@ -31,8 +31,8 @@ var prototype = {
 
     return out;
   },
-  mutateState: function (state) {
-    var prev = _.cloneDeep(state);
+  mutateState: function (state, interpreter) {
+    var prev = interpreter.getTopState();// _.cloneDeep(state);
 
     state.articulation = state.phrase.merge(this.parsed.articulations);
     state.articulation.mutateState(state);
@@ -40,14 +40,14 @@ var prototype = {
     this.adjustOctaveForPitchTransition(state);
     state.pitch.raw = this.getPitch(state);
     state.pitch.value = state.pitch.raw;
-    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).sort((a,b) => {
+    var modifiers = state.modifiers.filter(m => m.type === modifierType.pitch).sort((a, b) => {
       return a.order > b.order ? 1 : -1;
     });
     state.modifierInfo = [];
     var rawPitchString = pitchUtils.midiPitchToString(state.pitch.raw);
-    modifiers.forEach(m => { 
-       var info = m.fn(state); 
-       state.modifierInfo.push(`${m.id}: ${info} (${rawPitchString})`);
+    modifiers.forEach(m => {
+      var info = m.fn(state);
+      state.modifierInfo.push(`${m.id}: ${info} (${rawPitchString})`);
     });
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
@@ -56,16 +56,21 @@ var prototype = {
 
     var onOffset = state.on.offset;
     //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
-  
+
     if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
       //   onOffset = 0;
     }
-    var isRepeatedNote =  prev.pitch.value === state.pitch.value;
+    var isRepeatedNote = prev.pitch.value === state.pitch.value;
     if (isRepeatedNote) {
       onOffset = 0;
     }
-    state.on = { 
-      tick: state.time.tick + onOffset,
+
+    var onTick =  state.time.tick + onOffset;
+    if (prev.on.tick && !prev.on.duration) {
+      prev.on.duration =  onTick - prev.on.tick + (state.off.offset || 0)
+    }
+    state.on = {
+      tick: onTick,
       offset: onOffset,
       origin: this.origin
     };
@@ -89,7 +94,7 @@ var prototype = {
       if (isRepeatedNote) {
         offOffset = -5;
       }
-      
+
       if (isRepeatedNote) {
         offAnnotation += ' (repeat note)';
       }
@@ -100,11 +105,12 @@ var prototype = {
         duration: state.time.tick + offOffset - prev.on.tick,
         annotation: offAnnotation,
         offset: offOffset,
-        origin: prev.on.origin
+        origin: this.origin,
+        onOrigin: prev.on.origin
       });
     }
 
-    
+
     //noteon
     out.push({
       tick: state.time.tick + (state.on.offset || 0),
@@ -118,9 +124,16 @@ var prototype = {
       origin: this.origin //ref to string position
     });
 
+    var modifiers = state.modifiers.filter(m => m.appendEvents).sort((a, b) => {
+      return a.order > b.order ? 1 : -1;
+    });
+    modifiers.forEach(m => {
+      out = out.concat(m.appendEvents(state, out));
+    });
+
     return out;
   },
-  next:function (next) {
+  next: function (next) {
     next.time.tick += next.time.step;
   }
 }

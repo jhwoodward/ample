@@ -14,10 +14,13 @@ function MarkerParser(macros) {
       return acc;
     }, {});
   }
+
+  this.test = /^\$[a-zA-Z]+(\d+)?/; //for code highlighting only
 }
 
 var prototype = {
   match: function match(s) {
+
     var startTest = /^\$[a-zA-Z]+(\d+)?\(/.exec(s);
     if (!startTest) return false;
 
@@ -35,13 +38,10 @@ var prototype = {
       parsed.part = part;
     }
 
-    //TODO: WORK OUT HOW TO DO THIS WHEN YOU HAVE A BRAIN
     parsed.definitionStart = startTest[0].length;
-
-
     this.string = startTest[0] + bracketed + ')';
     this.parsed = parsed;
-   
+
     return true;
   },
   mutateState: function (state, interpreter) {
@@ -50,15 +50,19 @@ var prototype = {
     var origTick = state.time.tick;
     var part = interpreter.parse(this.parsed.part, this.parsed.definitionStart);
 
+    function generateState(tick) {
+      interpreter.next = interpreter.getNextState();
+      interpreter.next.time.tick = tick;
+    //  var existingStates = interpreter.states.filter(x => { return x.time.tick === tick; });
+    //  if (existingStates.length) {
+    //    var lastTickState = existingStates[existingStates.length - 1];
+   //     interpreter.next.scale = lastTickState.scale;
+    //  }
+      interpreter.generateState(part);
+    }
     interpreter.master.markers[this.parsed.name].forEach((tick, i) => {
-      if (!this.parsed.n) {
-        interpreter.next = interpreter.getNextState();
-        interpreter.next.time.tick = tick;
-        interpreter.generateState(part);
-      } else if (i === this.parsed.n - 1) {
-        interpreter.next = interpreter.getNextState();
-        interpreter.next.time.tick = tick;
-        interpreter.generateState(part);
+      if (!this.parsed.n || i === this.parsed.n - 1) {
+        generateState(tick);
       }
     });
 

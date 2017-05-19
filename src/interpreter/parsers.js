@@ -3,6 +3,10 @@ var main = [
   require('./parsers/KeyParser'),
   require('./parsers/BassConstraintParser'),
   require('./parsers/ChordConstraintParser'),
+  require('./parsers/ScaleConstraintParser'),
+  require('./parsers/ArpeggioOrnamentParser'),
+  require('./parsers/TurnOrnamentParser'),
+  require('./parsers/TrillOrnamentParser'),
   require('./parsers/AnimationParser'),
   require('./parsers/ParallelParser'),
   require('./parsers/MirrorParser'),
@@ -20,7 +24,7 @@ var main = [
   require('./parsers/NoteParser'),
   require('./parsers/OctaveParser'),
   require('./parsers/PitchbendParser'),
-  require('./parsers/RelativeNoteParser'),
+ // require('./parsers/RelativeNoteParser'),
   require('./parsers/RestParser'),
   require('./parsers/SustainParser'),
   require('./parsers/TempoParser'),
@@ -29,6 +33,7 @@ var main = [
   require('./parsers/OffParser'),
   require('./parsers/VelocityParser')
 ];
+
 var setter = [
   require('./parsers/SubstitutionSetterParser'),
   require('./parsers/AnnotationSetterParser')
@@ -44,6 +49,6 @@ var master = [
   require('./parsers/MasterScaleParser'),
   require('./parsers/MasterBassParser'),
   require('./parsers/MasterMarkerParser')
-]
+];
 
 module.exports = { main, setter, master };

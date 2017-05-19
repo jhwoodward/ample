@@ -1,72 +1,89 @@
 <md-toolbar class="main-toolbar">
   <div class="md-toolbar-tools main">
 
-    <h2  md-truncate class="brand" >
-      <span ng-repeat="l in vm.brand" 
-      ng-mouseover="vm.animateLogo()"
-      class="brand-letter" 
-      ng-class="{'active':l.active}">{{l.letter}}</span>
-      - {{vm.song.name}}
-      </h2>
-<div style="margin:auto" >
-    <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()"
-    ng-class="{'active':vm.sequencer.playing}"
-    >
+    <h2 md-truncate class="brand">
+      <span ng-repeat="l in vm.brand" ng-mouseover="vm.animateLogo()" class="brand-letter" ng-class="{'active':l.active}">{{l.letter}}</span>     
+    </h2>
+    <div flex style="text-align:center">
+      <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing}">
+      </md-button>
+      <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active':vm.sequencer.paused}">
+      </md-button>
+      <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
+      </md-button>
+    </div>
+   
+    <!--
+    <md-button  ng-click="vm.toggleTracks()" ng-if="vm.sequencer.interpreted" class="md-default">
+      Tracks
     </md-button>
-    <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()"
-    ng-class="{'active':vm.sequencer.paused}">
-    </md-button>
-    <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
-    </md-button>
-</div>
-   <md-button ng-click="vm.edit($event)" class="md-default">
-      Edit
-    </md-button>
-    <md-button ng-click="vm.save()" class="md-default">
-      Save
-    </md-button>
-    <md-button ng-click="vm.clone()" class="md-default">
-      Clone
-    </md-button>
-    <md-button ng-click="vm.delete()" ng-if="vm.song.created" class="md-default">
-      Delete
-    </md-button>
-    <md-button ng-click="vm.new()" class="md-default">
-      New
-    </md-button>
-    <md-button ng-click="vm.toggleRight()" class="md-default">
+    -->
+    <md-menu md-position-mode="target-right bottom">
+      <md-button aria-label="File menu"  ng-click="$mdMenu.open($event)">
+        {{vm.song.name}}
+      </md-button>
+      <md-menu-content>
+         
+        <md-menu-item>
+          <md-button ng-click="vm.edit($event)" class="md-default">
+            Edit
+          </md-button>
+        </md-menu-item>
+        <md-menu-item>
+          <md-button ng-click="vm.save()" class="md-default">
+            Save
+          </md-button>
+        </md-menu-item>
+        <!--
+        <md-menu-item>
+          <md-button ng-click="vm.clone()" class="md-default">
+            Clone
+          </md-button>
+        </md-menu-item>
+        -->
+        <md-menu-item ng-if="vm.song.created">
+          <md-button ng-click="vm.delete()" class="md-default">
+            Delete
+          </md-button>
+        </md-menu-item>
+     
+
+      </md-menu-content>
+
+    </md-menu>
+       <md-button ng-click="vm.toggleStore()" class="md-default">
       Load
     </md-button>
-
   </div>
 </md-toolbar>
-
 
 <section>
   <div layout="column" class="track-container">
     <div layout="row" class="track-row" flex>
-      <master-track ng-if="vm.song.useMaster"
-        flex 
-        master="vm.song.master"
-        sequencer="vm.sequencer">
+      <master-track ng-if="vm.song.useMaster" flex master="vm.song.master" sequencer="vm.sequencer">
       </master-track>
-      <track 
-        flex 
-        ng-repeat="track in vm.song.tracks" 
-        track="track"
-        track-index="$index"
-        sequencer="vm.sequencer">
+      <track flex ng-repeat="track in vm.song.tracks"
+      track="track" track-index="$index" sequencer="vm.sequencer">
       </track>
-     
+
     </div>
   </div>
+ <button ng-click="vm.log='keys'">Keys</button> <button ng-click="vm.log='roll'" vm.log='roll'>Roll</button>
+ <piano-keys  active="vm.log==='keys'"  sequencer="vm.sequencer"></piano-keys>
 
- <piano-keys  sequencer="vm.sequencer"></piano-keys>
- <!--
-  <piano-roll-horiz sequencer="vm.sequencer"></piano-roll-horiz>
--->
-  <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="right">
+  <piano-roll-horiz  active="vm.log==='roll'" sequencer="vm.sequencer"></piano-roll-horiz>
+
+  <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="store">
     <store></store>
+  </md-sidenav>
+
+  <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="tracks">
+    <tracks 
+      song="vm.song" 
+      sequencer="vm.sequencer"
+      is-open="vm.tracksOpen()"
+
+    ></tracks>
   </md-sidenav>
 
 </section>

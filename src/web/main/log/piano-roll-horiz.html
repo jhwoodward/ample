@@ -1,4 +1,6 @@
-<div class="log " style="position:relative" ng-class="{ 'playing': vm.sequencer.playing }">
+<div class="log " 
+ng-show="vm.active"
+style="position:relative" ng-class="{ 'playing': vm.sequencer.playing }">
   <div id="pianoroll" class="piano-roll-horiz" style="position:relative">
     <div 
     ng-repeat="beat in vm.beats"
@@ -13,7 +15,7 @@
     style="left:{{marker.tick}}px;">{{marker.key}}</div>
 
     <div ng-repeat="note in vm.data track by $index" 
-      ng-class="{'active': note.active}"
+      ng-class="{'active': note.active, 'ornament': note.ornament}"
       ng-mouseover="vm.hoverNote(note)"
       class="note track{{note.track}}" 
       style="left:{{note.on}}px;width:{{note.width}}px;top:{{note.top}}px;height:{{note.height}}px">

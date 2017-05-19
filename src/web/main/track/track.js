@@ -1,4 +1,4 @@
-var eventType = require('../../interpreter/constants').eventType;
+var eventType = require('../../../interpreter/constants').eventType;
 var _ = require('lodash');
 module.exports = function (ngModule) {
 
@@ -24,9 +24,9 @@ module.exports = function (ngModule) {
     vm.showChannelDropdown = function ($mdMenu, ev) {
       $mdMenu.open(ev);
     };
-    vm.toggleMute = function () {
-      vm.sequencer.toggleMute(vm.track);
-      if (vm.track.isMuted) {
+
+    $scope.$watch('vm.track.isMuted', function (isMuted) {
+      if (isMuted) {
         clearAllMarkers();
         if (subMarker) {
           subMarker.clear();
@@ -36,7 +36,7 @@ module.exports = function (ngModule) {
         }
         vm.setActive(false);
       }
-    }
+    });
 
     $scope.$watch('vm.sequencer', function (seq) {
       if (seq) {
@@ -73,7 +73,7 @@ module.exports = function (ngModule) {
 
       event.events.forEach(e => {
 
-         if (e.isMaster || !e.track || e.track.key !== vm.track.key) return;
+        if (e.isMaster || !e.track || e.track.key !== vm.track.key) return;
 
         if (e.origin) {
           var start = editor.posFromIndex(e.origin.start);
@@ -94,15 +94,20 @@ module.exports = function (ngModule) {
           case eventType.noteon:
             vm.setActive(true);
             if (sustainMarker) { sustainMarker.clear(); }
+            if (!e.origin) return;
             markers[e.origin.start] = editor.markText(start, end, { className: 'highlight' });
 
             break;
           case eventType.noteoff:
+           if (!e.onOrigin) return;
             vm.setActive(false);
-            if (markers[e.origin.start]) {
-              markers[e.origin.start].clear();
-              delete markers[start];
+            if (markers[e.onOrigin.start]) {
+              markers[e.onOrigin.start].clear();
+              delete markers[e.onOrigin.start];
             }
+            if (!e.origin) return;
+            if (sustainMarker) { sustainMarker.clear(); }
+            sustainMarker = editor.markText(start, end, { className: 'sustain-highlight' });
             break;
         }
 
@@ -129,9 +134,7 @@ module.exports = function (ngModule) {
       lineNumbers: false,
       height: '100%',
       mode: {
-        name: 'javascript',
-        statementIndent: 2,
-        json: true,
+        name: 'track-script',
         viewportMargin: Infinity
       },
       theme: 'blackboard'
@@ -140,6 +143,7 @@ module.exports = function (ngModule) {
     var editor;
     vm.codemirrorLoaded = function (ed) {
       editor = ed;
+      /*
       var charWidth = editor.defaultCharWidth(), basePadding = 4;
       editor.on("renderLine", function (cm, line, elt) {
         var off = CodeMirror.countColumn(line.text, null, cm.getOption("tabSize")) * charWidth;
@@ -148,12 +152,14 @@ module.exports = function (ngModule) {
       });
       editor.refresh();
       editor.focus();
-
+*/
     };
 
     $scope.$watch('vm.track.part', _.debounce(function (val, old) {
       if (val && old && val !== old) {
-        vm.sequencer.update(vm.track);
+        $timeout(function () {
+          vm.sequencer.update(vm.track);
+        });
       }
     }, 1000));
 

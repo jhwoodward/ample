@@ -18,6 +18,8 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
       part: ''
     };
   }
+
+  vm.log = 'roll';
   console.log(vm.song);
 
   if (!vm.song.tracks) {
@@ -28,26 +30,18 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
 
   vm.sequencer = new Sequencer(webMidiService.selectedOutput);
   vm.sequencer.subscribe(handleEvent);
-  
 
-  $timeout(function() { 
+
+  $timeout(function () {
     vm.animateLogo();
     vm.sequencer.load(vm.song.tracks, vm.song.master);
- }, 100);
+  }, 100);
 
   vm.save = save;
   vm.delete = del;
-  vm.new = function () {
-    if (!vm.song.created) {
-      vm.song = storeService.new();
-     // vm.tracks = songToArray(vm.song);
-      vm.sequencer.load(vm.song.tracks);
-    } else {
-      $state.go('root.main', { key: undefined });
-    }
-  }
 
-  vm.edit = function(ev) {
+
+  vm.edit = function (ev) {
     $mdDialog.show({
       controller: 'editController',
       controllerAs: 'vm',
@@ -57,35 +51,62 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
       clickOutsideToClose: false,
       fullscreen: false,
       resolve: {
-        sequencer: function() {
+        sequencer: function () {
           return vm.sequencer;
         },
-        song: function() {
+        song: function () {
           return vm.song;
         }
       }
     })
-    .then(function(answer) {
-      $scope.status = 'You said the information was "' + answer + '".';
-    }, function() {
-      $scope.status = 'You cancelled the dialog.';
-    });
+      .then(function (answer) {
+        $scope.status = 'You said the information was "' + answer + '".';
+      }, function () {
+        $scope.status = 'You cancelled the dialog.';
+      });
   };
 
 
-  vm.toggleRight = function () {
-    $mdSidenav('right').toggle();
+  vm.toggleStore = function () {
+    $mdSidenav('store').toggle();
   }
-  vm.isOpenRight = function () {
-    return $mdSidenav('right').isOpen();
-  };
+  vm.toggleTracks = function () {
+    $mdSidenav('tracks').toggle();
+  }
+  vm.tracksOpen = function () {
+    return $mdSidenav('tracks').isOpen();
+  }
 
   function save() {
-    var payload = _.cloneDeep(vm.song);
+
+    var payload = {
+      tracks: []
+    };
+    for (var key in song) {
+      if (key !== 'tracks' && key !== 'parts' && song.hasOwnProperty(key)) {
+        payload[key] = song[key];
+      }
+    }
+    var tracks = _.cloneDeep(vm.song.tracks);
+    tracks.forEach(track => {
+      delete track.$$hashKey;
+      var t = {};
+      for (var key in track) {
+        if (track.hasOwnProperty(key)) {
+          t[key] = track[key];
+        }
+      }
+      payload.tracks.push(t);
+    });
+    if (payload.master) {
+      delete payload.master.interpreted;
+    }
+    delete payload.parts;
+    console.log(payload);
     storeService.save(payload).then(function (result) {
       console.log(result);
     });
-  }
+  };
 
   function del() {
     storeService.delete(vm.song.key).then(function (result) {
@@ -105,7 +126,7 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
         sub: song.parts[key].sub,
         channel: song.parts[key].channel
       });
-      index ++;
+      index++;
     }
     return out;
 
@@ -128,7 +149,7 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   }
 
 
-  
+
   function handleEvent(e) {
     if (e.type === 'end') {
       vm.stop();
@@ -149,30 +170,31 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     vm.sequencer.start();
   }
 
-  vm.brand = 's c r i p t o p h o n i c s'.split(' ').map(l => {
+ // vm.brand = 's c r i p t o p h o n i c s'.split(' ').map(l => {
+     vm.brand = 'c a c o p h o n y'.split(' ').map(l => {
     return {
       letter: l
     };
   });
 
   var animating = false;
-  vm.animateLogo = function() {
+  vm.animateLogo = function () {
     if (animating) return;
     animating = true;
     var speed = 50;
-    vm.brand.forEach((l,i) => {
-      $timeout(function() {
+    vm.brand.forEach((l, i) => {
+      $timeout(function () {
         l.active = true;
         if (i > 0) {
-          vm.brand[i-1].active = false;
+          vm.brand[i - 1].active = false;
         }
-      },speed * i);
+      }, speed * i);
     });
-    $timeout(function() {
-      vm.brand[vm.brand.length-1].active = false;
+    $timeout(function () {
+      vm.brand[vm.brand.length - 1].active = false;
       animating = false;
-        
-      },speed * vm.brand.length);
+
+    }, speed * vm.brand.length);
   }
 
 

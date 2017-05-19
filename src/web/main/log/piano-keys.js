@@ -7,7 +7,8 @@ module.exports = function (ngModule) {
       replace: true,
       template: require('./piano-keys.html'),
       scope: {
-        sequencer: '='
+        sequencer: '=',
+        active: '='
       },
       bindToController: true,
       controller: ['$scope', '$timeout', controller],
@@ -43,11 +44,9 @@ module.exports = function (ngModule) {
         return out;
       });
 
-    
-      $timeout(function() {
-         el[0].scrollLeft = el[0].offsetWidth / 3;
-      });
-    
+
+
+
 
       scope.$watch('vm.sequencer', function (seq) {
         if (seq) {
@@ -55,16 +54,36 @@ module.exports = function (ngModule) {
         }
       });
 
+      function off() {
+        vm.keys.forEach(k => {
+          k.track = 0;
+        });
+      }
+
+      scope.$watch('vm.active', function (active) {
+        if (!active) {
+          off();
+        } else {
+          $timeout(function () {
+            el[0].scrollLeft = el[0].offsetWidth / 3;
+          });
+        }
+      });
+
       function handler(event) {
 
+        if (!vm.active) return;
         // if (event.trackIndex !== vm.trackIndex) return;
 
         if (event.type === 'ready' || event.type === 'solo') {
           // handleReady(event);
+          vm.keys.forEach(k => {
+            k.track = 0;
+          });
         }
 
         if (event.type === 'stop') {
-
+          off();
         }
 
         $timeout(function () {

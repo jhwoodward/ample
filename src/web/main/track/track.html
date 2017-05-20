@@ -24,8 +24,8 @@
       <md-button 
         aria-label="Solo" 
         class="md-fab md-micro solo" 
-        ng-click="vm.sequencer.toggleSolo(vm.track)"
         ng-class="{'active': vm.track.key === vm.sequencer.solo}"
+        ng-click="vm.sequencer.toggleSolo(vm.track)"
         >
         <md-tooltip md-direction="top">Solo</md-tooltip>
         S

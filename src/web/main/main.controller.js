@@ -37,10 +37,9 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     vm.sequencer.load(vm.song.tracks, vm.song.master);
   }, 100);
 
-  vm.save = save;
-  vm.delete = del;
 
 
+/*
   vm.edit = function (ev) {
     $mdDialog.show({
       controller: 'editController',
@@ -65,7 +64,7 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
         $scope.status = 'You cancelled the dialog.';
       });
   };
-
+*/
 
   vm.toggleStore = function () {
     $mdSidenav('store').toggle();
@@ -77,42 +76,7 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     return $mdSidenav('tracks').isOpen();
   }
 
-  function save() {
 
-    var payload = {
-      tracks: []
-    };
-    for (var key in song) {
-      if (key !== 'tracks' && key !== 'parts' && song.hasOwnProperty(key)) {
-        payload[key] = song[key];
-      }
-    }
-    var tracks = _.cloneDeep(vm.song.tracks);
-    tracks.forEach(track => {
-      delete track.$$hashKey;
-      var t = {};
-      for (var key in track) {
-        if (track.hasOwnProperty(key)) {
-          t[key] = track[key];
-        }
-      }
-      payload.tracks.push(t);
-    });
-    if (payload.master) {
-      delete payload.master.interpreted;
-    }
-    delete payload.parts;
-    console.log(payload);
-    storeService.save(payload).then(function (result) {
-      console.log(result);
-    });
-  };
-
-  function del() {
-    storeService.delete(vm.song.key).then(function (result) {
-      console.log(result);
-    });
-  }
 
 
   function songToArray(song) {

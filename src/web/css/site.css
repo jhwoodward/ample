@@ -1,18 +1,81 @@
 
   body, md-toolbar, md-toolbar input , #song-name, .track-row,.channel-menu-content,.channel-menu-item {
-     background-color: #2a3b4a;
+     background-color: #3f566b;
      color:  #d9dcc1  !important;
     }
     
   .side-menu {
-    color:rgba(0,0,0,0.87) !important;
+    color:rgba(72, 79, 90, 0.87) !important
   }
 
-  .main-toolbar  md-toolbar md-input-container .md-input {
-      text-align: right;
-      margin-top: 22px;
-      border-bottom: none;
+
+
+
+    .song-panel {
+      height:45px;
+    margin:0 auto; width: 350px;
+    background: #2a3b4a;
+    border-radius: 20px;
+          -webkit-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+      -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+      box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
     }
+
+.md-sidenav-right {
+ max-width:400px !important;
+      width: 400px !important;
+}
+    .md-sidenav-right, .md-sidenav-right  md-content {
+      background: #cde6f7 
+     
+    }
+  
+    .tracks-panel .track-list md-input-container  {
+      margin: 10px 0;
+    }
+    .tracks-panel  md-tabs md-ink-bar {
+      background: white;
+      height:4px;
+    }
+
+   .md-sidenav-right md-tabs-canvas , .tracks-panel .md-fab.md-button:not(.note),.tracks-panel  md-checkbox .md-icon  {
+      background-color: #809ab1;
+    }
+
+    .tracks-panel-buttons {
+        bottom: 0;
+    position: absolute;
+    width: 100%;
+    background: #809ab1;
+    color: white;
+    }
+      
+
+      .tracks-panel .md-tab {
+ padding: 20px 24px;
+      }  
+      .tracks-panel md-tab-item {
+        color: white !important;
+      }
+     .tracks-panel md-pagination-wrapper , .tracks-panel md-tabs-canvas {
+        height: 62px !important;
+      }
+
+md-checkbox .md-icon {
+  border-radius: 50%;
+  padding: 12px;
+}
+md-checkbox.md-checked .md-icon:after {
+      left: 9px;
+    top: 4px;
+}
+[md-ink-ripple-checkbox] {
+  padding: 14px;
+}
+.md-icon-button.md-micro {
+  font-size: 16px;
+  width:25px;
+}
 
    .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
     font-family: inherit;
@@ -103,7 +166,7 @@ h4 {
     }
 
     .md-toolbar-tools.main .md-icon-button {
-      font-size: 1.2em
+      font-size: 24px;
     }
   
     
@@ -253,6 +316,26 @@ h4 {
   box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73, 0 0 40px #2e8c73, 0 0 50px #2e8c73, 0 0 75px #2e8c73;
 }
 
+.piano-roll-horiz .note.track5.active, .track5 .track-toolbar .track-led.active {
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239), 0 0 40px rgb(127, 100, 239), 0 0 50px rgb(127, 100, 239), 0 0 75px rgb(127, 100, 239);
+}
+.piano-roll-horiz .note.track6.active, .track6 .track-toolbar .track-led.active {
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(255,64,129), 0 0 35px rgb(255,64,129), 0 0 40px rgb(255,64,129), 0 0 50px rgb(255,64,129), 0 0 75px rgb(255,64,129);
+}
+
+.piano-roll-horiz .note.track7.active, .track7 .track-toolbar .track-led.active {
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255), 0 0 40px rgb(0, 149, 255), 0 0 50px rgb(0, 149, 255), 0 0 75px rgb(0, 149, 255);
+}
+
+.piano-roll-horiz .note.track8.active, .track8 .track-toolbar .track-led.active {
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2), 0 0 40px rgb(72, 185, 2), 0 0 50px rgb(72, 185, 2), 0 0 75px rgb(72, 185, 2);
+}
+
+
+
+
+
+
 
 .piano-roll-horiz .beat {
   position:absolute;
@@ -303,6 +386,7 @@ h4 {
 .piano-roll .pitch .track3 {
        color: #0079b5;
     }
+
 .track4 .track-toolbar .track-key, 
 .note.track4, 
 .key.active.track4,
@@ -310,6 +394,39 @@ h4 {
 .track4 .md-button.md-fab.solo.md-micro.active  {
   background-color: #2e8c73;
 }
+
+.track5 .track-toolbar .track-key, 
+.note.track5, 
+.key.active.track5,
+.track5 .md-button.md-fab.mute.md-micro.active,
+.track5 .md-button.md-fab.solo.md-micro.active  {
+  background-color: rgb(127, 100, 239);
+}
+
+.track6 .track-toolbar .track-key, 
+.note.track6, 
+.key.active.track6,
+.track6 .md-button.md-fab.mute.md-micro.active,
+.track6 .md-button.md-fab.solo.md-micro.active  {
+  background-color: rgb(255,64,129);
+}
+
+.track7 .track-toolbar .track-key, 
+.note.track7, 
+.key.active.track7,
+.track7 .md-button.md-fab.mute.md-micro.active,
+.track7 .md-button.md-fab.solo.md-micro.active  {
+  background-color: rgb(0, 149, 255);
+}
+
+.track8 .track-toolbar .track-key, 
+.note.track8, 
+.key.active.track8,
+.track8 .md-button.md-fab.mute.md-micro.active,
+.track8 .md-button.md-fab.solo.md-micro.active  {
+  background-color: rgb(72, 185, 2);
+}
+
   .piano-roll .pitch .track4 {
        color: #2e8c73;
      }

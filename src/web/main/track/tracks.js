@@ -12,16 +12,16 @@ module.exports = function (ngModule) {
         sequencer: '='
       },
       bindToController: true,
-      controller: ['$scope', '$mdSidenav', controller],
+      controller: ['$scope', '$mdSidenav', 'storeService', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope, $mdSidenav) {
+  function controller($scope, $mdSidenav, storeService) {
     var vm = this;
     var orig, origInterpeted;
 
-    $scope.$watch('vm.isOpen', function(open) {
+    $scope.$watch('vm.isOpen', function (open) {
       if (open) {
         activate();
       }
@@ -53,7 +53,11 @@ module.exports = function (ngModule) {
       vm.sequencer.reorder(vm.song.tracks);
     }
 
+   
+    vm.delete = del;
+
     vm.ok = function () {
+      save();
       $mdSidenav('tracks').close();
     }
 
@@ -64,6 +68,44 @@ module.exports = function (ngModule) {
       vm.sequencer.reorder(vm.song.tracks);
       $mdSidenav('tracks').close();
     };
+
+    function save() {
+
+      var payload = {
+        tracks: []
+      };
+      for (var key in vm.song) {
+        if (key !== 'tracks' && key !== 'parts' && vm.song.hasOwnProperty(key)) {
+          payload[key] = vm.song[key];
+        }
+      }
+      var tracks = _.cloneDeep(vm.song.tracks);
+      tracks.forEach(track => {
+        delete track.$$hashKey;
+        var t = {};
+        for (var key in track) {
+          if (track.hasOwnProperty(key)) {
+            t[key] = track[key];
+          }
+        }
+        payload.tracks.push(t);
+      });
+      if (payload.master) {
+        delete payload.master.interpreted;
+      }
+      delete payload.parts;
+
+      storeService.save(payload).then(function (result) {
+        console.log(result);
+      });
+    };
+    
+
+    function del() {
+      storeService.delete(vm.song.key).then(function (result) {
+        console.log(result);
+      });
+    }
 
   }
 

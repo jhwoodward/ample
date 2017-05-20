@@ -48,12 +48,14 @@ function appendEvents(state, events, config, interpreter) {
   for (count = 1; count <= noteCount; count++) {
     var onTick = state.time.tick + (config.duration * count);
 
+    //TODO: not really necessary to recalculate for every tick. Every beat should be enough
     var dummyState = _.cloneDeep(interpreter.getStateAt(onTick));
     dummyState.pitch = _.clone(pitches[pitchIndex]);
     var modifiers = getModifiers(dummyState);
     modifiers.forEach(m => {
       m.fn(dummyState);
     });
+    
     out.push({
       tick: onTick,
       offset: dummyState.on.offset,

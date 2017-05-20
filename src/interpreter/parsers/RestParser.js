@@ -23,7 +23,7 @@ var prototype = {
     if (prev.on.tick && !prev.on.duration) {
       prev.on.duration =  offTick - prev.on.tick;
     }
-     delete state.on.tick;
+     
   },
   getEvents: function (state, prev, events) {
     var out = [];
@@ -33,7 +33,7 @@ var prototype = {
   //    e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
   //  });
 
-    if (prev.on.tick) {
+    if (state.on.tick) {
       var offset = state.off.offset;
       if (offset > 0) offset = 0;
       var offTick = state.time.tick + offset;
@@ -47,10 +47,8 @@ var prototype = {
         origin: this.origin,
         onOrigin: prev.on.origin
       });
-
-     
-
     }
+    delete state.on.tick;
 
 
 

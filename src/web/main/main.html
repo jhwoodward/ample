@@ -9,17 +9,25 @@
       <div class="song-panel md-toolbar-tools brand">
         <md-button class="md-icon-button ion-ios-settings-strong" ng-click="vm.toggleTracks()">
         </md-button>
+        <h2 flex md-truncate class="song-text" ng-click="vm.toggleTracks()" style="outline:none;cursor:pointer;">{{vm.song.name}}</h2>
 
-        <md-button class="md-icon-button  ion-skip-backward" ng-click="vm.rewind()">
-        </md-button>
-        <h2 flex md-truncate  class="song-text" ng-click="vm.toggleTracks()" style="outline:none;cursor:pointer;">{{vm.song.name}}</h2>
+        <div class="marker-info song-text">
+          <span ng-repeat="marker in vm.sequencer.markers">
+            <span style="cursor:pointer;outline:none;" ng-click="vm.goTo(marker)" ng-class="{'active': marker.active}" class="beat marker">{{marker.key}}</span>
+              <span ng-if="$index < vm.sequencer.markers.length-1"> - </span>
 
+          </span>
 
+        </div>
 
         <div class="beat-info song-text">
           <span class="beat">{{vm.sequencer.beat}} </span>
           <span class="beat-ticks">{{vm.sequencer.beatTicks}}</span>
         </div>
+
+
+        <md-button class="md-icon-button  ion-skip-backward" ng-click="vm.sequencer.rewind()">
+        </md-button>
         <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing || vm.sequencer.paused}">
         </md-button>
         <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active': vm.sequencer.paused}">

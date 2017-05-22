@@ -9,6 +9,8 @@ function Sequencer(output) {
   this.paused = false;
   this.interval = 1;
   this.tick = 0;
+  this.beat = 0;
+  this.beatTicks = 0;
   this.onTick = this.onTick.bind(this);
   this.output = output;
   this.listeners = [];
@@ -175,6 +177,9 @@ Sequencer.prototype = {
       }
     }
 
+    if (this.tick >= this.maxTick) {
+      this.tick = 0;
+    }
 
     this.stopped = false;
     this.paused = false;
@@ -270,7 +275,15 @@ Sequencer.prototype = {
     if (this.clock) {
       this.clock.stop();
     }
+    this.markers.forEach(m => {
+      m.active = false;
+    });
 
+  },
+  rewind: function () {
+    this.tick = 0;
+    this.beat = 0;
+    this.beatTicks = 0;
   },
   end: function () {
     this.stopped = true;
@@ -314,6 +327,14 @@ Sequencer.prototype = {
 
     this.beat = Math.floor(this.tick / 48);
     this.beatTicks = this.tick - (this.beat * 48);
+
+    this.markers.forEach((m, i) => {
+      if (this.tick > m.tick) {
+        m.active = (i >= this.markers.length - 1 || this.tick < this.markers[i + 1].tick);
+      } else {
+        m.active = false;
+      }
+    });
 
     var events;
     if (this.solo) {

@@ -30,7 +30,6 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   vm.sequencer.subscribe(handleEvent);
 
   $timeout(function () {
-    vm.animateLogo();
     vm.sequencer.load(vm.song.tracks, vm.song.master);
   }, 100);
 
@@ -103,35 +102,20 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     vm.sequencer.start();
   }
 
-  vm.rewind = function(){
-    vm.sequencer.tick =0;
-  }
-
-  vm.brand = 'm i d i s c r i p t'.split(' ').map(l => {
-    return {
-      letter: l
-    };
-  });
-
-  var animating = false;
-  vm.animateLogo = function () {
-    if (animating) return;
-    animating = true;
-    var speed = 50;
-    vm.brand.forEach((l, i) => {
-      $timeout(function () {
-        l.active = true;
-        if (i > 0) {
-          vm.brand[i - 1].active = false;
-        }
-      }, speed * i);
+  vm.goTo = function(marker) {
+    vm.sequencer.markers.forEach(m => {
+      m.active=false;
     });
-    $timeout(function () {
-      vm.brand[vm.brand.length - 1].active = false;
-      animating = false;
-
-    }, speed * vm.brand.length);
+    marker.active =true;
+    vm.sequencer.tick = marker.tick;
+    if (!vm.sequencer.playing) {
+      vm.sequencer.play();
+    }
   }
+
+ 
+
+
 
 
   vm.togglePause = function () {

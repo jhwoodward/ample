@@ -89,6 +89,7 @@ app.config(['$stateProvider', '$urlRouterProvider',
   }]);
 
 require('./css/site.css');
+require('./css/blackboard.css');
 require('./css/track.css')
 
 module.exports = app;

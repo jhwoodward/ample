@@ -18,7 +18,7 @@
   }
 
   .song-text {
-    text-align: center;
+
     line-height: 19px;
     color:#a2a2a2;
     border-radius: 2px;
@@ -43,9 +43,9 @@
 
     .song-panel {
       height:45px;
-    margin:0 auto; width: 500px;
+    margin:0 auto; 
     border-radius: 20px;
-    
+    width:700px;
     /*
           -webkit-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
@@ -597,7 +597,7 @@ md-list[dnd-list] .dndDraggingSource {
 
 
 
-.track-content .highlight {
+.track-content .highlight, .beat.marker.active {
   border-bottom:3px solid white;
 }
 .highlight {

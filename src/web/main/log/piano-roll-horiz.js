@@ -65,6 +65,8 @@ module.exports = function (ngModule) {
         if (vm.active) {
           if (currentEvent && currentEvent.tick > width) {
             el[0].scrollLeft = Math.round(currentEvent.tick - width);
+          } else if (currentEvent && currentEvent.tick < width) {
+            el[0].scrollLeft = 0;
           }
         }
 

@@ -133,6 +133,7 @@ module.exports = function (ngModule) {
       lineWrapping: true,
       lineNumbers: false,
       height: '100%',
+      matchBrackets: true,
       mode: {
         name: 'track-script',
         viewportMargin: Infinity

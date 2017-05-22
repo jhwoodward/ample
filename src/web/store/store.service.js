@@ -19,23 +19,19 @@ module.exports = function (ngModule) {
           master: {
             part: ''
           },
-          parts: [
+          tracks: [
             {
-              key: 'part1',
+              key: 'track1',
               channel: 0,
               part: ''
             },
             {
-              key: 'part2',
+              key: 'track2',
               channel: 0,
               part: ''
-            }, {
-              key: 'part3',
-              channel: 0,
-              part: ''
-            },
+            }, 
             {
-              key: 'part4',
+              key: 'track3',
               channel: 0,
               part: ''
             }

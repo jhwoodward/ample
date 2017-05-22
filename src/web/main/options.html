@@ -1,0 +1,27 @@
+<div>
+  <md-button ng-click="vm.close()" class="md-icon-button ion-close close-left">
+  </md-button>
+  <md-tabs md-dynamic-height>
+
+    <md-tab id="tab2">
+      <md-tab-label>Options</md-tab-label>
+      <md-tab-body>
+
+        <div class="md-padding" style="margin-top:10px">
+          <md-radio-group ng-model="vm.log">
+            <md-radio-button value="keys" class="md-primary">Keys</md-radio-button>
+            <md-radio-button value="roll">Roll</md-radio-button>
+          </md-radio-group>
+        </div>
+      </md-tab-body>
+    </md-tab>
+    <md-tab id="tab1">
+      <md-tab-label>About</md-tab-label>
+      <md-tab-body>
+
+
+      </md-tab-body>
+    </md-tab>
+  </md-tabs>
+
+</div>

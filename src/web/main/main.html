@@ -1,27 +1,37 @@
 <md-toolbar class="main-toolbar">
   <div class="md-toolbar-tools main">
-
-    <h2 md-truncate class="brand">
-      <span ng-repeat="l in vm.brand" ng-mouseover="vm.animateLogo()" class="brand-letter" ng-class="{'active':l.active}">{{l.letter}}</span>
+    <md-button class="md-icon-button ion-navicon-round" ng-click="vm.toggleOptions()">
+    </md-button>
+    <h2 md-truncate class="brand" ng-click="vm.toggleOptions()" style="outline:none;cursor:pointer">
+      Midiscript
     </h2>
     <div flex>
       <div class="song-panel md-toolbar-tools brand">
-         <md-button class="md-icon-button ion-android-list" ng-click="vm.toggleTracks()">
+        <md-button class="md-icon-button ion-ios-settings-strong" ng-click="vm.toggleTracks()">
         </md-button>
-        <h2 flex md-truncate ng-click="vm.toggleTracks()" style="text-align:center;outline:none;cursor:pointer">{{vm.song.name}}</h2>
-        <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing}">
+
+        <md-button class="md-icon-button  ion-skip-backward" ng-click="vm.rewind()">
         </md-button>
-        <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active':vm.sequencer.paused}">
+        <h2 flex md-truncate  class="song-text" ng-click="vm.toggleTracks()" style="outline:none;cursor:pointer;">{{vm.song.name}}</h2>
+
+
+
+        <div class="beat-info song-text">
+          <span class="beat">{{vm.sequencer.beat}} </span>
+          <span class="beat-ticks">{{vm.sequencer.beatTicks}}</span>
+        </div>
+        <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing || vm.sequencer.paused}">
+        </md-button>
+        <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active': vm.sequencer.paused}">
         </md-button>
         <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
         </md-button>
-       
 
       </div>
     </div>
 
-    <md-button ng-click="vm.toggleStore()" class="md-default">
-      Load
+    <md-button ng-click="vm.toggleStore()" class="md-icon-button">
+      <span class="ion-android-folder"></span>
     </md-button>
   </div>
 </md-toolbar>
@@ -36,16 +46,22 @@
 
     </div>
   </div>
+  <!--
   <button ng-click="vm.log='keys'">Keys</button> <button ng-click="vm.log='roll'" vm.log='roll'>Roll</button>
+  -->
   <piano-keys active="vm.log==='keys'" sequencer="vm.sequencer"></piano-keys>
 
   <piano-roll-horiz active="vm.log==='roll'" sequencer="vm.sequencer"></piano-roll-horiz>
 
-  <md-sidenav class="md-sidenav-right md-whiteframe-4dp" md-component-id="store">
+  <md-sidenav class="md-sidenav-left side-menu" md-component-id="options">
+    <options log="vm.log"></options>
+  </md-sidenav>
+
+  <md-sidenav class="md-sidenav-right side-menu" md-component-id="store">
     <store></store>
   </md-sidenav>
 
-  <md-sidenav class="tracks-panel md-sidenav-right md-whiteframe-4dp" md-component-id="tracks">
+  <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="tracks">
     <tracks song="vm.song" sequencer="vm.sequencer" is-open="vm.tracksOpen()"></tracks>
   </md-sidenav>
 

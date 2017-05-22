@@ -12,6 +12,10 @@ var trackRegex = parsers.map(p => {
   };
 }).filter(p => p !== null)
 
+trackRegex.push({regex: /\(|\)/, token: 'bracket',push:'start'});
+trackRegex.push({regex: /\{|\}/, token: 'brace',push:'start'});
+trackRegex.push({regex: /\*[\d]+/, token: 'loop',push:'start'});
+
 CodeMirror.defineSimpleMode('track-script', {
   start: trackRegex,
   // The multi-line comment state.

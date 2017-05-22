@@ -8,17 +8,13 @@ function Sequencer(output) {
   this.stopped = false;
   this.paused = false;
   this.interval = 1;
-  this.tick = -1;
+  this.tick = 0;
   this.onTick = this.onTick.bind(this);
   this.output = output;
   this.listeners = [];
   this.muted = [];
   this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
-
 }
-
-
-
 
 Sequencer.prototype = {
   subscribe: function (listener) {
@@ -134,7 +130,7 @@ Sequencer.prototype = {
     });
     this.validate(events);
 
-    var masterEvents = events.filter(e=>e.isMaster);
+    var masterEvents = events.filter(e => e.isMaster);
 
     this.index(events);
     this.reorder();
@@ -179,7 +175,7 @@ Sequencer.prototype = {
       }
     }
 
-    this.tick = 0;
+
     this.stopped = false;
     this.paused = false;
     this.fastForwarding = false;
@@ -207,7 +203,7 @@ Sequencer.prototype = {
     track.hidden = track.isMuted;
     this.raiseEvent({ type: 'mute', interpreted: this.interpreted, tracks: this.tracks });
   },
-  isNotSolo: function(track) {
+  isNotSolo: function (track) {
     return this.solo && this.solo !== track.key;
   },
   toggleSolo: function (track) {
@@ -270,6 +266,7 @@ Sequencer.prototype = {
     // this.allNotesOff();
     this.raiseEvent({ type: 'stop' });
     this.playing = false;
+    this.paused = false;
     if (this.clock) {
       this.clock.stop();
     }
@@ -306,17 +303,24 @@ Sequencer.prototype = {
         this.end();
         return;
       }
-     
-     
     }
+
+    this.raiseEvents();
+
+    this.tick++;
+
+  },
+  raiseEvents: function () {
+
+    this.beat = Math.floor(this.tick / 48);
+    this.beatTicks = this.tick - (this.beat * 48);
 
     var events;
     if (this.solo) {
       events = this.events[this.tick].filter(e => e.track.key === this.solo || e.isMaster);
     } else {
-      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track.key) === -1  || e.isMaster);
+      events = this.events[this.tick].filter(e => this.muted.indexOf(e.track.key) === -1 || e.isMaster);
     }
-
     events.forEach(function (e) {
 
       switch (e.type) {
@@ -367,16 +371,13 @@ Sequencer.prototype = {
     }.bind(this));
 
     if (!this.fastForwarding) {
-
       this.raiseEvent({
         type: 'tick',
         tick: this.tick,
+        beat: this.beat,
         events: events
       });
-
     }
-    this.tick++;
-
   },
   trigger: function (e) {
 

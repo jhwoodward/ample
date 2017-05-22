@@ -20,51 +20,19 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   }
 
   vm.log = 'roll';
-  console.log(vm.song);
 
   if (!vm.song.tracks) {
     vm.song.tracks = songToArray(vm.song);
     delete vm.song.parts;
   }
-  //
 
   vm.sequencer = new Sequencer(webMidiService.selectedOutput);
   vm.sequencer.subscribe(handleEvent);
-
 
   $timeout(function () {
     vm.animateLogo();
     vm.sequencer.load(vm.song.tracks, vm.song.master);
   }, 100);
-
-
-
-/*
-  vm.edit = function (ev) {
-    $mdDialog.show({
-      controller: 'editController',
-      controllerAs: 'vm',
-      template: require('./edit.html'),
-      parent: angular.element(document.body),
-      targetEvent: ev,
-      clickOutsideToClose: false,
-      fullscreen: false,
-      resolve: {
-        sequencer: function () {
-          return vm.sequencer;
-        },
-        song: function () {
-          return vm.song;
-        }
-      }
-    })
-      .then(function (answer) {
-        $scope.status = 'You said the information was "' + answer + '".';
-      }, function () {
-        $scope.status = 'You cancelled the dialog.';
-      });
-  };
-*/
 
   vm.toggleStore = function () {
     $mdSidenav('store').toggle();
@@ -72,12 +40,13 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   vm.toggleTracks = function () {
     $mdSidenav('tracks').toggle();
   }
+  vm.toggleOptions = function () {
+    $mdSidenav('options').toggle();
+  }
+
   vm.tracksOpen = function () {
     return $mdSidenav('tracks').isOpen();
   }
-
-
-
 
   function songToArray(song) {
     var out = [];
@@ -134,8 +103,11 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     vm.sequencer.start();
   }
 
- // vm.brand = 's c r i p t o p h o n i c s'.split(' ').map(l => {
-     vm.brand = 'c a c o p h o n y'.split(' ').map(l => {
+  vm.rewind = function(){
+    vm.sequencer.tick =0;
+  }
+
+  vm.brand = 'm i d i s c r i p t'.split(' ').map(l => {
     return {
       letter: l
     };

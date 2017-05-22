@@ -1,10 +1,6 @@
 /* Port of TextMate's Blackboard theme */
 
-.cm-s-blackboard.CodeMirror { 
-  background: #0C1021; 
-  color: #F8F8F8;
-  line-height: 1.3em;
- }
+
 .cm-s-blackboard div.CodeMirror-selected { background: #253B76; }
 .cm-s-blackboard .CodeMirror-line::selection, .cm-s-blackboard .CodeMirror-line > span::selection, .cm-s-blackboard .CodeMirror-line > span > span::selection { background: rgba(37, 59, 118, .99); }
 .cm-s-blackboard .CodeMirror-line::-moz-selection, .cm-s-blackboard .CodeMirror-line > span::-moz-selection, .cm-s-blackboard .CodeMirror-line > span > span::-moz-selection { background: rgba(37, 59, 118, .99); }
@@ -15,45 +11,61 @@
 .cm-s-blackboard .CodeMirror-cursor { border-left: 1px solid #A7A7A7; }
 
 
-.track:not(.master-track) .cm-s-blackboard .cm-note { color: #FF6400; }
 
-.track:not(.master-track) .cm-s-blackboard .cm-rest { color: #82a7c7;; }
 .track:not(.master-track) .cm-s-blackboard .cm-marker {     
-  color: #6aa0e8;;
+  color: #94b5e0;
  
-  border-radius: 5px; 
+
     padding-left:3px; 
     padding-right: 3px;
 }
 
+
 .track.master-track .cm-s-blackboard .cm-masterscale {
-  color: #FF6400;
-border-radius: 5px; 
+  color: #f7e976;
+
 padding-left:3px; 
 padding-right: 3px;
  }
 .track.master-track .cm-s-blackboard .cm-mastermarker {
-    color: #6aa0e8;;
+    color: #94b5e0;
    
-     border-radius: 5px; 
+
      padding-left:3px;
       padding-right: 3px;}
-.track.master-track .cm-s-blackboard .cm-tempo { color: #82a7c7; }
+.track.master-track .cm-s-blackboard .cm-tempo { color: #af9e7d; }
 
-.track .cm-s-blackboard .cm-substitutionsetter, .track .cm-s-blackboard .cm-substitution { 
-  color: #7ad4da;
-  border-radius: 5px;  }
-.track .cm-s-blackboard .cm-sustain { color: #FF6400; }
-.track .cm-s-blackboard .cm-duration { color: #fae63c;; }
+.track .cm-s-blackboard .cm-substitutionsetter, 
+.track .cm-s-blackboard .cm-substitution
+ { 
+  color: #94b5e0;
+  }
+  .track .cm-s-blackboard .cm-annotationsetter, 
+.track .cm-s-blackboard .cm-annotation,
+.track .cm-brace 
+ { 
+  color: #de68d3;
+  }
 
-.cm-s-blackboard .cm-transpose { color: #82a7c7; }
-.cm-s-blackboard .cm-octave { color: #82a7c7; }
+.track:not(.master-track) .cm-s-blackboard .cm-note,
+.track:not(.master-track) .cm-s-blackboard .cm-rest,
+.track .cm-s-blackboard .cm-sustain { 
+  color: #f7e976;
+}
 
-.cm-s-blackboard .cm-chordconstraint,
-.cm-s-blackboard .cm-bassconstraint,
-.cm-s-blackboard .cm-scaleconstraint,
-.cm-s-blackboard .cm-arpeggioornament, .cm-s-blackboard .cm-trillornament, .cm-s-blackboard .cm-turnornament
- { color: #82a7c7; }
+.track .cm-s-blackboard .cm-duration { color: #ff8749; }
+
+.cm-s-blackboard .cm-transpose { color: #61CE3C}
+.cm-s-blackboard .cm-octave { color: #61CE3C }
+
+.cm-chordconstraint,
+.cm-bassconstraint,
+.cm-scaleconstraint,
+.cm-arpeggioornament, 
+.cm-trillornament, 
+.cm-turnornament,
+.cm-on,.cm-off
+ { color: #af9e7d; }
 
 
 
@@ -75,3 +87,34 @@ padding-right: 3px;
 
 .cm-s-blackboard .CodeMirror-activeline-background { background: #3C3636; }
 .cm-s-blackboard .CodeMirror-matchingbracket { outline:1px solid grey;color:white !important; }
+
+
+.track .cm-bracket , .track .cm-loop {
+  color: #6aa0e8;
+}
+
+
+
+
+.cm-bracket.CodeMirror-matchingbracket {
+    outline: 1px solid #1459b5;
+     color: #b8d2f5  !important;
+  /*  background: #2169c3;*/
+}
+
+.cm-brace.CodeMirror-matchingbracket {
+    outline: 1px solid #a02fa0;
+    color: #ffb8f8 !important;
+  /*  background: #2169c3;*/
+}
+.cm-annotation.CodeMirror-matchingbracket,
+.cm-annotationsetter.CodeMirror-matchingbracket {
+    outline: none;
+     color: #de68d3 !important;
+  /*  background: #2169c3;*/
+}
+.cm-substitution.CodeMirror-matchingbracket,
+.cm-substitutionsetter.CodeMirror-matchingbracket {
+   color: #6aa0e8 !important;
+   outline: none;
+}

@@ -8,6 +8,8 @@ function AnnotationSetterParser(macros) {
   this.type = 'AnnotationSetter';
   this.setter = true;
   this.master = true;
+
+    this.test = /{\w+}=/;///for code highlighting only
 }
 
 var prototype = { 

@@ -11,6 +11,7 @@ require('./main/codemirror/note-script');
 require('./main/codemirror/track-script');
 require('./main/codemirror/master-track-script');
 require('angular-material/angular-material.css');
+
 // Icons
 //require('font-awesome/css/font-awesome.css');
 
@@ -21,8 +22,10 @@ require('./main/log/piano-roll')(mainModule);
 require('./main/log/piano-keys')(mainModule);
 require('./main/log/piano-roll-horiz')(mainModule);
 require('./main/log/info-log')(mainModule);
+require('./main/log/draggable')(mainModule);
 require('./main/track/track')(mainModule);
 require('./main/track/tracks')(mainModule);
+require('./main/options')(mainModule);
 require('./main/track/master-track')(mainModule);
 require('./main/webmidi.service')(mainModule);
 
@@ -43,7 +46,7 @@ sharedModule.directive('unload', ['$timeout', function ($timeout) {
   }
 }]);
 
-let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial',  'dndLists','ui.router', 'ui.codemirror', 'sharedModule', 'storeModule', 'mainModule']);
+let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial',  'dndLists', 'ui.router', 'ui.codemirror', 'sharedModule', 'storeModule', 'mainModule']);
 
 app.config(['$stateProvider', '$urlRouterProvider',
   function ($stateProvider, $urlRouterProvider) {

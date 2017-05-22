@@ -25,7 +25,7 @@ var prototype = {
     var remainder = s.substring(bracketed.length + 2, s.length);
     if (!remainder.length) return false;
     if (remainder[0] !== '*') return false;
-    var count = /^\*[\d]{1,3}/.exec(remainder)[0].replace('*', '');
+    var count = /^\*[\d]+/.exec(remainder)[0].replace('*', '');
     var parsed = {
       count: parseInt(count, 10)
     };

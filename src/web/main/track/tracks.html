@@ -1,11 +1,5 @@
-<div class="side-menu tracks">
-  <!-- <md-toolbar class="modal-header">
-    <div class="md-toolbar-tools">
-      <h1 flex>Tracks</h1>
-      <md-button ng-click="vm.cancel()" class="md-icon-button ion-close">
-      </md-button>
-    </div>
-  </md-toolbar>-->
+<div >
+
   <md-tabs md-dynamic-height>
 
     <md-tab id="tab2">
@@ -15,44 +9,38 @@
         <div class="md-padding" style="margin-top:10px">
 
           <md-checkbox style="margin-left:2px" ng-model="vm.song.useMaster" aria-label="Use Master">
-           <span style="padding-left:8px">Use master track</span>
+            <span style="padding-left:8px;margin-top: -3px;" class="system-text">Use master track</span>
           </md-checkbox>
 
-        <md-list dnd-list="vm.song.tracks" class="track-list">
-          <md-list-item class="track{{$index+1}}" ng-repeat="track in vm.song.tracks" dnd-draggable="track" dnd-effect-allowed="move" dnd-moved="vm.moved($index)">
-            <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
-            <md-input-container flex>
-              <label>Name</label>
-              <input type="text" ng-model="track.key" />
-            </md-input-container>
-            <md-button 
-              ng-click="vm.sequencer.toggleMute(track)" 
-              ng-class="{'active': track.isMuted && !vm.sequencer.solo}" 
-              class="md-icon-button md-micro mute">M
-              <md-tooltip md-direction="top">Mute</md-tooltip>
-            </md-button>
-            <md-button 
-              ng-click="vm.sequencer.toggleSolo(track)"
-              ng-class="{'active': vm.track.key === vm.sequencer.solo}"
-              class="md-icon-button md-micro solo">S
-              <md-tooltip md-direction="top">Solo</md-tooltip>
+          <md-list dnd-list="vm.song.tracks" class="track-list">
+            <md-list-item class="track{{$index+1}}" ng-repeat="track in vm.song.tracks" dnd-draggable="track" dnd-effect-allowed="move"
+              dnd-moved="vm.moved($index)">
+              <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
+              <md-input-container flex>
+                <label>Name</label>
+                <input type="text" ng-model="track.key" />
+              </md-input-container>
+              <md-button ng-click="vm.sequencer.toggleMute(track)" ng-class="{'active': track.isMuted && !vm.sequencer.solo}" class="md-icon-button md-micro mute">M
+                <md-tooltip md-direction="top">Mute</md-tooltip>
+              </md-button>
+              <md-button ng-click="vm.sequencer.toggleSolo(track)" ng-class="{'active': vm.track.key === vm.sequencer.solo}" class="md-icon-button md-micro solo">S
+                <md-tooltip md-direction="top">Solo</md-tooltip>
 
-            </md-button>
-            <md-button ng-click="vm.deleteTrack($index)" 
-            class="md-fab md-button md-micro"><span class="ion-minus-round"></span>
-              <md-tooltip md-direction="top">Delete track</md-tooltip>
-            </md-button>
-          </md-list-item>
-       
-       <div style="outline:none; cursor:pointer" ng-if="vm.song.tracks.length < 8" ng-click="vm.addTrack()" >
-              <button style="margin-top: 12px" class="md-fab md-button md-micro">
+              </md-button>
+              <md-button ng-click="vm.deleteTrack($index)" class="md-fab md-button md-micro"><span class="ion-minus-round"></span>
+                <md-tooltip md-direction="top">Delete track</md-tooltip>
+              </md-button>
+            </md-list-item>
+
+            <div style="outline:none; cursor:pointer" ng-if="vm.song.tracks.length < 8" ng-click="vm.addTrack()">
+              <button class="md-fab md-button md-micro">
                 <span class="ion-plus-round"></span>
              
          </button>
-          Add another track
-         </div>
-        
- </div>
+              <span class="system-text">Add track</span>
+            </div>
+
+        </div>
       </md-tab-body>
     </md-tab>
     <md-tab id="tab1">
@@ -86,8 +74,6 @@
     </md-tab>
   </md-tabs>
   <div class="tracks-panel-buttons" layout="row">
-
-   
     <md-button ng-click="vm.ok() ">
       Save
     </md-button>
@@ -95,5 +81,5 @@
     <md-button ng-click="vm.cancel() ">
       Cancel
     </md-button>
-    </md-dialog-actions>
   </div>
+</div>

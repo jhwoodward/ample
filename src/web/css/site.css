@@ -1,63 +1,122 @@
 
+
   body, md-toolbar, md-toolbar input , #song-name, .track-row,.channel-menu-content,.channel-menu-item {
-     background-color: #3f566b;
-     color:  #d9dcc1  !important;
+     background-color: #000;
+     color:  #d9dcc1;
     }
     
   .side-menu {
     color:rgba(72, 79, 90, 0.87) !important
   }
 
+  .beat-marker {
+    position:absolute;
+   
+    width:40px;
+    cursor: ew-resize;
+    height: 100%;
+  }
 
+  .song-text {
+    text-align: center;
+    line-height: 19px;
+    color:#a2a2a2;
+    border-radius: 2px;
+    margin-left:10px;
+    margin-right:10px;
+  }
 
+  .beat-marker .needle {
+ border-left:  1px solid #423d35;
+ margin-left:20px;
+ margin-right:19px;
+  height: 100%;
+  }
+
+  .beat-marker[dragging=true] .needle {
+     border-color:  white;
+  }
+
+.beat-info {text-align:right;width:80px;}
+.beat-info .beat {width:80px}
+.beat-info .beat-ticks {width:80px}
 
     .song-panel {
       height:45px;
-    margin:0 auto; width: 350px;
-    background: #2a3b4a;
+    margin:0 auto; width: 500px;
     border-radius: 20px;
+    
+    /*
           -webkit-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+      */
+    }
+    .track-row {
+      border-top: 1px solid #423d35;
+      border-bottom: 1px solid #423d35;
     }
 
-.md-sidenav-right {
+.tracks-panel {
  max-width:400px !important;
       width: 400px !important;
 }
-    .md-sidenav-right, .md-sidenav-right  md-content {
+    .side-menu, .side-menu  md-content {
       background: #cde6f7 
-     
+    }
+
+    .side-menu .close-left {
+      position: absolute;
+      right: 0;
+      z-index: 99;
+      color: white;
+      margin: 10px;
     }
   
     .tracks-panel .track-list md-input-container  {
       margin: 10px 0;
     }
-    .tracks-panel  md-tabs md-ink-bar {
+    .side-menu  md-tabs md-ink-bar {
       background: white;
       height:4px;
     }
 
-   .md-sidenav-right md-tabs-canvas , .tracks-panel .md-fab.md-button:not(.note),.tracks-panel  md-checkbox .md-icon  {
+   .side-menu md-tabs-canvas , 
+   .side-menu md-toolbar, 
+   .tracks-panel .md-fab.md-button:not(.note),
+   .tracks-panel  md-checkbox .md-icon  {
       background-color: #809ab1;
+      color: white;
     }
 
-    .tracks-panel-buttons {
+    .tracks-panel-buttons,.btn-remove-tag {
         bottom: 0;
     position: absolute;
     width: 100%;
     background: #809ab1;
     color: white;
     }
+    md-chips md-chip {
+      background: white;
+    }
       
+      .system-text {
+        text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+      }
+      h1.system-text {
+         font-size: 14px !important;
+         font-weight: 500;
+      }
 
-      .tracks-panel .md-tab {
+   .side-menu .md-tab {
  padding: 20px 24px;
       }  
-      .tracks-panel md-tab-item {
+      .side-menu md-tab-item {
         color: white !important;
       }
-     .tracks-panel md-pagination-wrapper , .tracks-panel md-tabs-canvas {
+     .side-menu md-pagination-wrapper ,.side-menu  md-tabs-canvas {
         height: 62px !important;
       }
 
@@ -88,7 +147,8 @@ h4 {
 }
   
   .main-toolbar {
-    background-color: #304354 !important;
+    background-color:  #353535 !important;
+    color: #000!important;
   }
 
   .brand {
@@ -105,8 +165,12 @@ h4 {
   }
    
    .track.master-track .track-content, .track.master-track  .track-content .CodeMirror {
-      background:#23313e;
+      background:#000;
      
+   }
+
+   .master-track .md-toolbar-tools {
+     background: #4e4e4e;
    }
 
    .track.master-track  .track-content .CodeMirror {
@@ -131,12 +195,13 @@ h4 {
 
  */
   .track.collapsed .track-content, .track-collapsed .CodeMirror {
-      opacity: 0.8;
+      opacity: 0.7;
+   }
+   .track.collapsed .track-key {
+     background: #353535 !important;
    }
 
-   .track.collapsed .md-toolbar-tools {
-     padding-left: 0;
-   }
+ 
     .track .md-button {
      margin: 0 !important;
    }
@@ -171,18 +236,18 @@ h4 {
   
     
     .log {
-      height: calc(100vh - 519px);
+      height: calc(100vh - 500px);
       overflow:auto;
       white-space: nowrap;
+     background: #171717;
       color:#999;
-      
+      /*
       -webkit-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
       box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
+*/
       border-top: none !important;
 
-      border-radius: 10px;
-      margin: 5px;
       margin-top: 0;
     }
     .log.playing {
@@ -205,37 +270,26 @@ h4 {
     .track .track-toolbar {
       height:40px;
       min-height: 40px;
-      border-top-left-radius: 10px;
-      border-top-right-radius: 10px;
       background-color: transparent !important;
+      color: white;
     }
 
     .track-content {
-      border-radius: 10px;
+      border-radius: 5px;
       height:400px;
-      background-color: #0C1021
+      background-color: #000;
     }
 
     .CodeMirror-scroll {
       border-radius: 10px;
     }
 
-   
-    .log {
-    background-color: #23313e;
-    }
- 
-
-  
 
 .md-open-menu-container, .channel-menu {
   border-radius: 10px;
 }
 
-.main-toolbar .md-toolbar-tools .md-button {
-    margin: 0;    color: #809296 !important;
-    font-weight: normal;
-}
+
 
 .track-container {
   overflow-x: auto;
@@ -260,17 +314,14 @@ h4 {
 .track-toolbar .md-button.md-fab.mute.md-micro.active {
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
 }
-.track-toolbar .md-button.md-fab.mute.md-micro:hover {
-  color: #d62222; 
-  background-color: transparent;
-  
-}
+
 
 .track-toolbar .md-button.md-fab.mute.md-micro.active:hover {
   color:white;
 }
-.track-toolbar .md-button.md-fab.solo.md-micro:hover {
-  color:  #72a202;
+.track-toolbar .md-button.md-fab.solo.md-micro:hover,
+.track-toolbar .md-button.md-fab.mute.md-micro:hover  {
+  color:  black;
   background-color: transparent;
 }
 
@@ -281,9 +332,10 @@ h4 {
 
 .track {
   min-width:250px !important;
-  border-radius: 10px;
-  margin: 5px;
+  border-right: 1px solid #423d35;
 }
+
+
 
 .piano-roll-horiz {
   height: 100%;
@@ -300,6 +352,7 @@ h4 {
 .piano-roll-horiz .note.ornament {
   opacity:0.5;
 }
+
 .piano-roll-horiz .note.active, .track-led.active {
   background-color: white !important;
 }
@@ -315,6 +368,8 @@ h4 {
 .piano-roll-horiz .note.track4.active, .track4 .track-toolbar .track-led.active {
   box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73, 0 0 40px #2e8c73, 0 0 50px #2e8c73, 0 0 75px #2e8c73;
 }
+
+
 
 .piano-roll-horiz .note.track5.active, .track5 .track-toolbar .track-led.active {
   box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239), 0 0 40px rgb(127, 100, 239), 0 0 50px rgb(127, 100, 239), 0 0 75px rgb(127, 100, 239);
@@ -339,10 +394,10 @@ h4 {
 
 .piano-roll-horiz .beat {
   position:absolute;
-  color: #3e5569;
+  color: #423d35;
 }
 .piano-roll-horiz .beat.marker {
-  color:#a2b9ce;
+  border-color:#423d35;
   bottom: 5px;
   
 }
@@ -361,15 +416,14 @@ h4 {
        color: #d83e00;
      }
   
-.track-toolbar .track-key {
-       padding: 3px 9px 5px;
-    border-radius: 20px;
-  }
+.md-button.md-fab.solo.md-micro.active {
+  background: black !important;
+}
+
 .track2 .track-toolbar .track-key, 
 .note.track2, 
 .key.active.track2,
-.track2 .md-button.md-fab.mute.md-micro.active,
-.track2 .md-button.md-fab.solo.md-micro.active  {
+.track2 .md-button.md-fab.mute.md-micro.active {
   background-color: #8e8b00;
 }
    .piano-roll .pitch .track2 {
@@ -379,8 +433,7 @@ h4 {
 .track3 .track-toolbar .track-key, 
 .note.track3, 
 .key.active.track3,
-.track3 .md-button.md-fab.mute.md-micro.active,
-.track3 .md-button.md-fab.solo.md-micro.active  {
+.track3 .md-button.md-fab.mute.md-micro.active {
   background-color: #0079b5;
 }  
 .piano-roll .pitch .track3 {
@@ -390,40 +443,35 @@ h4 {
 .track4 .track-toolbar .track-key, 
 .note.track4, 
 .key.active.track4,
-.track4 .md-button.md-fab.mute.md-micro.active,
-.track4 .md-button.md-fab.solo.md-micro.active  {
+.track4 .md-button.md-fab.mute.md-micro.active {
   background-color: #2e8c73;
 }
 
 .track5 .track-toolbar .track-key, 
 .note.track5, 
 .key.active.track5,
-.track5 .md-button.md-fab.mute.md-micro.active,
-.track5 .md-button.md-fab.solo.md-micro.active  {
+.track5 .md-button.md-fab.mute.md-micro.active {
   background-color: rgb(127, 100, 239);
 }
 
 .track6 .track-toolbar .track-key, 
 .note.track6, 
 .key.active.track6,
-.track6 .md-button.md-fab.mute.md-micro.active,
-.track6 .md-button.md-fab.solo.md-micro.active  {
+.track6 .md-button.md-fab.mute.md-micro.active {
   background-color: rgb(255,64,129);
 }
 
 .track7 .track-toolbar .track-key, 
 .note.track7, 
 .key.active.track7,
-.track7 .md-button.md-fab.mute.md-micro.active,
-.track7 .md-button.md-fab.solo.md-micro.active  {
+.track7 .md-button.md-fab.mute.md-micro.active  {
   background-color: rgb(0, 149, 255);
 }
 
 .track8 .track-toolbar .track-key, 
 .note.track8, 
 .key.active.track8,
-.track8 .md-button.md-fab.mute.md-micro.active,
-.track8 .md-button.md-fab.solo.md-micro.active  {
+.track8 .md-button.md-fab.mute.md-micro.active  {
   background-color: rgb(72, 185, 2);
 }
 
@@ -470,6 +518,10 @@ h4 {
 .main-toolbar .md-button {
   min-width: 0;
 }
+.main-toolbar .md-toolbar-tools .md-button {
+    margin: 0;    color: #b9b9b9 !important;
+    font-weight: normal;
+}
 
 
 .track-led {
@@ -477,7 +529,7 @@ border-radius: 50%;
     width: 10px;
     height: 10px;
     background-color: #000;
-    margin-left: -15px;
+   
     margin-top: 1px;
     margin-right: 10px;
 }
@@ -515,9 +567,7 @@ md-tabs, md-tabs md-content {
   height: 100%;
 }
 
- .brand-letter.active  {
-  color:  #fff !important;
-}
+
 
 
 .edit-song-dialog md-dialog-content{
@@ -554,15 +604,20 @@ md-list[dnd-list] .dndDraggingSource {
     text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px white, 0 0 35px white, 0 0 40px white, 0 0 50px white, 0 0 75px white;
   color: white !important;
 }
+ .song-panel.md-toolbar-tools .active,  .brand-letter.active {
+    text-shadow:  0 0 10px white;
+  color: white !important;
+}
 .sustain-highlight {
   border-bottom:3px solid grey;
 }
 .sub-highlight {
-  background-color: #287ce4    !important; color: black !important;
+  background-color: #287ce4    !important; color: white !important;
 
 }
 .scale-highlight {
-  background-color: #f35104; ; color: black !important;
+  background-color: #f7e976; color: black !important;
+
 }
 
     .piano-roll .beat {

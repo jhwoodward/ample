@@ -8,6 +8,10 @@ style="position:relative" ng-class="{ 'playing': vm.sequencer.playing }">
     ng-if="beat.count > 0"
     class="beat"
     style="left:{{$index*48}}px;top:5px;">{{beat.count}}</div>
+    <div class="beat-marker" ng-drag="vm.onDragBeatMarker(tick)"
+    style="left:{{vm.sequencer.tick-20}}px;">
+    <div class="needle"></div>
+    </div>
     <div 
     ng-repeat="marker in vm.markers"
     ng-class="{'active': marker.active}"

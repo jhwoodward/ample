@@ -20,7 +20,7 @@ module.exports = function (ngModule) {
     function link(scope, el, attr, vm) {
 
       var currentEvent;
-      var width = el[0].offsetWidth - 100;
+      var width = el[0].offsetWidth - 250;
 
       /*
             var cssTransform = (function () {
@@ -54,11 +54,17 @@ module.exports = function (ngModule) {
           //  window.requestAnimationFrame(scroll);
       */
 
+      vm.onDragBeatMarker = function(tick) {
+        if (!tick) return;
+        vm.sequencer.tick = tick + el[0].scrollLeft;
+        scope.$digest();
+      }
+
 
       function scroll() {
         if (vm.active) {
           if (currentEvent && currentEvent.tick > width) {
-            el[0].scrollLeft = currentEvent.tick - width;
+            el[0].scrollLeft = Math.round(currentEvent.tick - width);
           }
         }
 
@@ -95,7 +101,7 @@ module.exports = function (ngModule) {
         }
 
         if (event.type === 'start') {
-          width = el[0].offsetWidth - 100;
+          width = el[0].offsetWidth - 250;
           el[0].scrollLeft = 0;
         }
 
@@ -195,7 +201,7 @@ module.exports = function (ngModule) {
 
 
         var height = el[0].offsetHeight - 50;
-        var scaleFactor = height / (highestPitch - lowestPitch);
+        var scaleFactor = Math.round(height / (highestPitch - lowestPitch));
         var offset = ((127 - highestPitch) * scaleFactor) - 40;
         data = data.map(note => {
           note.top = (note.pitch * scaleFactor) - offset;

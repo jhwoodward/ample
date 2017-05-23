@@ -2,6 +2,7 @@ require('./simple.js');
 var parsers = require('../../../interpreter/parsers');
 
 var parsers = [].concat(parsers.setter).concat(parsers.main);
+
 var trackRegex = parsers.map(p => {
   var parser = new p();
   if (!parser.test) return null;
@@ -14,7 +15,7 @@ var trackRegex = parsers.map(p => {
 
 trackRegex.push({regex: /\(|\)/, token: 'bracket',push:'start'});
 trackRegex.push({regex: /\{|\}/, token: 'brace',push:'start'});
-trackRegex.push({regex: /\*[\d]+/, token: 'loop',push:'start'});
+trackRegex.push({regex: /( ?)\*( ?)[\d]+/, token: 'loop',push:'start'});
 
 CodeMirror.defineSimpleMode('track-script', {
   start: trackRegex,

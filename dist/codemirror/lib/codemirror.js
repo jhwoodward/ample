@@ -1647,7 +1647,7 @@ function processLine(cm, text, state, startAt) {
   stream.start = stream.pos = startAt || 0
   if (text == "") { callBlankLine(mode, state) }
   while (!stream.eol()) {
-    readToken(mode, stream, state)
+    readToken(mode, stream, state,null,cm)
     stream.start = stream.pos
   }
 }
@@ -1659,10 +1659,10 @@ function callBlankLine(mode, state) {
   if (inner.mode.blankLine) { return inner.mode.blankLine(inner.state) }
 }
 
-function readToken(mode, stream, state, inner) {
+function readToken(mode, stream, state, inner, cm) {
   for (var i = 0; i < 10; i++) {
     if (inner) { inner[0] = innerMode(mode, state).mode }
-    var style = mode.token(stream, state)
+    var style = mode.token(stream, state, cm)
     if (stream.pos > stream.start) { return style }
   }
   throw new Error("Mode " + mode.name + " failed to advance stream.")
@@ -1719,7 +1719,7 @@ function runMode(cm, text, mode, state, f, lineClasses, forceToEnd) {
       stream.pos = text.length
       style = null
     } else {
-      style = extractLineClasses(readToken(mode, stream, state, inner), lineClasses)
+      style = extractLineClasses(readToken(mode, stream, state, inner, cm), lineClasses)
     }
     if (inner) {
       var mName = inner[0].name

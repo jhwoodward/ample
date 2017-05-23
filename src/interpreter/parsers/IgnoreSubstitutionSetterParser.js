@@ -11,14 +11,12 @@ function IgnoreSubstitutionSetterParser() {
 
 var prototype = {
   match: function match(s) {
-    var startTest = /^\(\w+\)=\(/.exec(s);
+    var startTest = /^\w+( ?)=( ?)\(/.exec(s);
     if (!startTest) return false;
-
-    var key = /^\(\w+\)=/.exec(s)[0].replace('(', '').replace(')', '').replace('=', '');
     var bracketed = parserUtils.getBracketed(s, startTest[0].length);
     var value = bracketed.trim();
     this.string = startTest[0] + bracketed + ')';
-    this.parsed = { type: 'substitution', key, value };
+    this.parsed = { type: 'substitution'};
 
     return true;
   },

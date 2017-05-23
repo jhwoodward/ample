@@ -8,16 +8,16 @@ function SubstitutionSetterParser() {
   this.setter = true;
   this.master = true;
 
-  this.test = /^\(\w+\)=/;///for code highlighting only
+  this.test = /^\w+( ?)=( ?)/;///for code highlighting only
   this.testEnd = /\)/;
 }
 
 var prototype = {
   match: function match(s) {
-    var startTest = /^\(\w+\)=\(/.exec(s);
+    var startTest = /^\w+( ?)=( ?)\(/.exec(s);
     if (!startTest) return false;
 
-    var key = /^\(\w+\)=/.exec(s)[0].replace('(', '').replace(')', '').replace('=', '');
+    var key = /^\w+( ?)=/.exec(s)[0].replace('=', '');
     var bracketed = parserUtils.getBracketed(s, startTest[0].length);
     var value = bracketed;//.trim();
     this.string = startTest[0] + bracketed + ')';

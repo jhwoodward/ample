@@ -87,7 +87,8 @@ function Rule(data, states) {
 }
 
 function tokenFunction(states, config) {
-  return function (stream, state) {
+  return function (stream, state, cm) {
+
     if (state.pending) {
       var pend = state.pending.shift();
       if (state.pending.length == 0) state.pending = null;
@@ -105,6 +106,19 @@ function tokenFunction(states, config) {
         if (state.local.endScan && (m = state.local.endScan.exec(stream.current())))
           stream.pos = stream.start + m.index;
         return tok;
+      }
+    }
+
+    //TODO: SOULD BE MOVED SOMEWHERE WHERE IT CAN BE PROCESSED ONLY WHEN TEXT CHANGED
+    if (cm) {
+      var val = cm.doc.getValue();
+      var keywords = val.match(/\w+( ?)=/g);
+      var subRule = states.start.filter(s => s.token === 'substitution')[0];
+      if (keywords) {
+        keywords = keywords.map(k => '^' + k.replace('=', '')).join('|');
+        subRule.regex = new RegExp(keywords, 'g');
+      } else {
+        subRule.regex = /$^/;
       }
     }
 
@@ -130,19 +144,19 @@ function tokenFunction(states, config) {
           state.indent.pop();
 
         return rule.token;
-          /*
-        if (matches.length > 2) {
-          state.pending = [];
-          for (var j = 2; j < matches.length; j++)
-            if (matches[j])
-              state.pending.push({ text: matches[j], token: rule.token[j - 1] });
-          stream.backUp(matches[0].length - (matches[1] ? matches[1].length : 0));
-          return rule.token[0];
-        } else if (rule.token && rule.token.join) {
-          return rule.token[0];
-        } else {
-          return rule.token;
-        }*/
+        /*
+      if (matches.length > 2) {
+        state.pending = [];
+        for (var j = 2; j < matches.length; j++)
+          if (matches[j])
+            state.pending.push({ text: matches[j], token: rule.token[j - 1] });
+        stream.backUp(matches[0].length - (matches[1] ? matches[1].length : 0));
+        return rule.token[0];
+      } else if (rule.token && rule.token.join) {
+        return rule.token[0];
+      } else {
+        return rule.token;
+      }*/
       }
     }
     stream.next();
@@ -164,7 +178,7 @@ function cmp(a, b) {
 
 function enterLocalMode(config, state, spec, token) {
   var pers;
-  if (spec.persistent) { 
+  if (spec.persistent) {
     for (var p = state.persistentStates; p && !pers; p = p.next) {
       if (spec.spec ? cmp(spec.spec, p.spec) : spec.mode == p.mode) pers = p;
     }
@@ -172,14 +186,14 @@ function enterLocalMode(config, state, spec, token) {
   var mode = pers ? pers.mode : spec.mode || CodeMirror.getMode(config, spec.spec);
   var lState = pers ? pers.state : CodeMirror.startState(mode);
   if (spec.persistent && !pers) {
-     state.persistentStates = { 
-       mode: mode, 
-       spec: spec.spec, 
-       state: lState, 
-       next: state.persistentStates 
-      };
+    state.persistentStates = {
+      mode: mode,
+      spec: spec.spec,
+      state: lState,
+      next: state.persistentStates
+    };
   }
-   
+
   state.localState = lState;
   state.local = {
     mode: mode,

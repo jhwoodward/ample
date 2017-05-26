@@ -64,6 +64,14 @@ module.exports = function (ngModule) {
         return;
       }
 
+      //for reverse play fake noteoff
+      if (event.type === 'noteoff') {
+        vm.setActive(false);
+        if (markers[event.onOrigin.start]) {
+          markers[event.onOrigin.start].clear();
+        }
+      }
+
       if (event.type !== 'tick') return;
 
       event.events.sort(function (a, b) {
@@ -95,11 +103,14 @@ module.exports = function (ngModule) {
             vm.setActive(true);
             if (sustainMarker) { sustainMarker.clear(); }
             if (!e.origin) return;
+            if (markers[e.origin.start]) {
+              markers[e.origin.start].clear();
+            }
             markers[e.origin.start] = editor.markText(start, end, { className: 'highlight' });
 
             break;
           case eventType.noteoff:
-           if (!e.onOrigin) return;
+            if (!e.onOrigin) return;
             vm.setActive(false);
             if (markers[e.onOrigin.start]) {
               markers[e.onOrigin.start].clear();

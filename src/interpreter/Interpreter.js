@@ -107,9 +107,9 @@ Interpreter.prototype.getStateAt = function (tick) {
     }
   });
   return out;
- // var tickStates = this.states.filter(x => { return x.time.tick === tick; });
- // if (!tickStates.length) return undefined;
- // return tickStates[tickStates.length - 1];
+  // var tickStates = this.states.filter(x => { return x.time.tick === tick; });
+  // if (!tickStates.length) return undefined;
+  // return tickStates[tickStates.length - 1];
 }
 
 Interpreter.prototype.getTopState = function () {
@@ -170,7 +170,20 @@ Interpreter.prototype.getAnimation = function () {
   return out;
 }
 
-
+Interpreter.prototype.setDuration = function (events) {
+  var noteons = events.filter(e => e.type === eventType.noteon);
+  var noteoffs = _.cloneDeep(events.filter(e => e.type === eventType.noteoff));
+  noteons.forEach(on => {
+    for (var i = 0; i < noteoffs.length; i++) {
+      var off = noteoffs[i];
+      if (off.pitch.value === on.pitch.value) {
+        on.duration = off.duration || (off.tick - on.tick);
+        noteoffs.splice(i, 1);
+        break;
+      }
+    }
+  });
+}
 
 Interpreter.prototype.getEvents = function () {
 
@@ -194,6 +207,8 @@ Interpreter.prototype.getEvents = function () {
     }
     return acc;
   }, []);
+
+  this.setDuration(events);
 
   events = events.concat(this.statelessEvents);
 

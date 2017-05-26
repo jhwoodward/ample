@@ -54,10 +54,14 @@ module.exports = function (ngModule) {
           //  window.requestAnimationFrame(scroll);
       */
 
-      vm.onDragBeatMarker = function(tick) {
+      vm.onDragBeatMarker = function (tick) {
         if (!tick) return;
         vm.sequencer.tick = tick + el[0].scrollLeft;
         scope.$digest();
+      }
+
+      vm.goTo = function (beat) {
+        vm.sequencer.goToBeat(beat);
       }
 
 
@@ -65,7 +69,7 @@ module.exports = function (ngModule) {
         if (vm.active) {
           if (currentEvent && currentEvent.tick > width) {
             el[0].scrollLeft = Math.round(currentEvent.tick - width);
-          } else if (currentEvent && currentEvent.tick < width) {
+          } else if (currentEvent && currentEvent.tick < el[0].scrollLeft) {
             el[0].scrollLeft = 0;
           }
         }
@@ -102,6 +106,14 @@ module.exports = function (ngModule) {
           handleReady(event);
         }
 
+        if (event.type === 'position') {
+           if (event.tick > width) {
+            el[0].scrollLeft = Math.round(event.tick - width);
+          } else if (event.tick < el[0].scrollLeft) {
+            el[0].scrollLeft = 0;
+          }
+        }
+
         if (event.type === 'start') {
           width = el[0].offsetWidth - 250;
           el[0].scrollLeft = 0;
@@ -120,6 +132,15 @@ module.exports = function (ngModule) {
               vm.beats.forEach(beat => {
                 beat.active = beat.count === Math.floor(event.tick / 48);
               });
+            });
+          });
+        }
+
+        //for reverse play fake noteoff
+        if (event.type === 'noteoff') {
+           $timeout(function () {
+            scope.$apply(function () {
+              vm.data.filter(e => e.on === event.onTick && e.meta.on.pitch.value === event.pitch.value).map(n => n.active = false);
             });
           });
         }
@@ -173,6 +194,7 @@ module.exports = function (ngModule) {
           var noteons = interpreted.events.filter(e => e.type === eventType.noteon);
           var noteoffs = interpreted.events.filter(e => e.type === eventType.noteoff);
 
+          //TODO: no need to calc duration anymore here
           noteons.forEach(on => {
 
             for (var i = 0; i < noteoffs.length; i++) {
@@ -201,8 +223,9 @@ module.exports = function (ngModule) {
           });
         });
 
+        var height = el[0].offsetHeight - 100;
 
-        var height = el[0].offsetHeight - 50;
+
         var scaleFactor = Math.round(height / (highestPitch - lowestPitch));
         var offset = ((127 - highestPitch) * scaleFactor) - 40;
         data = data.map(note => {
@@ -211,8 +234,19 @@ module.exports = function (ngModule) {
           note.width = note.duration;
           return note;
         });
-
-
+        
+        /*
+         var dist = (highestPitch - lowestPitch);
+        var scale = Math.round(height / dist) * height;
+       
+        data = data.map(note => {
+                  note.top = ((note.pitch/dist) * scale);
+                  note.height = 10;// scaleFactor > 20 ? 20 : scaleFactor;
+                  note.width = note.duration;
+                  return note;
+                });
+        
+*/
 
         var beats = [];
         var beatCount = -1;

@@ -7,6 +7,8 @@ module.exports = function (ngModule) {
       replace: true,
       template: require('./store.html'),
       scope: {
+        isOpen: '=',
+        song: '='
       },
       bindToController: true,
       controller: ['$scope', '$timeout', 'storeService', '$mdSidenav', '$rootScope', '$state', '$log', controller],
@@ -18,28 +20,31 @@ module.exports = function (ngModule) {
     var vm = this;
 
 
-    storeService.getAll().then(function (songs) {
-      vm.songs = songs;
+    $scope.$watch('vm.isOpen', function (open) {
+      if (open) {
+        activate();
+      }
     });
 
-    vm.new = function () {
-       $state.go('root.main', { key: '0' }, {reload: true });
-       vm.close();
-       /*
-      if (!currentSong || !currentSong.created) {
-        vm.song = storeService.new();
-        // vm.tracks = songToArray(vm.song);
-        vm.sequencer.load(vm.song.tracks);
+    $scope.$on('login', activate);
+
+    function activate() {
+      if (storeService.isLoggedIn()) {
+        storeService.getAll(storeService.user.key).then(function (songs) {
+          vm.songs = songs;
+        });
       } else {
-        $state.go('root.main', { key: undefined });
+       
       }
-      */
+
     }
+
+   
 
     vm.load = function (song) {
-      $state.go('root.main', { key: song.key });
-
+      $state.go('root.main', { key: song.key, owner: song.owner || 'tutorial' });
     }
+
     vm.close = function () {
       $mdSidenav('store').close()
         .then(function () {

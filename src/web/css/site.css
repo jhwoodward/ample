@@ -2,12 +2,10 @@
 
   body, md-toolbar, md-toolbar input , #song-name, .track-row,.channel-menu-content,.channel-menu-item {
      background-color: #000;
-     color:  #d9dcc1;
+  
     }
     
-  .side-menu {
-    color:rgba(72, 79, 90, 0.87) !important
-  }
+
 
   .beat-marker {
     position:absolute;
@@ -21,7 +19,6 @@
 
     line-height: 19px;
     color:#a2a2a2;
-    border-radius: 2px;
     margin-left:10px;
     margin-right:10px;
   }
@@ -41,68 +38,74 @@
 .beat-info .beat {width:80px}
 .beat-info .beat-ticks {width:80px}
 
-    .song-panel {
-      height:45px;
-    margin:0 auto; 
-    border-radius: 20px;
-    width:700px;
-    /*
-          -webkit-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
-      -moz-box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
-      box-shadow: inset 1px 2px 40px -5px rgba(0,0,0,0.3);
-      */
-    }
+
     .track-row {
       border-top: 1px solid #423d35;
       border-bottom: 1px solid #423d35;
     }
 
-.tracks-panel {
- max-width:400px !important;
-      width: 400px !important;
-}
-    .side-menu, .side-menu  md-content {
-      background: #cde6f7 
+
+  
+
+    .tracks-panel-buttons {
+       border-top: 1px solid #eee;
     }
 
-    .side-menu .close-left {
-      position: absolute;
-      right: 0;
-      z-index: 99;
-      color: white;
-      margin: 10px;
-    }
+  
   
     .tracks-panel .track-list md-input-container  {
       margin: 10px 0;
     }
-    .side-menu  md-tabs md-ink-bar {
-      background: white;
-      height:4px;
-    }
+    
+
+/*
+    md-input-container.md-default-theme:not(.md-input-invalid).md-input-has-value label, md-input-container:not(.md-input-invalid).md-input-has-value label {
+    color: rgba(255, 255, 255, 0.54);
+}
+
+md-input-container.md-default-theme .md-input, md-input-container .md-input {
+    color: rgba(255, 255, 255, 0.87);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+md-input-container.md-default-theme .md-placeholder, md-input-container .md-placeholder, md-input-container.md-default-theme label, md-input-container label {
+    color: rgba(255, 255, 255, 0.38);
+}
 
    .side-menu md-tabs-canvas , 
    .side-menu md-toolbar, 
    .tracks-panel .md-fab.md-button:not(.note),
    .tracks-panel  md-checkbox .md-icon  {
-      background-color: #809ab1;
+      background-color: #292929;
       color: white;
     }
+*/
 
+.btn-rewind {
+  font-size: 29px !important;
+  margin-top: -4px !important;
+}
+
+
+
+.md-button.md-micro.md-button 
+{
+  color: white;
+}
     .tracks-panel-buttons,.btn-remove-tag {
         bottom: 0;
     position: absolute;
     width: 100%;
-    background: #809ab1;
-    color: white;
+ /*   background: #809ab1;
+    color: white;*/
     }
+    /*
     md-chips md-chip {
       background: white;
-    }
+    }*/
       
       .system-text {
         text-transform: uppercase;
-    font-size: 13px;
+    font-size: 13px !important;
     letter-spacing: 0.01em;
       }
       h1.system-text {
@@ -110,18 +113,10 @@
          font-weight: 500;
       }
 
-   .side-menu .md-tab {
- padding: 20px 24px;
-      }  
-      .side-menu md-tab-item {
-        color: white !important;
-      }
-     .side-menu md-pagination-wrapper ,.side-menu  md-tabs-canvas {
-        height: 62px !important;
-      }
+
 
 md-checkbox .md-icon {
-  border-radius: 50%;
+     border-width: 1px;
   padding: 12px;
 }
 md-checkbox.md-checked .md-icon:after {
@@ -129,7 +124,7 @@ md-checkbox.md-checked .md-icon:after {
     top: 4px;
 }
 [md-ink-ripple-checkbox] {
-  padding: 14px;
+  padding: 12px;
 }
 .md-icon-button.md-micro {
   font-size: 16px;
@@ -145,21 +140,19 @@ md-checkbox.md-checked .md-icon:after {
 h4 {
   font-size: 16px;
 }
+
+.btn-reverse {
+  transform: rotate(180deg);
+}
   
+ 
   .main-toolbar {
     background-color:  #353535 !important;
-    color: #000!important;
+    color: #a2a2a2 !important;
   }
 
   .brand {
-    /*
-    font-family: monospace;
-    font-weight: 700 !important;
-    font-size: 30px !important;
-    color: #809296 !important;
-    */
     font-size: 14px !important;
-    color: #809296 !important;
     text-transform: uppercase;
     letter-spacing: 0.1em;
   }
@@ -221,9 +214,7 @@ h4 {
       opacity: 1 !important;
     }
 
-    .songs md-list-item {
-      padding: 0
-    }
+  
 
     .view-container {
 
@@ -275,19 +266,15 @@ h4 {
     }
 
     .track-content {
-      border-radius: 5px;
+    
       height:400px;
       background-color: #000;
     }
 
-    .CodeMirror-scroll {
-      border-radius: 10px;
-    }
+  
 
 
-.md-open-menu-container, .channel-menu {
-  border-radius: 10px;
-}
+
 
 
 
@@ -357,33 +344,51 @@ h4 {
   background-color: white !important;
 }
 .piano-roll-horiz .note.track1.active, .track1 .track-toolbar .track-led.active {
- box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #d83e00, 0 0 35px #d83e00, 0 0 40px #d83e00, 0 0 50px #d83e00, 0 0 75px #d83e00;
+ /*box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #d83e00, 0 0 35px #d83e00, 0 0 40px #d83e00, 0 0 50px #d83e00, 0 0 75px #d83e00;*/
+
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px #d83e00, 0 0 35px #d83e00;
 }
 .piano-roll-horiz .note.track2.active, .track2 .track-toolbar .track-led.active {
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #8e8b00, 0 0 35px #8e8b00, 0 0 40px #8e8b00, 0 0 50px #8e8b00, 0 0 75px #8e8b00;
+ /* box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #8e8b00, 0 0 35px #8e8b00, 0 0 40px #8e8b00, 0 0 50px #8e8b00, 0 0 75px #8e8b00;
+ */
+
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px #8e8b00, 0 0 35px #8e8b00;
 }
 .piano-roll-horiz .note.track3.active, .track3 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #0079b5, 0 0 35px #0079b5, 0 0 40px #0079b5, 0 0 50px #0079b5, 0 0 75px #0079b5;
+   /* box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #0079b5, 0 0 35px #0079b5, 0 0 40px #0079b5, 0 0 50px #0079b5, 0 0 75px #0079b5;*/
+
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px #0079b5, 0 0 35px #0079b5;
 }
 .piano-roll-horiz .note.track4.active, .track4 .track-toolbar .track-led.active {
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73, 0 0 40px #2e8c73, 0 0 50px #2e8c73, 0 0 75px #2e8c73;
+ /* box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73, 0 0 40px #2e8c73, 0 0 50px #2e8c73, 0 0 75px #2e8c73;*/
+
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px #2e8c73, 0 0 35px #2e8c73;
 }
 
 
 
 .piano-roll-horiz .note.track5.active, .track5 .track-toolbar .track-led.active {
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239), 0 0 40px rgb(127, 100, 239), 0 0 50px rgb(127, 100, 239), 0 0 75px rgb(127, 100, 239);
+ /* box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239), 0 0 40px rgb(127, 100, 239), 0 0 50px rgb(127, 100, 239), 0 0 75px rgb(127, 100, 239);*/
+
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239);
 }
 .piano-roll-horiz .note.track6.active, .track6 .track-toolbar .track-led.active {
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(255,64,129), 0 0 35px rgb(255,64,129), 0 0 40px rgb(255,64,129), 0 0 50px rgb(255,64,129), 0 0 75px rgb(255,64,129);
+  /*box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(255,64,129), 0 0 35px rgb(255,64,129), 0 0 40px rgb(255,64,129), 0 0 50px rgb(255,64,129), 0 0 75px rgb(255,64,129);*/
+
+  box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px rgb(255,64,129), 0 0 35px rgb(255,64,129);
+
 }
 
 .piano-roll-horiz .note.track7.active, .track7 .track-toolbar .track-led.active {
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255), 0 0 40px rgb(0, 149, 255), 0 0 50px rgb(0, 149, 255), 0 0 75px rgb(0, 149, 255);
+ /* box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255), 0 0 40px rgb(0, 149, 255), 0 0 50px rgb(0, 149, 255), 0 0 75px rgb(0, 149, 255);*/
+   box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255);
+
 }
 
 .piano-roll-horiz .note.track8.active, .track8 .track-toolbar .track-led.active {
-  box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2), 0 0 40px rgb(72, 185, 2), 0 0 50px rgb(72, 185, 2), 0 0 75px rgb(72, 185, 2);
+ /* box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2), 0 0 40px rgb(72, 185, 2), 0 0 50px rgb(72, 185, 2), 0 0 75px rgb(72, 185, 2);*/
+    box-shadow: 0 0 5px #fff, 0 0 10px #fff,  0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2);
+
 }
 
 
@@ -491,7 +496,7 @@ h4 {
   padding:0;
   padding-top:5px;
   padding-bottom: 5px;
-  border-radius:10px;
+
 }
 .channel-menu-item {
   align-items: right;
@@ -563,21 +568,66 @@ md-input-container .md-errors-spacer {
   min-width: 0;
 }
 
-md-tabs, md-tabs md-content {
-  height: 100%;
+   .side-menu .md-tab {
+ padding: 20px 24px;
+      }  
+
+    .side-menu .close-left {
+      position: absolute;
+      right: 0;
+      z-index: 99;
+     /* color: white;*/
+      margin: 10px;
+    }
+
+    md-tabs.md-default-theme md-tabs-wrapper, md-tabs md-tabs-wrapper {
+        border-bottom: 1px solid #c5c5c5;
+    }
+   
+     .side-menu md-pagination-wrapper ,.side-menu  md-tabs-canvas {
+        height: 62px !important;
+      }
+     md-sidenav, .side-menu, .side-menu  md-tabs ,.side-menu  md-content {
+      background: #d8d8d8 !important;
+    }
+    .side-menu  md-content {
+      border-right: 1px solid #c5c5c5;
+    }
+
+.side-menu.store md-list-item {
+  border-bottom: 1px solid #c5c5c5;;
+}
+
+.side-menu.store md-list {
+  padding:0 !important;
+}
+
+.side-menu.store md-list-item.md-2-line::before, 
+.side-menu.store md-list-item.md-2-line > .md-no-style::before,
+.side-menu.store md-list-item, 
+.side-menu.store md-list-item .md-list-item-inner,
+.side-menu.store md-list-item.md-2-line > .md-no-style  {
+  min-height: 30px !important;
+}
+.side-menu.store md-list-item.md-2-line .md-list-item-text p, 
+.side-menu.store md-list-item.md-2-line > .md-no-style .md-list-item-text p, 
+.side-menu.store md-list-item.md-3-line .md-list-item-text p, 
+.side-menu.store md-list-item.md-3-line > .md-no-style .md-list-item-text p {
+  font-weight:normal;
+  margin-top: 4px;
 }
 
 
-
-
-.edit-song-dialog md-dialog-content{
-  width: 500px;
-  height: 400px;
-}
-.edit-song-dialog md-list-item {
-  padding:0;
+.side-menu.store md-list-item .md-button {
+    padding: 10px 5px 5px 15px !important;
 }
 
+md-list-item.disabled {
+  opacity: 0.5;
+}
+md-list-item.disabled md-button {
+  cursor: default;
+}
 
 
 md-list[dnd-list] {
@@ -601,10 +651,11 @@ md-list[dnd-list] .dndDraggingSource {
   border-bottom:3px solid white;
 }
 .highlight {
-    text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px white, 0 0 35px white, 0 0 40px white, 0 0 50px white, 0 0 75px white;
+   /* text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px white, 0 0 35px white, 0 0 40px white, 0 0 50px white, 0 0 75px white;*/
+    text-shadow: 0 0 5px #fff, 0 0 15px #fff, 0 0 20px white, 0 0 35px white;
   color: white !important;
 }
- .song-panel.md-toolbar-tools .active,  .brand-letter.active {
+ .main-toolbar .md-toolbar-tools .active {
     text-shadow:  0 0 10px white;
   color: white !important;
 }

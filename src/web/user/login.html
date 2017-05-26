@@ -1,0 +1,50 @@
+<md-dialog aria-label="Login">
+
+  <form autocomplete="off" name="vm.loginForm" ng-submit="vm.login()">
+    <md-toolbar>
+      <div class="md-toolbar-tools modal-header">
+        <h2>Log in</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="vm.cancel()">
+          <md-icon class="ion-close" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+      <md-content class="md-padding" layout="column">
+        <md-input-container>
+          <label>Username</label>
+          <input type="text" ng-change="vm.onChangeUsername()"  required name="key" ng-model="vm.account.key" />
+          <div ng-messages="vm.loginForm.key.$error" role="alert" multiple>
+            <div ng-message="required">You must supply a username</div>
+            <div ng-message="notfound">Username not found</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container>
+          <label>Password</label>
+          <input type="password" ng-change="vm.onChangePassword()" required name="password" ng-model="vm.account.password" />
+          <div ng-messages="vm.loginForm.password.$error" role="alert" multiple>
+            <div ng-message="required">You must supply a password</div>
+            <div ng-message="incorrect">Password is incorrect</div>
+          </div>
+        </md-input-container>
+
+      </md-content>
+
+    </md-dialog-content>
+
+     <md-dialog-actions layout="row">
+
+      <span flex></span>
+      <md-button md-primary type="submit" ng-disabled="!vm.loginForm.$valid">
+        Log in
+      </md-button>
+      <md-button ng-click="vm.cancel() ">
+        Cancel
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

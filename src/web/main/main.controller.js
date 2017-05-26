@@ -5,29 +5,43 @@ var Sequencer = require('./Sequencer.js');
 var beautify_js = require('js-beautify').js_beautify
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', '$mdDialog', controller]);
+  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', '$mdDialog', controller]);
 }
 
 
-function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService, $mdDialog) {
+function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService, $mdDialog) {
   var vm = this;
 
-  vm.song = song;
+  //if (!song) {
+  //  $state.go('root.new');
+  //}
+  vm.song = $rootScope.song = song;
+
   if (!vm.song.master) {
     vm.song.master = {
       part: ''
     };
   }
 
-  vm.log = 'roll';
-
-  if (!vm.song.tracks) {
-    vm.song.tracks = songToArray(vm.song);
-    delete vm.song.parts;
+  if (!vm.song.created) {
+    $timeout(function () {
+      $mdSidenav('tracks').open();
+    });
   }
+
+  $rootScope.user = storeService.user;
+  $scope.$on('login', function () {
+    $rootScope.user = storeService.user;
+  });
+
+  vm.log = 'roll';
 
   vm.sequencer = new Sequencer(webMidiService.selectedOutput);
   vm.sequencer.subscribe(handleEvent);
+  $scope.$on('$destroy', function () {
+    console.log('scope destroy');
+    vm.sequencer.unsubscribeAll();
+  });
 
   $timeout(function () {
     vm.sequencer.load(vm.song.tracks, vm.song.master);
@@ -46,41 +60,9 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
   vm.tracksOpen = function () {
     return $mdSidenav('tracks').isOpen();
   }
-
-  function songToArray(song) {
-    var out = [];
-    var index = 0;
-    for (var key in song.parts) {
-      out.push({
-        index,
-        key,
-        part: song.parts[key].part,
-        sub: song.parts[key].sub,
-        channel: song.parts[key].channel
-      });
-      index++;
-    }
-    return out;
-
+  vm.storeOpen = function () {
+    return $mdSidenav('store').isOpen();
   }
-
-  function songFromArray(tracks) {
-    var out = {};
-    tracks.forEach(t => {
-      out[t.key] = {
-        channel: t.channel,
-        sub: t.sub,
-        part: t.part,
-      }
-    });
-    return out;
-  }
-
-  function songToString(song) {
-    return beautify_js(JSON.stringify(song).replace(/\\n/g, '').replace(/\\t/g, ''), { indent_size: 2 });
-  }
-
-
 
   function handleEvent(e) {
     if (e.type === 'end') {
@@ -98,22 +80,38 @@ function controller($scope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMen
     */
   }
 
+  vm.clone = function () {
+    return storeService.clone(vm.song).then(function (song) {
+      $state.go('root.main', { key: song.key, owner: song.owner });
+    })
+  };
+
+  vm.new = function () {
+    $state.go('root.new');
+    //vm.close();
+    /*
+   if (!currentSong || !currentSong.created) {
+     vm.song = storeService.new();
+     // vm.tracks = songToArray(vm.song);
+     vm.sequencer.load(vm.song.tracks);
+   } else {
+     $state.go('root.main', { key: undefined });
+   }
+   */
+  }
+
   vm.play = function () {
     vm.sequencer.start();
   }
 
-  vm.goTo = function(marker) {
-    vm.sequencer.markers.forEach(m => {
-      m.active=false;
-    });
-    marker.active =true;
-    vm.sequencer.tick = marker.tick;
-    if (!vm.sequencer.playing) {
-      vm.sequencer.play();
-    }
+  vm.goTo = function (marker) {
+    vm.sequencer.goToMarker(marker);
+    //  if (!vm.sequencer.playing) {
+    //    vm.sequencer.play();
+    //   }
   }
 
- 
+
 
 
 

@@ -1,8 +1,24 @@
 <div>
+  <!--
   <md-button ng-click="vm.close()" class="md-icon-button ion-close close-left">
   </md-button>
+  -->
   <md-tabs md-dynamic-height>
 
+    <md-tab id="tab1">
+      <md-tab-label>Account</md-tab-label>
+      <md-tab-body>
+        <md-button ng-click="vm.signup()" ng-if="!vm.isLoggedIn">
+          Sign up
+        </md-button>
+        <md-button ng-click="vm.login()" ng-if="!vm.isLoggedIn">
+          Sign in
+        </md-button>
+        <md-button ng-click="vm.logout()" ng-if="vm.isLoggedIn">
+          Log out
+        </md-button>
+      </md-tab-body>
+    </md-tab>
     <md-tab id="tab2">
       <md-tab-label>Options</md-tab-label>
       <md-tab-body>
@@ -15,7 +31,7 @@
         </div>
       </md-tab-body>
     </md-tab>
-    <md-tab id="tab1">
+    <md-tab id="tab3">
       <md-tab-label>About</md-tab-label>
       <md-tab-body>
 

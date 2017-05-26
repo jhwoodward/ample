@@ -1,0 +1,10 @@
+<md-list-item 
+  class="md-2-line" 
+  ng-class="{'disabled':song.key === $root.song.key && song.owner === $root.song.owner }" 
+  ng-repeat="song in vm.songs" 
+  ng-click="vm.select(song)">
+  <div class="md-list-item-text">
+    <h3 class="system-text">{{ song.name }}</h3>
+    <p>{{ song.description }}</p>
+  </div>
+</md-list-item>

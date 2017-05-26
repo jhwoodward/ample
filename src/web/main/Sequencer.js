@@ -15,10 +15,15 @@ function Sequencer(output) {
   this.output = output;
   this.listeners = [];
   this.muted = [];
+  this.markers = [];
   this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
+  this.increment = 1;
 }
 
 Sequencer.prototype = {
+  unsubscribeAll: function () {
+    this.listeners = [];
+  },
   subscribe: function (listener) {
     this.listeners.push(listener);
   },
@@ -157,30 +162,10 @@ Sequencer.prototype = {
     this.endTick = this.maxTick;
     this.loop = false;//options.loop;
 
-    if (options.startBeat) {
-      this.startTick = (parseInt(startBeat, 10) * 48) - 12;
-    }
-    if (options.endBeat) {
-      this.endTick = (parseInt(endBeat, 10) * 48);
-    }
-    if (options.marker) {
-      var markerName = /[a-zA-Z]+/.exec(options.marker)[0];
-      var markerNthTest = /\d+/.exec(options.marker);
-      markerName += markerNthTest ? parseInt(markerNthTest[0], 10) : '1';
-      var marker = this.markers.filter(m => m.key === markerName);
-      if (!marker.length) throw (new Error('Marker not found: ' + markerName));
-      marker = marker[0]
-      this.startTick = marker.tick;
-      if (this.markers.indexOf(marker) < this.markers.length - 1) {
-        var nextMarker = this.markers[this.markers.indexOf(marker) + 1];
-        this.endTick = nextMarker.tick - 1;
-      }
-    }
-
     if (this.tick >= this.maxTick) {
       this.tick = 0;
     }
-
+    this.increment = 1;
     this.stopped = false;
     this.paused = false;
     this.fastForwarding = false;
@@ -232,6 +217,7 @@ Sequencer.prototype = {
     if (this.context) {
       this.context.close();
     }
+
     this.context = new AudioContext();
     this.clock = new WAAClock(this.context);
     this.clock.start();
@@ -240,8 +226,44 @@ Sequencer.prototype = {
 
     this.scheduled = this.clock.callbackAtTime(this.onTick, 0.01)
       .repeat(0.01)
-      .tolerance({ late: 50 })
+      .tolerance({ late: 500 })
 
+  },
+  reverse: function () {
+    this.increment = -1;
+    if (!this.playing) {
+      this.stopped = false;
+      this.paused = false;
+      if (this.tick > this.maxTick) {
+        this.tick = this.maxTick;
+      }
+      this.play();
+    }
+
+  },
+  goToMarker: function (marker) {
+    this.markers.forEach(m => {
+      m.active = false;
+    });
+    marker.active = true;
+    this.tick = marker.tick;
+    this.raiseEvent({
+      type: 'position',
+      tick: this.tick,
+      beat: this.beat
+    });
+  },
+  goToBeat: function (beat) {
+    this.markers.forEach(m => {
+      m.active = false;
+    });
+    this.tick = beat * 48;
+    this.beat = beat;
+    this.raiseEvent({
+      type: 'position',
+      tick: this.tick,
+      beat: this.beat
+    });
   },
   fastForward: function () {
     this.ffendTick = this.endTick;
@@ -284,10 +306,25 @@ Sequencer.prototype = {
     this.tick = 0;
     this.beat = 0;
     this.beatTicks = 0;
+    this.raiseEvent({
+      type: 'position',
+      tick: this.tick,
+      beat: this.beat
+    });
+  },
+  toend: function () {
+    this.tick = this.maxTick;
+    this.beat = Math.floor(this.maxTick / 48);
+    this.beatTicks = 0;
+    this.raiseEvent({
+      type: 'position',
+      tick: this.tick,
+      beat: this.beat
+    });
   },
   end: function () {
     this.stopped = true;
-    // this.allNotesOff();
+    this.playing = false;
     this.raiseEvent({ type: 'end' });
   },
   togglePause: function () {
@@ -305,7 +342,7 @@ Sequencer.prototype = {
   },
   onTick: function () {
     if (this.stopped || this.paused) return;
-    if (this.tick > this.endTick) {
+    if (this.increment > 0 && this.tick > this.endTick) {
       if (this.fastForwarding) {
         this.onFastForwardCompleted();
         return;
@@ -317,10 +354,18 @@ Sequencer.prototype = {
         return;
       }
     }
+    if (this.increment < 0 && this.tick <= 0) {
+      if (this.loop) {
+        this.tick = this.maxTick;
+      } else {
+        this.end();
+        return;
+      }
+    }
 
     this.raiseEvents();
 
-    this.tick++;
+    this.tick += this.increment;
 
   },
   raiseEvents: function () {
@@ -342,6 +387,14 @@ Sequencer.prototype = {
     } else {
       events = this.events[this.tick].filter(e => this.muted.indexOf(e.track.key) === -1 || e.isMaster);
     }
+
+    this.raiseEvent({
+      type: 'tick',
+      tick: this.tick,
+      beat: this.beat,
+      events: events
+    });
+
     events.forEach(function (e) {
 
       switch (e.type) {
@@ -371,15 +424,36 @@ Sequencer.prototype = {
               });
             this.noteState[e.track] = this.noteState[e.track] || {};
             this.noteState[e.track][e.pitch.value] = 1;
+
+            //fake noteoff if playing in reverse;
+            if (this.increment < 0) {
+              (function (seq) {
+                setTimeout(function () {
+                  seq.output.stopNote(e.pitch.value, e.track.channel + 1);
+                  delete seq.noteState[e.track][e.pitch.value];
+                  seq.raiseEvent({
+                    type: 'noteoff',
+                    onOrigin: e.origin,
+                    onTick: e.tick,
+                    pitch: e.pitch,
+                    channel: e.track.channel
+                  });
+                }, e.duration * 10);
+              })(this);
+
+            }
           }
           this.raiseEvent(e);
           break;
         case eventType.noteoff:
           if (!this.fastForwarding || e.keyswitch) {
             this.output.stopNote(e.pitch.value, e.track.channel + 1);
-            delete this.noteState[e.track][e.pitch.value];
+            if (this.noteState[e.track]) {
+              delete this.noteState[e.track][e.pitch.value];
+            }
+
           }
-          this.raiseEvent(e);
+          //   this.raiseEvent(e);
           break;
         case eventType.substitution:
           //
@@ -391,14 +465,6 @@ Sequencer.prototype = {
 
     }.bind(this));
 
-    if (!this.fastForwarding) {
-      this.raiseEvent({
-        type: 'tick',
-        tick: this.tick,
-        beat: this.beat,
-        events: events
-      });
-    }
   },
   trigger: function (e) {
 

@@ -109,12 +109,16 @@ function tokenFunction(states, config) {
       }
     }
 
-    //TODO: SOULD BE MOVED SOMEWHERE WHERE IT CAN BE PROCESSED ONLY WHEN TEXT CHANGED
+    //TODO: SHOULD BE MOVED SOMEWHERE WHERE IT CAN BE PROCESSED ONLY WHEN TEXT CHANGES
     if (cm) {
       var val = cm.doc.getValue();
       var keywords = val.match(/\w+( ?)=/g);
       var subRule = states.start.filter(s => s.token === 'substitution')[0];
       if (keywords) {
+        keywords.sort((a,b) => {
+          if (a.length > b.length) return -1;
+          return 1;
+        });
         keywords = keywords.map(k => '^' + k.replace('=', '')).join('|');
         subRule.regex = new RegExp(keywords, 'g');
       } else {

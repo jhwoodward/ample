@@ -21,7 +21,7 @@ function MarkerParser(macros) {
 var prototype = {
   match: function match(s) {
 
-    var startTest = /^\$[a-zA-Z]+(\d+)?\(/.exec(s);
+    var startTest = /^\$[a-zA-Z]+(\d+)?/.exec(s);
     if (!startTest) return false;
 
     var markerNameTest = /[a-zA-Z]+/.exec(startTest[0]);
@@ -29,17 +29,24 @@ var prototype = {
     var n = /\d+/.exec(startTest[0]);
     n = n ? parseInt(n[0]) : undefined;
     var parsed = { name, n };
-    var bracketed = utils.getBracketed(s, startTest[0].length);
-    var part = bracketed;
-    if (this.substitutions[part]) {
-      parsed.key = part;
-      parsed.part = this.substitutions[part].value;
+    var remainder = s.substring(startTest[0].length);
+    var part;
+    var nextMarkerStart = remainder.indexOf('$');
+    if (nextMarkerStart >-1) {
+      part = remainder.substring(0, nextMarkerStart-1);
     } else {
-      parsed.part = part;
+      part = remainder;
     }
 
+   // if (this.substitutions[part]) {
+   //   parsed.key = part;
+   //   parsed.part = this.substitutions[part].value;
+  //  } else {
+      parsed.part = part;
+  //  }
+
     parsed.definitionStart = startTest[0].length;
-    this.string = startTest[0] + bracketed + ')';
+    this.string = startTest[0] + part;
     this.parsed = parsed;
 
     return true;

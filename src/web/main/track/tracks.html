@@ -1,6 +1,6 @@
-<div >
+<div>
 
-  <md-tabs md-dynamic-height>
+  <md-tabs md-dynamic-height md-selected="vm.selectedTabIndex">
 
     <md-tab id="tab2">
       <md-tab-label>Tracks</md-tab-label>
@@ -20,6 +20,7 @@
                 <label>Name</label>
                 <input type="text" ng-model="track.key" />
               </md-input-container>
+              <!--
               <md-button ng-click="vm.sequencer.toggleMute(track)" ng-class="{'active': track.isMuted && !vm.sequencer.solo}" class="md-icon-button md-micro mute">M
                 <md-tooltip md-direction="top">Mute</md-tooltip>
               </md-button>
@@ -27,6 +28,7 @@
                 <md-tooltip md-direction="top">Solo</md-tooltip>
 
               </md-button>
+              -->
               <md-button ng-click="vm.deleteTrack($index)" class="md-fab md-button md-micro"><span class="ion-minus-round"></span>
                 <md-tooltip md-direction="top">Delete track</md-tooltip>
               </md-button>
@@ -46,38 +48,58 @@
     <md-tab id="tab1">
       <md-tab-label>Info</md-tab-label>
       <md-tab-body>
-        <md-content class="md-padding" layout="column">
-          <md-input-container>
-            <label>Name</label>
-            <input type="text" ng-model="vm.song.name" />
-          </md-input-container>
+        <form name="vm.songForm">
+          <md-content class="md-padding" layout="column">
+            <md-input-container>
+              <label>Name</label>
+              <input type="text" required name="name" md-autofocus="vm.nameHasFocus" ng-model="vm.song.name" />
+              <div ng-messages="vm.songForm.name.$error" role="alert" multiple>
+                <div ng-message="required" >You must supply a name if you want to save the song</div>
+              </div>
+            </md-input-container>
 
-          <md-input-container>
-            <label>Tags</label>
-            <md-chips ng-model="vm.song.tags" md-removable="true" placeholder="Enter tags..." delete-button-label="Remove Tag" delete-hint="Press delete to remove tag"
-              secondary-placeholder="+Tag">
+            <md-input-container>
+              <label>Tags</label>
+              <md-chips ng-model="vm.song.tags" md-removable="true" placeholder="Enter tags..." delete-button-label="Remove Tag" delete-hint="Press delete to remove tag"
+                secondary-placeholder="+Tag">
 
-              <button md-chip-remove class="md-primary btn-remove-tag">
+                <button md-chip-remove class="md-primary btn-remove-tag">
               <span class="ion-close"></span>
             </button>
-            </md-chips>
-          </md-input-container>
+              </md-chips>
+            </md-input-container>
 
-          <md-input-container class="md-block">
-            <label>Description</label>
-            <textarea ng-model="vm.song.description" md-maxlength="150" rows="5" md-select-on-focus></textarea>
+            <md-input-container class="md-block">
+              <label>Description</label>
+              <textarea ng-model="vm.song.description" md-maxlength="150" rows="5" md-select-on-focus></textarea>
 
-          </md-input-container>
-        </md-content>
-
+            </md-input-container>
+            <span ng-if="vm.song.created">Created: {{vm.song.created}}</span>
+          </md-content>
+        </form>
       </md-tab-body>
     </md-tab>
   </md-tabs>
   <div class="tracks-panel-buttons" layout="row">
-    <md-button ng-click="vm.ok() ">
+    <md-button ng-click="vm.save()" 
+      ng-disabled="!vm.songForm.$valid"
+      ng-if= "vm.song.owner === $root.user.key || !vm.song.created"
+    >
       Save
     </md-button>
-    <span flex></span>
+
+
+     <md-button ng-click="vm.clone()" 
+      ng-disabled="!vm.songForm.$valid"
+      ng-if= "vm.song.owner !== $root.user.key && vm.song.created"
+      >
+      Clone
+    </md-button>
+   
+     <md-button ng-click="vm.del()" ng-if="vm.song.created && vm.song.owner === $root.user.key">
+      Delete
+    </md-button>
+     <span flex></span>
     <md-button ng-click="vm.cancel() ">
       Cancel
     </md-button>

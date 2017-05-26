@@ -12,14 +12,16 @@ module.exports = function (ngModule) {
         sequencer: '='
       },
       bindToController: true,
-      controller: ['$scope', '$mdSidenav', 'storeService', controller],
+      controller: ['$scope', '$mdSidenav', 'storeService', '$state', '$mdDialog', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope, $mdSidenav, storeService) {
+  function controller($scope, $mdSidenav, storeService, $state, $mdDialog) {
     var vm = this;
     var orig, origInterpeted;
+
+
 
     $scope.$watch('vm.isOpen', function (open) {
       if (open) {
@@ -28,6 +30,12 @@ module.exports = function (ngModule) {
     })
 
     function activate() {
+      if (!vm.song.created) {
+        vm.selectedTabIndex = 1;
+      }
+
+      vm.nameHasFocus = !vm.song.created;
+
       orig = _.cloneDeep(vm.song);
       origInterpeted = _.cloneDeep(vm.sequencer.interpreted);
       vm.song.tracks.forEach((t, i) => t.originalIndex = i);
@@ -53,58 +61,67 @@ module.exports = function (ngModule) {
       vm.sequencer.reorder(vm.song.tracks);
     }
 
-   
-    vm.delete = del;
 
-    vm.ok = function () {
-      save();
-      $mdSidenav('tracks').close();
+    vm.del = del;
+    
+    vm.clone = function () {
+      if (!vm.songForm.$valid) return;
+      clone().then(function(song){
+        $state.go('root.main', { key: song.key, owner: storeService.user.key });
+      });
+    }
+    vm.save = function () {
+      if (!vm.songForm.$valid) return;
+      //validate that name is not null and unique in user's namespace
+
+      if (!vm.song.created) {
+        save().then(function (song) {
+          $state.go('root.main', { key: song.key, owner: storeService.user.key });
+        });
+      } else {
+        save().then(function () {
+          $mdSidenav('tracks').close();
+        });
+      }
     }
 
     vm.cancel = function () {
-      _.extend(vm.song, orig);
-      vm.song.tracks = orig.tracks;
-      vm.sequencer.interpreted = origInterpeted;
-      vm.sequencer.reorder(vm.song.tracks);
+      if (vm.song.created) {
+        _.extend(vm.song, orig);
+        vm.song.tracks = orig.tracks;
+        vm.sequencer.interpreted = origInterpeted;
+        vm.sequencer.reorder(vm.song.tracks);
+      }
+
       $mdSidenav('tracks').close();
     };
 
+ 
+
     function save() {
-
-      var payload = {
-        tracks: []
-      };
-      for (var key in vm.song) {
-        if (key !== 'tracks' && key !== 'parts' && vm.song.hasOwnProperty(key)) {
-          payload[key] = vm.song[key];
-        }
-      }
-      var tracks = _.cloneDeep(vm.song.tracks);
-      tracks.forEach(track => {
-        delete track.$$hashKey;
-        var t = {};
-        for (var key in track) {
-          if (track.hasOwnProperty(key)) {
-            t[key] = track[key];
-          }
-        }
-        payload.tracks.push(t);
-      });
-      if (payload.master) {
-        delete payload.master.interpreted;
-      }
-      delete payload.parts;
-
-      storeService.save(payload).then(function (result) {
-        console.log(result);
-      });
+      return storeService.save(vm.song);
     };
-    
 
-    function del() {
-      storeService.delete(vm.song.key).then(function (result) {
-        console.log(result);
+    function clone() {
+      return storeService.clone(vm.song);
+    };
+
+    function del(ev) {
+
+      var confirm = $mdDialog.confirm()
+        .title('Delete song')
+        .textContent('Are you sure you want to delete this song forever?')
+        .ariaLabel('Delete')
+        .targetEvent(ev)
+        .ok('Yes - delete it')
+        .cancel('No - keep it');
+
+      $mdDialog.show(confirm).then(function () {
+        storeService.delete(vm.song.key).then(function (result) {
+          $state.go('root.new');
+        });
       });
+
     }
 
   }

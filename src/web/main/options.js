@@ -12,12 +12,12 @@ module.exports = function (ngModule) {
         sequencer: '='
       },
       bindToController: true,
-      controller: ['$scope', '$mdSidenav', controller],
+      controller: ['$scope', '$mdSidenav', 'userService', '$rootScope', '$mdDialog', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope, $mdSidenav) {
+  function controller($scope, $mdSidenav, userService, $rootScope, $mdDialog) {
     var vm = this;
     vm.close = function () {
       $mdSidenav('options').close();
@@ -27,11 +27,51 @@ module.exports = function (ngModule) {
       if (open) {
         activate();
       }
-    })
+    });
+
+    $scope.$on('login', activate);
+
+    vm.isLoggedIn = userService.isLoggedIn();
+
 
     function activate() {
+      vm.isLoggedIn = userService.isLoggedIn();
+    }
 
 
+    vm.signup = function (ev) {
+      $mdDialog.show({
+        template: require('../user/signup.html'),
+        controller: 'SignupController',
+        controllerAs: 'vm',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: false
+      }).then(function () {
+          $mdSidenav('options').close();
+        });
+    }
+
+    vm.login = function (ev) {
+      $mdDialog.show({
+        template: require('../user/login.html'),
+        controller: 'LoginController',
+        controllerAs: 'vm',
+        parent: angular.element(document.body),
+        targetEvent: ev,
+        clickOutsideToClose: false
+      }).then(function () {
+        $mdSidenav('options').close();
+      });
+    }
+
+
+
+    vm.logout = function () {
+      userService.logout();
+      vm.isLoggedIn = false;
+      $rootScope.$broadcast('login');
+      $mdSidenav('options').close();
     }
 
 

@@ -1,29 +1,28 @@
 <div class="side-menu store">
-  <md-toolbar class="md-theme-light">
-    <div class="md-toolbar-tools">
-      <h1 flex class="system-text">Library</h1>
-      <md-button ng-click="vm.close()" class="md-icon-button ion-close">
-      </md-button>
-    </div>
-  </md-toolbar>
-  <md-content>
-    <md-list flex>
-       <md-list-item  ng-click="vm.new()">
-          <div class="md-list-item-text">
-          <h3>New</h3>
-        </div>
-       
-        </md-list-item>
-      <md-list-item class="md-2-line" ng-repeat="song in vm.songs" ng-click="vm.load(song)" >
-          
-        <div class="md-list-item-text">
-          <h3>{{ song.name }}</h3>
-          <p>{{ song.description }}</p>
-        </div>
+  <md-tabs md-dynamic-height>
+
+    <md-tab id="tab2"  ng-if="$root.user.key !== 'guest'" >
+      <md-tab-label>{{$root.user.key}}</md-tab-label>
+      <md-tab-body>
+        <md-content>
+           <song-list 
+            
+              list-name='{{$root.user.key}}' 
+              on-selected="vm.load(song)">
+           </song-list>
+        </md-content>
+
+      </md-tab-body>
+    </md-tab>
+    <md-tab id="tab2">
+      <md-tab-label>Tutorial</md-tab-label>
+      <md-tab-body>
+        <song-list 
+          list-name='tutorial' 
+          on-selected="vm.load(song)">
+        </song-list>
+      </md-tab-body>
+    </md-tab>
 
 
-      </md-list-item>
-    </md-list>
-
-  </md-content>
 </div>

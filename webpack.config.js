@@ -2,6 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 var config = {
+  watch: true,
   entry: './src/web/app.js',
   output: {
     path:'./dist/',

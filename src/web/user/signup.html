@@ -1,0 +1,71 @@
+<md-dialog aria-label="Signup" >
+  <form autocomplete="off" name="vm.signupForm" ng-submit="vm.signup()">
+    <md-toolbar>
+      <div class="md-toolbar-tools modal-header">
+        <h2>Sign up</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="vm.cancel()">
+          <md-icon class="ion-close" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+
+      <md-content class="md-padding" layout="column">
+        <!-- fake fields are a workaround for chrome autofill getting the wrong fields -->
+        <input style="display:none" type="text" name="fakeusernameremembered" />
+        <input style="display:none" type="password" name="fakepasswordremembered" />
+        <md-input-container>
+          <label>Name</label>
+          <input type="text" required name="name" md-autofocus="vm.nameHasFocus" ng-model="vm.account.name" />
+          <div ng-messages="vm.signupForm.name.$error" role="alert" multiple>
+            <div ng-message="required">You must supply an account name</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container>
+          <label>Email address</label>
+          <input type="email" required name="email" ng-model="vm.account.email" />
+          <div ng-messages="vm.signupForm.email.$error" role="alert" multiple>
+            <div ng-message="required">You must supply an email address</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container>
+          <label>Username</label>
+          <input type="text" required name="key" ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="vm.account.key" ng-model-options='{ debounce: 1000 }'
+            ng-change='vm.checkUnique()' />
+          <div ng-messages="vm.signupForm.key.$error" role="alert" multiple>
+            <div ng-message="required">You must supply a username</div>
+            <div ng-message="unique">There's already a user with this name</div>
+            <div ng-message="reserved">User name not allowed</div>
+            <div ng-message="pattern">User name can only have letters and numbers</div>
+          </div>
+        </md-input-container>
+
+        <md-input-container>
+          <label>Password</label>
+          <input type="password" required name="password" ng-model="vm.account.password" />
+          <div ng-messages="vm.signupForm.password.$error" role="alert" multiple>
+            <div ng-message="required">You must supply a password</div>
+          </div>
+        </md-input-container>
+
+
+      </md-content>
+
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+
+      <span flex></span>
+      <md-button md-primary type="submit" ng-disabled="!vm.signupForm.$valid">
+        Sign up
+      </md-button>
+      <md-button ng-click="vm.cancel() ">
+        Cancel
+      </md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

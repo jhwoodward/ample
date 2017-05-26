@@ -446,6 +446,9 @@ Sequencer.prototype = {
           this.raiseEvent(e);
           break;
         case eventType.noteoff:
+          //if playing backwards, use fake noteoffs
+          if (this.increment < 0) return;
+
           if (!this.fastForwarding || e.keyswitch) {
             this.output.stopNote(e.pitch.value, e.track.channel + 1);
             if (this.noteState[e.track]) {

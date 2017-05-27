@@ -8,13 +8,13 @@
     <md-tab id="tab1">
       <md-tab-label>Account</md-tab-label>
       <md-tab-body>
-        <md-button ng-click="vm.signup()" ng-if="!vm.isLoggedIn">
+        <md-button ng-click="vm.signup($event)" ng-if="!vm.isLoggedIn">
           Sign up
         </md-button>
-        <md-button ng-click="vm.login()" ng-if="!vm.isLoggedIn">
-          Sign in
+        <md-button ng-click="vm.login($event)" ng-if="!vm.isLoggedIn">
+          Log in
         </md-button>
-        <md-button ng-click="vm.logout()" ng-if="vm.isLoggedIn">
+        <md-button ng-click="vm.logout($event)" ng-if="vm.isLoggedIn">
           Log out
         </md-button>
       </md-tab-body>

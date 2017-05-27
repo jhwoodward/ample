@@ -1,6 +1,5 @@
 var _ = require('lodash');
 var eventType = require('./constants').eventType;
-var stateUtils = require('./stateUtils');
 
 function State(defaultPhraseParser) {
 
@@ -37,7 +36,11 @@ function State(defaultPhraseParser) {
   };
 
   _.merge(this, state);
-  this.mutate(defaultPhraseParser || stateUtils.getDefaultPhraseParser()); 
+
+  if (defaultPhraseParser) {
+    this.mutate(defaultPhraseParser);
+  }
+
 
 }
 
@@ -54,11 +57,11 @@ State.prototype.clone = function () {
 
 State.prototype.mutate = function (parser, interpreter) {
 
-  if (interpreter) {
+  if (interpreter && interpreter.master) {
     interpreter.master.states.forEach(function (s) {
       if (s.tick === this.time.tick) {
         _.merge(this, s.state);
-       // s.applied = true;
+        // s.applied = true;
       }
     }.bind(this));
   }

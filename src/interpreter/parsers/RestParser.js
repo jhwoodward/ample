@@ -21,7 +21,7 @@ var prototype = {
   
     state.phrase.mutateState(state);
     if (prev.on.tick && !prev.on.duration) {
-      prev.on.duration =  offTick - prev.on.tick;
+      prev.on.duration = prev.on.parser.duration =  offTick - prev.on.tick;
     }
      
   },

@@ -114,15 +114,18 @@ function tokenFunction(states, config) {
       var val = cm.doc.getValue();
       var keywords = val.match(/\w+( ?)=/g);
       var subRule = states.start.filter(s => s.token === 'substitution')[0];
+      var shuffleRule = states.start.filter(s => s.token === 'shuffle')[0];
       if (keywords) {
         keywords.sort((a,b) => {
           if (a.length > b.length) return -1;
           return 1;
         });
-        keywords = keywords.map(k => '^' + k.replace('=', '')).join('|');
+        keywords = keywords.map(k => '^' + k.replace('=', '').trim()).join('|');
         subRule.regex = new RegExp(keywords, 'g');
+        if (shuffleRule) shuffleRule.regex = new RegExp(keywords, 'g');
       } else {
-        subRule.regex = /$^/;
+        subRule.regex =  /$^/;
+        if (shuffleRule) shuffleRule.regex = /$^/;
       }
     }
 

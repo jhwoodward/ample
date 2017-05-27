@@ -208,7 +208,8 @@ Interpreter.prototype.getEvents = function () {
     return acc;
   }, []);
 
-  this.setDuration(events);
+  //TODO: remove this - shouldn't be required any more
+  //this.setDuration(events);
 
   events = events.concat(this.statelessEvents);
 
@@ -282,7 +283,8 @@ Interpreter.prototype.parseMacros = function (part, macroParsers) {
   this.macros.filter(macro => {
     return macro.type === macroType.annotation ||
       macro.type === macroType.substitution ||
-      macro.type === macroType.articulation;
+      macro.type === macroType.articulation ||
+      macro.type === 'shuffle';
   }).forEach(macro => {
     macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart);
   });

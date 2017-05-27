@@ -28,7 +28,6 @@ require('./main/webmidi.service')(mainModule);
 require('./main/padZeros.filter')(mainModule);
 
 let userModule = angular.module('userModule', []);
-require('./user/signup')(userModule);
 require('./user/user.service')(userModule);
 require('./user/signup.controller')(userModule);
 require('./user/login.controller')(userModule);
@@ -37,6 +36,9 @@ let storeModule = angular.module('storeModule', []);
 require('./store/store.service')(storeModule);
 require('./store/store')(storeModule);
 require('./store/song-list')(storeModule);
+
+let tutorialModule = angular.module('tutorialModule', []);
+require('./tutorial/notation.controller')(tutorialModule);
 
 let sharedModule = angular.module('sharedModule', []);
 sharedModule.directive('unload', ['$timeout', function ($timeout) {
@@ -50,7 +52,7 @@ sharedModule.directive('unload', ['$timeout', function ($timeout) {
   }
 }]);
 
-let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'dndLists', 'ui.router', 'ui.codemirror', 'sharedModule', 'storeModule', 'userModule', 'mainModule']);
+let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'dndLists', 'ui.router', 'ui.codemirror', 'sharedModule', 'storeModule','tutorialModule', 'userModule', 'mainModule']);
 
 app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThemingProvider','$mdInkRippleProvider',
   function ($stateProvider, $urlRouterProvider, $locationProvider, $mdThemingProvider,$mdInkRippleProvider) {

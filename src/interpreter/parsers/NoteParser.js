@@ -34,8 +34,11 @@ var prototype = {
   mutateState: function (state, interpreter) {
     var prev = interpreter.getTopState();// _.cloneDeep(state);
 
-    state.articulation = state.phrase.merge(this.parsed.articulations);
-    state.articulation.mutateState(state);
+    if (state.phrase) {
+      state.articulation = state.phrase.merge(this.parsed.articulations);
+      state.articulation.mutateState(state);
+
+    }
 
     this.adjustOctaveForPitchTransition(state);
     state.pitch.raw = this.getPitch(state);
@@ -54,7 +57,7 @@ var prototype = {
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
     state.pitch.string = pitchUtils.midiPitchToString(state.pitch.value);
 
-    var onOffset = state.on.offset;
+    var onOffset = state.on.offset || 0;
     //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
 
     if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
@@ -65,14 +68,16 @@ var prototype = {
       onOffset = 0;
     }
 
-    var onTick =  state.time.tick + onOffset;
+    //TODO: noteoff needs a bit of tidying up / refactoring
+    var onTick = state.time.tick + onOffset;
     if (prev.on.tick && !prev.on.duration) {
-      prev.on.duration =  onTick - prev.on.tick + (state.off.offset || 0)
+      prev.on.duration = prev.on.parser.duration = onTick - prev.on.tick + (state.off.offset || 0);
     }
     state.on = {
       tick: onTick,
       offset: onOffset,
-      origin: this.origin
+      origin: this.origin,
+      parser: this
     };
 
   },
@@ -121,7 +126,9 @@ var prototype = {
       annotation: state.phrase.parsed.key,
       articulation: state.articulation.info,
       modifiers: state.modifierInfo.join(', '),
-      origin: this.origin //ref to string position
+      origin: this.origin, //ref to string position
+      duration: this.duration
+
     });
 
     var modifiers = state.modifiers.filter(m => m.appendEvents).sort((a, b) => {

@@ -36,7 +36,9 @@ padding-right: 3px;
 .track.master-track .cm-s-blackboard .cm-tempo { color: #af9e7d; }
 
 .track .cm-s-blackboard .cm-substitutionsetter, 
-.track .cm-s-blackboard .cm-substitution
+.track .cm-s-blackboard .cm-shufflesetter, 
+.track .cm-s-blackboard .cm-substitution,
+.track .cm-s-blackboard .cm-shuffle
  { 
   color: #94b5e0;
   }

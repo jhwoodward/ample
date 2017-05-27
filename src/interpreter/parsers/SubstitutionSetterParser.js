@@ -17,7 +17,7 @@ var prototype = {
     var startTest = /^\w+( ?)=( ?)\(/.exec(s);
     if (!startTest) return false;
 
-    var key = /^\w+( ?)=/.exec(s)[0].replace('=', '');
+    var key = /^\w+( ?)=/.exec(s)[0].replace('=', '').trim();
     var bracketed = parserUtils.getBracketed(s, startTest[0].length);
     var value = bracketed;//.trim();
     this.string = startTest[0] + bracketed + ')';

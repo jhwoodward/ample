@@ -12,6 +12,10 @@ module.exports = function (ngModule) {
 function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService, $mdDialog) {
   var vm = this;
 
+  if (storeService.user.key === 'guest') {
+    showTutorialDialog();
+  }
+
   //if (!song) {
   //  $state.go('root.new');
   //}
@@ -106,15 +110,17 @@ function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdP
 
   vm.goTo = function (marker) {
     vm.sequencer.goToMarker(marker);
-    //  if (!vm.sequencer.playing) {
-    //    vm.sequencer.play();
-    //   }
   }
 
-
-
-
-
+  function showTutorialDialog() {
+    $mdDialog.show({
+      template: require('../tutorial/notation.html'),
+      controller: 'NotationController',
+      controllerAs: 'vm',
+      parent: angular.element(document.body),
+      clickOutsideToClose: false
+    });
+  }
 
   vm.togglePause = function () {
     vm.sequencer.togglePause();

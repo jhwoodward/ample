@@ -22,6 +22,11 @@ function controller($rootScope, userService, $mdDialog) {
     }
 
   }
+  
+  vm.cancel = function () {
+    $mdDialog.cancel();
+  };
+
 
   vm.onChangePassword = function () {
     vm.loginForm.password.$setValidity('incorrect', true);

@@ -14,7 +14,7 @@
 
       </md-tab-body>
     </md-tab>
-    <md-tab id="tab2">
+    <md-tab id="tab2"  ng-if="$root.user.key !== 'tutorial'">
       <md-tab-label>Tutorial</md-tab-label>
       <md-tab-body>
         <song-list 

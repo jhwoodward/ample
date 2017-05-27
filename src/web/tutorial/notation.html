@@ -1,0 +1,45 @@
+<md-dialog aria-label="Tutorial">
+
+  <md-toolbar>
+    <div class="md-toolbar-tools modal-header">
+      <h2>Tutorial 1 - Notation</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" ng-click="vm.cancel()">
+        <md-icon class="ion-close" aria-label="Close dialog"></md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content>
+
+    <md-content class="md-padding" layout="column">
+
+      <p>To create a melody simply enter the letters a-g or A-G. To move up use upper case, to move down use lower case. For
+        example an ascending scale of C would be cDEFGABC^. The ^ at the end indicates the end of the phrase (a rest).
+
+    </md-content>
+
+  </md-dialog-content>
+
+  <md-dialog-actions layout="row">
+
+    <span flex></span>
+
+    <md-button md-primary ng-click="vm.prev()">
+      Previous tutorial
+    </md-button>
+
+    <md-button flex md-primary ng-click="vm.try()">
+      Try it
+    </md-button>
+
+    <md-button md-primary ng-click="vm.next()">
+      Next tutorial
+    </md-button>
+
+    <md-button ng-click="vm.cancel()">
+      Cancel
+    </md-button>
+  </md-dialog-actions>
+  </form>
+</md-dialog>

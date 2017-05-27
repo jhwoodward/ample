@@ -46,12 +46,12 @@
 
   <md-button ng-if="$root.user.key !== 'guest'" 
   class="md-icon-button ion-android-document" 
-  ng-click="vm.new()">
+  ng-click="vm.new($event)">
     <md-tooltip md-direction="top">New</md-tooltip>
     </md-button>
 
      <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" 
-      class="md-icon-button ion-ios-browsers" ng-click="vm.clone()">
+      class="md-icon-button ion-ios-browsers" ng-click="vm.clone($event)">
         <md-tooltip md-direction="top">Clone</md-tooltip>
     </md-button>
 

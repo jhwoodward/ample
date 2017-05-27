@@ -14,7 +14,6 @@ var prototype = {
     var startTest = /^\w+( ?)=( ?)\(/.exec(s);
     if (!startTest) return false;
     var bracketed = parserUtils.getBracketed(s, startTest[0].length);
-    var value = bracketed.trim();
     this.string = startTest[0] + bracketed + ')';
     this.parsed = { type: 'substitution'};
 

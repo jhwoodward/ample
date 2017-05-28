@@ -8,7 +8,8 @@ var trackRegex = parsers.map(p => {
   if (!parser.test) return null;
   return {
     regex: parser.test,
-    token: parser.type.toLowerCase(),
+    token: parser.type.toLowerCase(),// + parser.sub ? ' sub' : '',
+    sub: parser.sub,
     push: 'start'
   };
 }).filter(p => p !== null)

@@ -81,6 +81,12 @@ Interpreter.prototype.parse = function (part, cursor) {
 
 Interpreter.prototype.appendState = function(states) {
   this.states = this.states.concat(states);
+  /*
+  this.next = this.getNextState();
+  var lastParser = states[states.length - 1].parser;
+  if (lastParser.next) {
+    lastParser.next(this.next);
+  }*/
 }
 
 Interpreter.prototype.generateState = function (parsers) {

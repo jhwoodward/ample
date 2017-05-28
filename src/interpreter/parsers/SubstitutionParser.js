@@ -5,6 +5,7 @@ var eventType = require('../constants').eventType;
 
 function SubstitutionParser(macros) {
   this.type = 'Substitution';
+  this.sub = true;
   this.test = /^\w+(?!=)/;
   this.substitutions = {};
   if (macros) {

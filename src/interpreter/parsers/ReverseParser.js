@@ -4,12 +4,12 @@ var macroType = require('../constants').macroType;
 var eventType = require('../constants').eventType;
 var State = require('../State');
 
-function ShuffleParser(macros) {
-  this.type = 'shuffle';
+function ReverseParser(macros) {
+  this.type = 'reverse';
   this.test = /^\w+(?!=)/;
   this.sub = true;//for code highlighting
   this.substitutions = {};
-  this.shuffles = {};
+  this.reverses = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
       if (item.type === macroType.substitution) {
@@ -17,8 +17,8 @@ function ShuffleParser(macros) {
       }
       return acc;
     }, {});
-    this.shuffles = macros.reduce(function (acc, item) {
-      if (item.type === 'shuffle') {
+    this.reverses = macros.reduce(function (acc, item) {
+      if (item.type === 'reverse') {
         acc[item.key] = item;
       }
       return acc;
@@ -29,18 +29,17 @@ function ShuffleParser(macros) {
 var prototype = {
   parse: function (s) {
     var key = /\w+/.exec(s)[0];
-    if (this.shuffles[key]) {
+    if (this.reverses[key]) {
       return key;
     }
   },
   mutateState: function (state, interpreter) {
-    this.startState = _.clone(state);
-    var shuffle = this.shuffles[this.parsed];
+    var reverse = this.reverses[this.parsed];
 
-    var sub = this.substitutions[shuffle.value];
+    var sub = this.substitutions[reverse.value];
 
     var states = [];
-    var next = interpreter.getTopState();// new State();
+    var next = interpreter.next || interpreter.getNextState();// new State();
 
     var fakeInterpreter = {
       getTopState: function () {
@@ -57,11 +56,11 @@ var prototype = {
         parser.next(next);
       }
     }
-    var startTick = states[0].time.tick;
+    this.startTick = states[0].time.tick;
 
     console.log(states);
     states.reverse();
-    states[0].time.tick = startTick;
+    states[0].time.tick = this.startTick;
     states.forEach((s, i) => {
       if (i > 0) {
         var prev = states[i - 1];
@@ -71,8 +70,16 @@ var prototype = {
         }
       }
     });
-    console.log(states);
+    
+   // states = states.filter(s => s.parser.getEvents);
+    
     interpreter.appendState(states);
+
+  var finalState = _.cloneDeep(interpreter.getTopState());
+    if (finalState.parser.next) {
+      finalState.parser.next(finalState);
+    }
+    this.endTick = finalState.time.tick;
 
     //// var states = new Interpreter().interpret(sub.value);
     // Can now potentially act on the array of parsers in sub.
@@ -86,25 +93,22 @@ var prototype = {
 
   },
   getEvents: function () {
-    return [];
-    /*
     return [
       {
-        tick: this.startState.time.tick,
+        tick: this.startTick,
         type: eventType.substitution,
         origin: this.origin //ref to string position
       },
       {
         tick: this.endTick,
         type: eventType.substitutionEnd,
-        origin: this.origin
+        origin: this.origin 
       }
     ];
-    */
-
+    
   },
   continue: true
 }
 
-ShuffleParser.prototype = _.extend({}, parser, prototype);
-module.exports = ShuffleParser;
+ReverseParser.prototype = _.extend({}, parser, prototype);
+module.exports = ReverseParser;

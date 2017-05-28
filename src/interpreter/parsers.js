@@ -14,8 +14,10 @@ var main = [
   require('./parsers/LoopParser'),
   require('./parsers/MarkerParser'),
   require('./parsers/IgnoreShuffleSetterParser'),
+  require('./parsers/IgnoreReverseSetterParser'),
   require('./parsers/IgnoreSubstitutionSetterParser'),
   require('./parsers/SubstitutionParser'),
+  require('./parsers/ReverseParser'),
   require('./parsers/ShuffleParser'),
   require('./parsers/IgnoreAnnotationSetterParser'),
   require('./parsers/AnnotationParser'),
@@ -38,6 +40,7 @@ var main = [
 
 var setter = [
   require('./parsers/ShuffleSetterParser'),
+  require('./parsers/ReverseSetterParser'),
   require('./parsers/SubstitutionSetterParser'),
   require('./parsers/AnnotationSetterParser')
 ];

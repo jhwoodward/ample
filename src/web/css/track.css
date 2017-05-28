@@ -38,7 +38,8 @@ padding-right: 3px;
 .track .cm-s-blackboard .cm-substitutionsetter, 
 .track .cm-s-blackboard .cm-shufflesetter, 
 .track .cm-s-blackboard .cm-substitution,
-.track .cm-s-blackboard .cm-shuffle
+.track .cm-s-blackboard .cm-reverse,
+.track .cm-s-blackboard .cm-reversesetter
  { 
   color: #94b5e0;
   }

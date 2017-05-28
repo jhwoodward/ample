@@ -210,8 +210,8 @@ module.exports = function (ngModule) {
                   track: on.trackIndex + 1,
                   pitch: 127 - on.pitch.value,
                   on: on.tick,
-                  off: off.tick,
-                  duration: off.duration || (off.tick - on.tick),
+                  off: on.tick + on.duration,
+                  duration: on.duration,// off.duration || (off.tick - on.tick),
                   meta: { on, off },
                   ornament: on.ornament
                 });
@@ -282,7 +282,7 @@ module.exports = function (ngModule) {
       $timeout(function () {
         note.active = false;
         vm.sequencer.trigger(note.meta.off);
-      }, note.meta.off.duration * vm.sequencer.interval * 10);
+      }, note.meta.on.duration * vm.sequencer.interval * 10);
     }
   }
 

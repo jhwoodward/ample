@@ -10,6 +10,11 @@ var prototype = {
     return true;
   },
   mutateState: function (state) {
+
+    if (state.on) {
+       state.on.duration += state.time.step;
+    }
+   
   },
   getEvents: function (state, prev, events) {
     var out = [];

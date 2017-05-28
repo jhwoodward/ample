@@ -56,29 +56,26 @@ var prototype = {
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
     state.pitch.string = pitchUtils.midiPitchToString(state.pitch.value);
-
-    var onOffset = state.on.offset || 0;
-    //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
-
-    if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
-      //   onOffset = 0;
-    }
-    var isRepeatedNote = prev.pitch.value === state.pitch.value;
-    if (isRepeatedNote) {
-      onOffset = 0;
-    }
-
-    //TODO: noteoff needs a bit of tidying up / refactoring
-    var onTick = state.time.tick + onOffset;
-    if (prev.on.tick && !prev.on.duration) {
-      prev.on.duration = prev.on.parser.duration = onTick - prev.on.tick + (state.off.offset || 0);
-    }
-    state.on = {
-      tick: onTick,
-      offset: onOffset,
-      origin: this.origin,
-      parser: this
-    };
+    /*
+        var onOffset = state.on.offset || 0;
+        //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
+    
+        if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
+          //   onOffset = 0;
+        }
+        var isRepeatedNote = prev.pitch.value === state.pitch.value;
+        if (isRepeatedNote) {
+          onOffset = 0;
+        }
+    
+        //TODO: noteoff needs a bit of tidying up / refactoring
+        var onTick = state.time.tick + onOffset;
+        // if (prev.on.tick && !prev.on.duration) {
+        //   prev.on.duration = prev.on.parser.duration = onTick - prev.on.tick + (state.off.offset || 0)
+        // }
+        */
+    this.duration = state.time.step;
+    state.on = this;
 
   },
   getEvents: function (state, prev) {
@@ -91,6 +88,7 @@ var prototype = {
     });
 
     //prev note off
+    /*
     if (prev.on.tick) {
       var offOffset = state.off.offset || 0;
       var offAnnotation = state.phrase.parsed.key;
@@ -114,7 +112,20 @@ var prototype = {
         onOrigin: prev.on.origin
       });
     }
+    */
+    var isRepeatedNote = prev.pitch.value === state.pitch.value;
 
+    var offOffset = state.off.offset || 0;
+    //TODO: prevent positive offsets at the end of a phrase
+    if (isRepeatedNote) {
+      offOffset = -5;
+    }
+   // this.duration += offOffset;
+    var offAnnotation = state.phrase.parsed.key;
+
+    if (isRepeatedNote) {
+      offAnnotation += ' (repeat note)';
+    }
 
     //noteon
     out.push({
@@ -127,8 +138,19 @@ var prototype = {
       articulation: state.articulation.info,
       modifiers: state.modifierInfo.join(', '),
       origin: this.origin, //ref to string position
-      duration: this.duration
+      duration: this.duration + offOffset,
+    });
 
+
+    //noteoff
+    out.push({
+      tick: state.time.tick + this.duration,
+      type: eventType.noteoff,
+      pitch: state.pitch,
+      duration: this.duration + offOffset,
+      annotation: offAnnotation,
+      offset: offOffset,
+      onOrigin: this.origin
     });
 
     var modifiers = state.modifiers.filter(m => m.appendEvents).sort((a, b) => {

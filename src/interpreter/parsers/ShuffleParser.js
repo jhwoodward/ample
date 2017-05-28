@@ -35,14 +35,14 @@ var prototype = {
   mutateState: function (state, interpreter) {
     this.startState = _.clone(state);
     var shuffle = this.shuffles[this.parsed];
-    
+
     var sub = this.substitutions[shuffle.value];
 
     var states = [];
-    var next = new State();
+    var next = interpreter.getTopState();// new State();
 
     var fakeInterpreter = {
-      getTopState: function(){
+      getTopState: function () {
         return states[states.length - 1];
       }
     };
@@ -56,9 +56,24 @@ var prototype = {
         parser.next(next);
       }
     }
-    console.log(states);
+    var startTick = states[0].time.tick;
 
-   //// var states = new Interpreter().interpret(sub.value);
+    console.log(states);
+    states.reverse();
+    states[0].time.tick = startTick;
+    states.forEach((s, i) => {
+      if (i > 0) {
+        var prev = states[i - 1];
+        s.time.tick = prev.time.tick;
+        if (prev.parser.duration) {
+          s.time.tick += prev.parser.duration;
+        }
+      }
+    });
+    console.log(states);
+    interpreter.appendState(states);
+
+    //// var states = new Interpreter().interpret(sub.value);
     // Can now potentially act on the array of parsers in sub.
 
     // Would need to generate state from the parsers to get the actual notes

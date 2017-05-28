@@ -11,27 +11,32 @@ var prototype = {
     return true;
   },
   mutateState: function (state, interpreter) {
-    var prev = interpreter.getTopState();
+    //var prev = interpreter.getTopState();
 
-    var offset = state.off.offset;
-    if (offset > 0) offset = 0;
-    var offTick = state.time.tick + offset;
+   // var offset = state.off.offset;
+   // if (offset > 0) offset = 0;
+  //  var offTick = state.time.tick + offset;
 
-    state.off.tick = offTick;
-  
-    state.phrase.mutateState(state);
+    // state.off.tick = offTick;
+
+    this.duration = state.time.step;
+    state.on =  this;
+    
+
+   // state.phrase.mutateState(state);
+    /*
     if (prev.on.tick && !prev.on.duration) {
       prev.on.duration = prev.on.parser.duration =  offTick - prev.on.tick;
-    }
-     
+    }*/
+
   },
   getEvents: function (state, prev, events) {
     var out = [];
 
     out = state.phrase.getEvents(state, prev, events);
-  //  out.forEach(e => {
-  //    e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
-  //  });
+    //  out.forEach(e => {
+    //    e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
+    //  });
 
     if (state.on.tick) {
       var offset = state.off.offset;

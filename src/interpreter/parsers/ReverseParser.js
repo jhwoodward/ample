@@ -2,31 +2,36 @@ var _ = require('lodash');
 var parser = require('./_parser');
 var macroType = require('../constants').macroType;
 var eventType = require('../constants').eventType;
-var State = require('../State');
+var parserUtils = require('../parserUtils');
+var SubInterpreter = require('../SubInterpreter');
 
 function ReverseParser(macros) {
   this.type = 'reverse';
-  this.test = /^\w+(?!=)/;
-  this.sub = true;//for code highlighting
-  this.substitutions = {};
-  this.reversals = {};
-  if (macros) {
-    this.substitutions = macros.reduce(function (acc, item) {
-      if (item.type === macroType.substitution) {
-        acc[item.key] = item;
-      }
-      return acc;
-    }, {});
-    this.reversals = macros.reduce(function (acc, item) {
-      if (item.type === 'reverse') {
-        acc[item.key] = item;
-      }
-      return acc;
-    }, {});
+  this.test = /^reverse/; ///for code highlighting only
+}
+
+
+function generateState(initialState, parsers, interpreter) {
+  var subInterpreter = new SubInterpreter(initialState);
+  subInterpreter.parse = function(part, cursor) {
+    return interpreter.parse(part, cursor);
   }
+  subInterpreter.generateState(parsers);
+  return subInterpreter.states;
 }
 
 var prototype = {
+  match: function match(s) {
+    var startTest = /^reverse\(/.exec(s);
+    if (!startTest) return false;
+    var bracketed = parserUtils.getBracketed(s, startTest[0].length);
+    this.parsed = {
+      part: bracketed,
+      definitionStart: startTest[0].length
+    };
+    this.string = startTest[0] + bracketed + ')';
+    return true;
+  },
   parse: function (s) {
     var key = /\w+/.exec(s)[0];
     if (this.reversals[key]) {
@@ -34,31 +39,11 @@ var prototype = {
     }
   },
   mutateState: function (state, interpreter) {
-    var reverse = this.reversals[this.parsed];
 
-    var sub = this.substitutions[reverse.value];
+    var initialState = interpreter.next || interpreter.getNextState();
+    var states = generateState(initialState, interpreter.parse(this.parsed.part), interpreter);
 
-    var states = [];
-    var next = interpreter.next || interpreter.getNextState();// new State();
-
-    var fakeInterpreter = {
-      getTopState: function () {
-        return states[states.length - 1];
-      }
-    };
-    for (var i = 0; i < sub.parsed.length; i++) {
-      var parser = sub.parsed[i];
-      var state = next;
-      state.mutate(parser, fakeInterpreter);
-      states.push(state);
-      next = states[states.length - 1].clone();
-      if (parser.next) {
-        parser.next(next);
-      }
-    }
     this.startTick = states[0].time.tick;
-
-    console.log(states);
     states.reverse();
     states[0].time.tick = this.startTick;
     states.forEach((s, i) => {
@@ -70,23 +55,16 @@ var prototype = {
         }
       }
     });
-    
-   // states = states.filter(s => s.parser.getEvents);
-    
+
     interpreter.appendState(states);
 
-  var finalState = _.cloneDeep(interpreter.getTopState());
+    var finalState = _.cloneDeep(interpreter.getTopState());
     if (finalState.parser.next) {
       finalState.parser.next(finalState);
     }
     this.endTick = finalState.time.tick;
 
-    //// var states = new Interpreter().interpret(sub.value);
-    // Can now potentially act on the array of parsers in sub.
-
-    // Would need to generate state from the parsers to get the actual notes
-    // Maybe new Interpreter().generateState() ?
-    // Then we could transpose, reorder, set to another rhythm etc
+    //  transpose, reorder, set to another rhythm etc
 
 
 
@@ -102,10 +80,10 @@ var prototype = {
       {
         tick: this.endTick,
         type: eventType.substitutionEnd,
-        origin: this.origin 
+        origin: this.origin
       }
     ];
-    
+
   },
   continue: true
 }

@@ -13,8 +13,8 @@ var main = [
   require('./parsers/NthTimeParser'),
   require('./parsers/LoopParser'),
   require('./parsers/MarkerParser'),
-  require('./parsers/IgnoreShuffleSetterParser'),
-  require('./parsers/IgnoreReverseSetterParser'),
+  //require('./parsers/IgnoreShuffleSetterParser'),
+  //require('./parsers/IgnoreReverseSetterParser'),
   require('./parsers/IgnoreSubstitutionSetterParser'),
   require('./parsers/SubstitutionParser'),
   require('./parsers/ReverseParser'),
@@ -39,8 +39,8 @@ var main = [
 ];
 
 var setter = [
-  require('./parsers/ShuffleSetterParser'),
-  require('./parsers/ReverseSetterParser'),
+  //require('./parsers/ShuffleSetterParser'),
+  //require('./parsers/ReverseSetterParser'),
   require('./parsers/SubstitutionSetterParser'),
   require('./parsers/AnnotationSetterParser')
 ];

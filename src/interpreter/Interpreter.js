@@ -293,8 +293,7 @@ Interpreter.prototype.parseMacros = function (part, macroParsers) {
   this.macros.filter(macro => {
     return macro.type === macroType.annotation ||
       macro.type === macroType.substitution ||
-      macro.type === macroType.articulation ||
-      macro.type === 'shuffle';
+      macro.type === macroType.articulation
   }).forEach(macro => {
     macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart);
   });

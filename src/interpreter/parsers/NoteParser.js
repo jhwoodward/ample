@@ -54,6 +54,9 @@ var prototype = {
 
     //parsed pitch values are required to correctly calculate pitch based on previous character
     state.pitch = _.merge(state.pitch, this.parsed.pitch);
+    // merge is not correctly passing on up / down due to undefined
+    state.pitch.down = this.parsed.pitch.down;
+    state.pitch.up = this.parsed.pitch.up;
     state.pitch.string = pitchUtils.midiPitchToString(state.pitch.value);
     /*
         var onOffset = state.on.offset || 0;

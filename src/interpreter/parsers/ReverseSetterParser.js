@@ -17,7 +17,7 @@ var prototype = {
     var startTest = /^\w+( ?)=( ?)/.exec(s);
 
     var key = /^\w+( ?)=/.exec(s)[0].replace('=', '').trim();
-    var value = /reverse( ?)\w+/.exec(s)[0].replace('reverse', '').trim();
+    var value = /=( ?)reverse( ?)\w+/.exec(s)[0].replace('reverse', '').replace('=', '').trim();
 
     return {
       type: 'reverse',

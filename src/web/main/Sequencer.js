@@ -23,6 +23,14 @@ function Sequencer(output) {
 Sequencer.prototype = {
   unsubscribeAll: function () {
     this.listeners = [];
+    if (this.context) {
+      this.context.close();
+      this.context = undefined;
+    }
+    if (this.clock) {
+      this.clock.stop();
+      this.clock = undefined;
+    }
   },
   subscribe: function (listener) {
     this.listeners.push(listener);

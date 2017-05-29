@@ -31,8 +31,7 @@ var prototype = {
 
     return out;
   },
-  mutateState: function (state, interpreter) {
-    var prev = interpreter.getTopState();// _.cloneDeep(state);
+  mutateState: function (state) {
 
     if (state.phrase) {
       state.articulation = state.phrase.merge(this.parsed.articulations);

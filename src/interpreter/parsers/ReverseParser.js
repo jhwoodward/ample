@@ -9,7 +9,7 @@ function ReverseParser(macros) {
   this.test = /^\w+(?!=)/;
   this.sub = true;//for code highlighting
   this.substitutions = {};
-  this.reverses = {};
+  this.reversals = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
       if (item.type === macroType.substitution) {
@@ -17,7 +17,7 @@ function ReverseParser(macros) {
       }
       return acc;
     }, {});
-    this.reverses = macros.reduce(function (acc, item) {
+    this.reversals = macros.reduce(function (acc, item) {
       if (item.type === 'reverse') {
         acc[item.key] = item;
       }
@@ -29,12 +29,12 @@ function ReverseParser(macros) {
 var prototype = {
   parse: function (s) {
     var key = /\w+/.exec(s)[0];
-    if (this.reverses[key]) {
+    if (this.reversals[key]) {
       return key;
     }
   },
   mutateState: function (state, interpreter) {
-    var reverse = this.reverses[this.parsed];
+    var reverse = this.reversals[this.parsed];
 
     var sub = this.substitutions[reverse.value];
 

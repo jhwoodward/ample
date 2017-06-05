@@ -81,10 +81,12 @@ var prototype = {
 
   },
   getEvents: function (state, prev) {
-    var out;
+    var out = [];
 
-    out = state.articulation.getEvents(state, prev);
-
+    if (state.articulation) {
+       out = state.articulation.getEvents(state, prev);
+    }
+   
     out.forEach(e => {
       e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
     });
@@ -123,7 +125,7 @@ var prototype = {
       offOffset = -5;
     }
    // this.duration += offOffset;
-    var offAnnotation = state.phrase.parsed.key;
+    var offAnnotation = state.phrase ? state.phrase.parsed.key: '';
 
     if (isRepeatedNote) {
       offAnnotation += ' (repeat note)';
@@ -136,7 +138,7 @@ var prototype = {
       type: eventType.noteon,
       pitch: state.pitch,
       velocity: state.velocity,
-      annotation: state.phrase.parsed.key,
+      annotation: offAnnotation,
       articulation: state.articulation.info,
       modifiers: state.modifierInfo.join(', '),
       origin: this.origin, //ref to string position
@@ -146,7 +148,7 @@ var prototype = {
 
     //noteoff
     out.push({
-      tick: state.time.tick + this.duration,
+      tick: state.time.tick + this.duration + offOffset,
       type: eventType.noteoff,
       pitch: state.pitch,
       duration: this.duration + offOffset,
@@ -158,11 +160,14 @@ var prototype = {
     var modifiers = state.modifiers.filter(m => m.appendEvents).sort((a, b) => {
       return a.order > b.order ? 1 : -1;
     });
+
+    var appended = [];
     modifiers.forEach(m => {
-      out = out.concat(m.appendEvents(state, out));
+      //NB if out is mutated by modifier (eg remove note off)...
+      appended = appended.concat(m.appendEvents(state, out));
     });
 
-    return out;
+    return out.concat(appended);
   },
   next: function (next) {
     next.time.tick += next.time.step;

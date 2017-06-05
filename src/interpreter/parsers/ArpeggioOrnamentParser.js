@@ -12,14 +12,11 @@ function appendEvents(state, events, config, interpreter) {
 
   var initialNoteOnTick = state.time.tick + (state.on.offset || 0);
   var noteon = events.filter(e => e.type === eventType.noteon)[0];
-
-  var noteoff = {
-    tick: state.time.tick + config.duration,// (state.on.duration || config.duration),
-    offset: state.on.offset,
-    type: eventType.noteoff,
-    pitch: noteon.pitch,
-    onOrigin: state.on.origin
-  }
+  noteon.duration = config.duration;
+  //reset note off
+  var noteoff = events.filter(e => e.type === eventType.noteoff)[0];
+  noteoff.tick = state.time.tick + config.duration;
+  noteoff.duration = config.duration;
 
   function getModifiers(state) {
     return state.modifiers.filter(m => m.type === modifierType.pitch).sort((a, b) => {
@@ -27,9 +24,9 @@ function appendEvents(state, events, config, interpreter) {
     });
   }
 
-  delete state.on.tick; //prevents further noteoffs
+ // delete state.on; //prevents further noteoffs
 
-  var out = [noteoff];
+  var out = [];
   var ornaments = {
     up: [4, 7, 4, 0],
     down: [-5, -8, -5, 0]
@@ -41,7 +38,7 @@ function appendEvents(state, events, config, interpreter) {
     return pitch;
   });
 
-  var noteCount = Math.floor(state.on.duration / config.duration);
+  var noteCount = Math.floor(state.parser.duration / config.duration);
   var onTick;
   var pitchIndex = 0;
   var count;
@@ -60,6 +57,7 @@ function appendEvents(state, events, config, interpreter) {
       type: eventType.noteon,
       pitch: dummyState.pitch,
       velocity: state.velocity - (count * 20),
+      duration: config.duration,
       ornament: true
     });
     out.push({
@@ -94,7 +92,7 @@ var prototype = {
       direction = directionTest[0];
     }
     return {
-      duration: parserUtils.parseValue(s).value,
+      duration: parserUtils.parseValue(s).value || 24,
       direction
     };
   },

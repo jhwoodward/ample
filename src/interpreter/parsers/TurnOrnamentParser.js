@@ -12,14 +12,11 @@ function appendEvents(state, events, config, interpreter) {
 
   var initialNoteOnTick = state.time.tick + (state.on.offset || 0);
   var noteon = events.filter(e => e.type === eventType.noteon)[0];
-
-  var noteoff = {
-    tick: state.time.tick + config.duration,// (state.on.duration || config.duration),
-    offset: state.on.offset,
-    type: eventType.noteoff,
-    pitch: noteon.pitch,
-    onOrigin: state.on.origin
-  }
+  noteon.duration = config.duration;
+  //reset note off
+  var noteoff = events.filter(e => e.type === eventType.noteoff)[0];
+  noteoff.tick = state.time.tick + config.duration;
+  noteoff.duration = config.duration;
 
   function getModifiers(state) {
     return state.modifiers.filter(m => m.type === modifierType.pitch).sort((a, b) => {
@@ -29,7 +26,7 @@ function appendEvents(state, events, config, interpreter) {
 
   delete state.on.tick; //prevents further noteoffs
 
-  var out = [noteoff];
+  var out = [];
   var ornaments = {
     up: [2, 0, -2, 0],
     down: [-2, 0, 2, 0]
@@ -62,6 +59,7 @@ function appendEvents(state, events, config, interpreter) {
       type: eventType.noteon,
       pitch: dummyState.pitch,
       velocity: state.velocity - (count * 5),
+      duration: config.duration,
       ornament: true
     });
     out.push({

@@ -1,0 +1,96 @@
+.cm-marker, 
+.cm-mastermarker {
+    color: #94b5e0;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.cm-masterscale {
+    color: #f7e976;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.cm-tempo {
+    color: #af9e7d;
+}
+
+.cm-substitutionsetter,
+.cm-substitutionsetsetter,
+.cm-substitution,
+.cm-substitutionset,
+.cm-reverse,
+.cm-shuffle,
+.cm-invert,
+.cm-pingpong {
+    color: #94b5e0;
+      padding-left: 1px;
+    padding-right: 1px;
+}
+
+
+
+
+.cm-annotationsetter,
+.cm-annotation {
+    color: #de68d3;
+}
+
+.cm-brace {
+    color: #de68d3;
+}
+
+.cm-note, 
+.cm-rest {
+    color: #f7e976;
+}
+
+.cm-sustain {
+    color: #f7e976;
+}
+
+.cm-duration {
+    color: #ff8749;
+}
+
+.cm-transpose, .cm-octave {
+    color: #61CE3C;
+}
+
+.cm-chordconstraint,
+.cm-bassconstraint,
+.cm-scaleconstraint,
+.cm-arpeggioornament,
+.cm-trillornament,
+.cm-turnornament,
+.cm-on,
+.cm-off {
+    color: #af9e7d;
+}
+
+.cm-bracket, 
+.cm-loop {
+    color: #6aa0e8;
+}
+
+.cm-bracket.CodeMirror-matchingbracket {
+    outline: 1px solid #1459b5;
+    color: #b8d2f5  !important;
+}
+
+.cm-brace.CodeMirror-matchingbracket {
+    outline: 1px solid #a02fa0;
+    color: #ffb8f8 !important;
+}
+
+.cm-annotation.CodeMirror-matchingbracket, 
+.cm-annotationsetter.CodeMirror-matchingbracket {
+    outline: none;
+    color: #de68d3 !important;
+}
+
+.cm-substitution.CodeMirror-matchingbracket, 
+.cm-substitutionsetter.CodeMirror-matchingbracket {
+    color: #6aa0e8 !important;
+    outline: none;
+}

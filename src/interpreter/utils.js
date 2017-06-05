@@ -8,24 +8,24 @@ var api = {
     player.annotations = _.extend({
       accent: '120=V'
     },
-    player.annotations);
+      player.annotations);
     player.substitutions = player.sub || player.substitutions;
 
     return api.buildMacros(
-      player.substitutions, 
-      player.annotations, 
-      player.articulations, 
-      player.animations, 
+      player.substitutions,
+      player.annotations,
+      player.articulations,
+      player.animations,
       player.constraints
     );
   },
   buildMacros: function (
-    substitutions, 
-    annotations, 
-    articulations, 
-    animations, 
+    substitutions,
+    annotations,
+    articulations,
+    animations,
     constraints
-    ) {
+  ) {
     var macros = [];
 
     var articulations = articulations || {
@@ -72,17 +72,28 @@ var api = {
     }
 
     if (constraints) {
-       macros = macros.concat(constraints);
+      macros = macros.concat(constraints);
     }
-  
+
     return macros;
 
   },
-  mergeMacros: function(existing, add) {
+  mergeMacros: function (existing, add) {
     add.forEach(a => {
-      var replaced = false;
+      var updated = false;
       existing.filter(x => x.type === a.type).forEach(x => {
         if (x.key === a.key) {
+
+          if (x.type === 'substitutionset') {
+            x.values[a.index] = {
+              part: a.value,
+              definitionStart: a.definitionStart,
+              origin: a.origin
+            };
+            updated = true;
+            return;
+          }
+
           if (x.value) {
             x.value = a.value;
           }
@@ -93,10 +104,18 @@ var api = {
             x.parsed = a.parsed;
           }
           x.definitionStart = a.definitionStart;
-          replaced = true;
+          updated = true;
         }
       });
-      if (!replaced) {
+      if (!updated) {
+        if (a.type === 'substitutionset') {
+          a.values = [];
+          a.values[a.index] = {
+            part: a.value,
+            definitionStart: a.definitionStart,
+            origin: a.origin
+          };
+        }
         existing.push(a);
       }
     });

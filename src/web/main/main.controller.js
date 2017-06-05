@@ -1,13 +1,11 @@
 var eventType = require('../../interpreter/constants').eventType;
 var utils = require('../../interpreter/utils');
 var Interpreter = require('../../interpreter/Interpreter');
-var Sequencer = require('./Sequencer.js');
-var beautify_js = require('js-beautify').js_beautify
+var Sequencer = require('../seq/Sequencer.js');
 
 module.exports = function (ngModule) {
   ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', '$mdDialog', controller]);
 }
-
 
 function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService, $mdDialog) {
   var vm = this;

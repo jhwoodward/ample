@@ -24,7 +24,7 @@ function Interpreter(macros, master) {
 
 Interpreter.prototype.interpretMaster = function (part) {
 
-  this.parseMacros(part, parsers.master);
+  this.parseMacros(part, parsers.master, true);
 
   var state = new State();
   this.states = [state];
@@ -72,21 +72,28 @@ Interpreter.prototype.interpretMaster = function (part) {
     return a.tick > b.tick ? 1 : -1;
   });
 
-  return { states, events, markers, markerArray };
+  return { states, events, markers, markerArray, macros: this.macros };
 }
 
 Interpreter.prototype.parse = function (part, cursor) {
   return parse(parsers.main, part, this.macros, cursor);
 }
 
-Interpreter.prototype.appendState = function(states) {
+Interpreter.prototype.appendState = function (states) {
   this.states = this.states.concat(states);
-  /*
+
   this.next = this.getNextState();
-  var lastParser = states[states.length - 1].parser;
-  if (lastParser.next) {
-    lastParser.next(this.next);
-  }*/
+
+  //needs to be a parser with duration 
+
+  var statesWithDuration = states.filter(s => s.parser.duration);
+  if (statesWithDuration.length) {
+    var lastParser = statesWithDuration[statesWithDuration.length - 1].parser;
+    this.next.time.tick += lastParser.duration;
+  }
+
+
+
 }
 
 Interpreter.prototype.generateState = function (parsers) {
@@ -280,7 +287,7 @@ Interpreter.prototype.setMacro = function (macro) {
   utils.mergeMacros(this.macros, [macro]);
 }
 
-Interpreter.prototype.parseMacros = function (part, macroParsers) {
+Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
 
   //macros can be either passed into the ctor or inline following the setter syntax
 
@@ -295,7 +302,7 @@ Interpreter.prototype.parseMacros = function (part, macroParsers) {
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation
   }).forEach(macro => {
-    macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart);
+    macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart, isMaster);
   });
 
   this.animations = {};
@@ -319,6 +326,10 @@ Interpreter.prototype.parseMacros = function (part, macroParsers) {
 Interpreter.prototype.interpret = function (part) {
 
   this.parseMacros(part, parsers.main);
+
+  if (this.master) {
+    _.extend(this.macros, this.master.macros);
+  }
 
   this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);
 

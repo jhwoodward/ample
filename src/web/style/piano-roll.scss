@@ -1,0 +1,86 @@
+.piano-roll {
+    height: 100%;
+    cursor: pointer;
+    transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    transition: transform 0.2s;
+
+    .beat {
+        position: absolute;
+        color: #423d35;
+
+        &.marker {
+            border-color: #423d35;
+            bottom: 5px;
+        }
+
+        &.active {
+            color: #a2b9ce;
+        }
+    }
+
+    .beat-marker {
+        position: absolute;
+        width: 40px;
+        cursor: ew-resize;
+        height: 100%;
+
+        .needle {
+            border-left: 1px solid #423d35;
+            margin-left: 20px;
+            margin-right: 19px;
+            height: 100%;
+        }
+
+        &[dragging=true] .needle {
+            border-color: white;
+            cursor: ew-resize;
+        }
+    }
+
+    .note {
+        border-radius: 10px;
+        position: absolute;
+
+        &.ornament {
+            opacity: 0.5;
+        }
+
+        &.active {
+            background-color: white !important;
+
+            &.track1 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #d83e00, 0 0 35px #d83e00;
+            }
+
+            &.track2 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #8e8b00, 0 0 35px #8e8b00;
+            }
+
+            &.track3 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0079b5, 0 0 35px #0079b5;
+            }
+
+            &.track4 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73;
+            }
+
+            &.track5 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239);
+            }
+
+            &.track6 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(255, 64, 129), 0 0 35px rgb(255, 64, 129);
+            }
+
+            &.track7 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255);
+            }
+
+            &.track8 {
+                box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2);
+            }
+        }
+    }
+}

@@ -13,6 +13,7 @@ var prototype = {
     if (s[0] !== '(') return false;
 
     var bracketed = utils.getBracketed(s, 1);
+    if (!bracketed) return false;
     var remainder = s.substring(bracketed.length + 2, s.length);
     if (!remainder.length) return false;
     var count = /^( ?)\*( ?)[\d]+/.exec(remainder);

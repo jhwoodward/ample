@@ -43,6 +43,11 @@ var config = {
              {
                 test: /\.css$/,
                 loader:'style!css-loader'
+            },
+            ,
+            {
+                test: /\.scss$/,
+                loaders: [ 'style', 'css', 'sass' ]
             }
             ,
             { test: /\.(png|jpg|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader' }

@@ -1,0 +1,60 @@
+.side-menu {
+    background: #d8d8d8 !important;
+
+    md-tabs,
+    md-content {
+        background: #d8d8d8 !important;
+    }
+
+    md-content {
+        border-right: 1px solid #c5c5c5;
+    }
+
+    .md-tab {
+        padding: 20px 24px;
+    }
+
+    .close-left {
+        position: absolute;
+        right: 0;
+        z-index: 99;
+
+        /* color: white;*/
+        margin: 10px;
+    }
+
+    md-pagination-wrapper,
+    md-tabs-canvas {
+        height: 62px !important;
+    }
+
+    &.store {
+        md-list-item {
+            border-bottom: 1px solid #c5c5c5;
+        }
+
+        md-list {
+            padding: 0 !important;
+        }
+
+        md-list-item.md-2-line::before,
+        md-list-item.md-2-line > .md-no-style::before,
+        md-list-item,
+        md-list-item .md-list-item-inner,
+        md-list-item.md-2-line > .md-no-style {
+            min-height: 30px !important;
+        }
+
+        md-list-item.md-2-line .md-list-item-text p,
+        md-list-item.md-2-line > .md-no-style .md-list-item-text p,
+        md-list-item.md-3-line .md-list-item-text p,
+        md-list-item.md-3-line > .md-no-style .md-list-item-text p {
+            font-weight: normal;
+            margin-top: 4px;
+        }
+
+        md-list-item .md-button {
+            padding: 10px 5px 5px 15px !important;
+        }
+    }
+}

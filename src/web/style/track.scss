@@ -1,0 +1,95 @@
+.track {
+
+  transition: all 0.7s ease-in-out;
+
+    &:not(.collapsed) {
+      min-width: 300px !important;
+    }
+    &.collapsed {
+      min-width: 200px !important;
+    }
+    border-right: 1px solid #423d35;
+
+    .track-content .highlight {
+      border-bottom: 3px solid white;
+    }
+
+    &.master-track .track-content,
+    &.master-track .track-content .CodeMirror {
+        background: #000;
+    }
+
+    &.master-track .track-content .CodeMirror {
+        box-shadow: inset 1px 2px 40px -5px rgba(0, 0, 0, 0.3);
+        height: 100%;
+        font-size: 1.4em;
+    }
+
+    .md-toolbar-tools {
+        background: #4e4e4e;
+    }
+
+    &.solo {
+      flex:2;
+      flex-grow: 2;
+      min-width:400px;
+      max-width:600px;
+    }
+
+    &.mute {
+      flex-grow: 0.1 !important;
+    }
+
+    &.collapsed {
+        flex-grow: 0.5;
+        -webkit-box-flex: 0.5;
+        -webkit-flex: 0.5;
+        flex: 0.5;
+
+        .track-content, .CodeMirror {
+            opacity: 0.7;
+        }
+
+        .track-key {
+            background: #353535 !important;
+        }
+
+        .md-button {
+            margin: 0 !important;
+        }
+    }
+
+    .CodeMirror {
+        height: auto;
+        font-size: 1.3em;
+    }
+
+    .track-toolbar {
+        height: 40px;
+        min-height: 40px;
+        background-color: transparent !important;
+        color: white;
+
+        .md-button.md-fab.md-micro {
+            background-color: transparent;
+        }
+
+        .md-button.md-fab.mute.md-micro.active {
+            box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+        }
+
+        .md-button.md-fab.mute.md-micro.active:hover {
+            color: white;
+        }
+
+        .md-button.md-fab.solo.md-micro:hover,
+        .md-button.md-fab.mute.md-micro:hover {
+            color: black;
+            background-color: transparent;
+        }
+
+        .md-button.md-fab.solo.md-micro.active:hover {
+            color: white;
+        }
+    }
+}

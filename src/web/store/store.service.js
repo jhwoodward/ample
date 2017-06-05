@@ -33,9 +33,20 @@ module.exports = function (ngModule) {
           payload[key] = song[key];
         }
       }
+      payload.tracks = song.tracks.map(t => { 
+        return { 
+          key: t.key,
+          channel: t.channel,
+          part: t.part 
+      }; });
+      /*
       var tracks = _.cloneDeep(song.tracks);
       tracks.forEach(track => {
         delete track.$$hashKey;
+        delete track.annotations;
+        delete track.substitutions;
+        delete track.macros;
+        delete track.originalIndex;
         var t = {};
         for (var key in track) {
           if (track.hasOwnProperty(key)) {
@@ -44,11 +55,12 @@ module.exports = function (ngModule) {
         }
         payload.tracks.push(t);
       });
+      */
       return payload;
     }
 
     Store.prototype = {
-      clearUser: function() {
+      clearUser: function () {
         this.user = guest;
         delete this.token;
       },
@@ -169,6 +181,10 @@ module.exports = function (ngModule) {
           url: root + '/one/' + this.type + '/' + owner + '/' + key
         }).then(onSuccess, onFail);
         function onSuccess(response) {
+
+          var lastLoad = JSON.stringify({ key: key, owner: owner });
+          localStorage.setItem('lastLoad', lastLoad);
+
           var item = response.data;
           item.tags = item.tags || [];
           return item;
@@ -183,7 +199,7 @@ module.exports = function (ngModule) {
     };
     //    return new Store('midiscript');
     return new Store('scriptophonics');
-  
+
   }]);
 
 };

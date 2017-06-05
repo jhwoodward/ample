@@ -6,7 +6,7 @@ var eventType = require('../constants').eventType;
 function SubstitutionParser(macros) {
   this.type = 'Substitution';
   this.sub = true;
-  this.test = /^\w+(?!=)/;
+  this.test = /^\w+(?!( ?)=)/;
   this.substitutions = {};
   if (macros) {
     this.substitutions = macros.reduce(function (acc, item) {
@@ -26,9 +26,18 @@ var prototype = {
     }
   },
   mutateState: function (state, interpreter) {
-    this.startState = _.clone(state);
+    this.startTick = state.time.tick;
+
+    //make transpose local to the sub
+   // var origTranspose = state.pitch.transpose;
+
     var sub = this.substitutions[this.parsed];
-    interpreter.generateState(sub.parsed);
+    interpreter.generateState(_.cloneDeep(sub.parsed));
+
+    //interpreter.next = interpreter.getNextState();
+    //interpreter.next.pitch.transpose = origTranspose;
+
+
     var finalState = _.cloneDeep(interpreter.getTopState());
     if (finalState.parser.next) {
       finalState.parser.next(finalState);
@@ -38,7 +47,7 @@ var prototype = {
   getEvents: function () {
     return [
       {
-        tick: this.startState.time.tick,
+        tick: this.startTick,
         type: eventType.substitution,
         origin: this.origin //ref to string position
       },
@@ -48,7 +57,6 @@ var prototype = {
         origin: this.origin 
       }
     ];
-    
   },
   continue: true
 }

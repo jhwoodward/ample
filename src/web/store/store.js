@@ -33,14 +33,9 @@ module.exports = function (ngModule) {
         storeService.getAll(storeService.user.key).then(function (songs) {
           vm.songs = songs;
         });
-      } else {
-       
-      }
-
+      } 
     }
-
-   
-
+    
     vm.load = function (song) {
       $state.go('root.main', { key: song.key, owner: song.owner || 'tutorial' });
     }

@@ -1,11 +1,20 @@
-function SubInterpreter(initialState) {
+function SubInterpreter(initialState, interpreter) {
   this.states = [];
-  this.statelessEvents = [];
+ // this.statelessEvents = [];
   this.next = initialState;
+  this.parse = function(part, cursor) {
+    return interpreter.parse(part, cursor);
+  }
+  this.getStateAt = function(onTick) {
+    return interpreter.getStateAt(onTick);
+  }
+ // this.master = interpreter.master;
 }
+
 SubInterpreter.prototype.getTopState = function () {
   return this.states[this.states.length - 1];
 }
+
 SubInterpreter.prototype.getNextState = function () {
   return this.getTopState().clone();
 }
@@ -19,9 +28,9 @@ SubInterpreter.prototype.generateState = function (parsers) {
     state.mutate(parser, this);
 
     if (parser.continue) {
-      if (parser.getEvents) {
-        this.statelessEvents = this.statelessEvents.concat(parser.getEvents());
-      }
+    //  if (parser.getEvents) {
+    //    this.statelessEvents = this.statelessEvents.concat(parser.getEvents());
+    //  }
       continue;
     }
     this.states.push(state);
@@ -30,5 +39,6 @@ SubInterpreter.prototype.generateState = function (parsers) {
       parser.next(this.next);
     }
   }
+  return this.states;
 }
 module.exports = SubInterpreter;

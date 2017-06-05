@@ -1,3 +1,4 @@
+var CodeMirror = require('./lib/codemirror');
 require('./simple.js');
 var parsers = require('../../interpreter/parsers');
 

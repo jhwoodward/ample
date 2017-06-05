@@ -2,7 +2,7 @@
 
 module.exports = function (ngModule) {
 
-  ngModule.service("webMidiService", ['$q', function ($q) {
+  ngModule.service('webMidiService', ['$q',  function ($q) {
 
     function WebMidiService() {
 
@@ -20,8 +20,19 @@ module.exports = function (ngModule) {
         return deferred.promise;
       }
     };
+/*
+    if (easymidi) {
+      
+       return { 
+         selectedOutput: new easymidi.Output('IAC Driver Bus 1') 
+        };
+    } else {
+      */
+      return new WebMidiService();
+   // }
+ 
 
-    return new WebMidiService();
+   
 
   }]);
 

@@ -5,14 +5,19 @@ require('angular-sanitize');
 require('@uirouter/angularjs');
 require('angular-aria');
 require('angular-material');
+require('angular-electron');
 require('angular-drag-and-drop-lists');
-require('angular-ui-codemirror');
+window.CodeMirror = require('./codemirror/lib/codemirror');
+require('./codemirror/addon/edit/matchbrackets');
+require('./codemirror/addon/edit/closebrackets');
+require('./codemirror/addon/fold/brace-fold');
 require('./codemirror/track-script');
 require('./codemirror/master-track-script');
-//require('pixi');
-
+require('angular-ui-codemirror');
 require('angular-material/angular-material.css');
 require('./style/all.scss');
+
+
 
 let main = angular.module('mainModule', []);
 require('./main/main.controller')(main);
@@ -29,7 +34,8 @@ require('./track/track')(track);
 require('./track/master-track')(track);
 
 let seq = angular.module('seqModule', []);
-require('./seq/webmidi.service')(seq);
+require('./seq/webMidi.service')(seq);
+require('./seq/midi.service')(seq);
 
 let user = angular.module('userModule', []);
 require('./user/user.service')(user);
@@ -49,10 +55,16 @@ require('./shared/padZeros.filter')(shared);
 require('./shared/unload')(shared);
 require('./shared/draggable')(shared);
 
-let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'dndLists', 'ui.router', 'ui.codemirror','vizModule', 'trackModule', 'seqModule', 'sharedModule', 'storeModule', 'tutorialModule', 'userModule', 'mainModule']);
+let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'dndLists', 'ui.router', 'ui.codemirror', 'angular-electron', 'vizModule', 'trackModule', 'seqModule', 'sharedModule', 'storeModule', 'tutorialModule', 'userModule', 'mainModule']);
 
-app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThemingProvider', '$mdInkRippleProvider',
-  function ($stateProvider, $urlRouterProvider, $locationProvider, $mdThemingProvider, $mdInkRippleProvider) {
+app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThemingProvider', '$mdInkRippleProvider', 'remoteProvider',
+  function ($stateProvider, $urlRouterProvider, $locationProvider, $mdThemingProvider, $mdInkRippleProvider, remoteProvider) {
+
+
+    remoteProvider.register('NanoTimer');
+  //  remoteProvider.register('midi');
+  //  remoteProvider.register('EventEmitter');
+    //remoteProvider.register('easymidi');
 
     $mdInkRippleProvider.disableInkRipple();
 
@@ -118,7 +130,7 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThe
         url: '',
         abstract: true,
         resolve: {
-          webmidi: function (webMidiService) {
+          midi: function (webMidiService) {
             return webMidiService.enable();
           }
         }

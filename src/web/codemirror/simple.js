@@ -1,4 +1,4 @@
-
+var CodeMirror = require('./lib/codemirror');
 
 CodeMirror.defineSimpleMode = function (name, states) {
   CodeMirror.defineMode(name, function (config) {

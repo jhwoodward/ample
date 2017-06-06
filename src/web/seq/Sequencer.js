@@ -36,9 +36,11 @@ Sequencer.prototype = {
     this.listeners.push(listener);
   },
   raiseEvent: function (e) {
+    
     this.listeners.forEach(function (listener) {
       listener(e);
     });
+    
   },
   preptrack: function (track) {
     if (track.annotations && track.annotations.name) {
@@ -104,7 +106,9 @@ Sequencer.prototype = {
         this.tracks[i] = updatedTrack;
         this.interpreted[i] = this.interpret(updatedTrack);
       }
-      events = events.concat(this.interpreted[i].events);
+      if (this.interpreted[i] && this.interpreted[i].events) {
+        events = events.concat(this.interpreted[i].events);
+      }
     });
 
     this.validate(events);

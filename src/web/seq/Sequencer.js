@@ -23,6 +23,7 @@ function Sequencer(output, timer) {
 Sequencer.prototype = {
   unsubscribeAll: function () {
     this.listeners = [];
+    this.timer.stop();
     /*
     if (this.context) {
       this.context.close();
@@ -223,17 +224,9 @@ Sequencer.prototype = {
   },
   play: function () {
     this.stop();
-    /*
-    if (this.context) {
-      this.context.close();
-    }
-*/
-    //   this.context = new AudioContext();
     this.playing = true;
     this.stopped = false;
-
-    this.timer.setInterval(this.onTick, '', this.interval + 'u');
-
+    this.timer.start(this.onTick, this.interval);
   },
   reverse: function () {
     this.increment = -1;
@@ -271,18 +264,6 @@ Sequencer.prototype = {
       beat: this.beat
     });
   },
-  fastForward: function () {
-    this.ffendTick = this.endTick;
-    this.endTick = this.startTick - 1;
-    this.fastForwarding = true;
-    this.timer = window.setInterval(this.onTick, 1);
-  },
-  onFastForwardCompleted: function () {
-    //window.clearInterval(this.timer);
-    this.endTick = this.ffendTick;
-    this.fastForwarding = false;
-    this.play();
-  },
   allNotesOff: function () {
     for (var i = 0; i < 3; i++) {
       for (var c = 0; c < 16; c++) {
@@ -300,12 +281,8 @@ Sequencer.prototype = {
     this.raiseEvent({ type: 'stop' });
     this.playing = false;
     this.paused = false;
-    this.timer.clearInterval();
-    /*
-    if (this.clock) {
-      this.clock.stop();
-    }
-    */
+    this.timer.stop();
+   
     this.markers.forEach(m => {
       m.active = false;
     });
@@ -340,8 +317,7 @@ Sequencer.prototype = {
     this.paused = !this.paused;
     this.playing = !this.paused;
     if (this.paused) {
-      this.timer.clearInterval();
-      //  this.clock.stop();
+      this.timer.stop();
       this.allNotesOff();
       this.raiseEvent({ type: 'pause' });
     } else {

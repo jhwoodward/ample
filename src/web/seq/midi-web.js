@@ -2,7 +2,7 @@
 
 module.exports = function (ngModule) {
 
-  ngModule.service('webMidiService', ['$q',  function ($q) {
+  ngModule.service('midiService', ['$q',  function ($q) {
 
     function WebMidiService() {
 

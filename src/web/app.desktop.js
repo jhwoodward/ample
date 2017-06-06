@@ -34,8 +34,9 @@ require('./track/track')(track);
 require('./track/master-track')(track);
 
 let seq = angular.module('seqModule', []);
-require('./seq/webMidi.service')(seq);
-require('./seq/midi.service')(seq);
+require('./seq/midi-web')(seq);
+require('./seq/timer-desktop')(seq);
+
 
 let user = angular.module('userModule', []);
 require('./user/user.service')(user);
@@ -130,8 +131,8 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThe
         url: '',
         abstract: true,
         resolve: {
-          midi: function (webMidiService) {
-            return webMidiService.enable();
+          midi: function (midiService) {
+            return midiService.enable();
           }
         }
       })

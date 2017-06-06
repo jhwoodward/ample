@@ -4,10 +4,10 @@ var Interpreter = require('../../interpreter/Interpreter');
 var Sequencer = require('../seq/Sequencer.js');
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 'webMidiService', '$mdDialog', controller]);
+  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', '$mdDialog','midiService', 'timer', controller]);
 }
 
-function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, webMidiService, $mdDialog) {
+function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer) {
   var vm = this;
 
   if (storeService.user.key === 'guest') {
@@ -38,7 +38,7 @@ function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdP
 
   vm.log = 'roll';
 
-  vm.sequencer = new Sequencer(webMidiService.selectedOutput);
+  vm.sequencer = new Sequencer(midiService.selectedOutput, timer);
   vm.sequencer.subscribe(handleEvent);
   $scope.$on('$destroy', function () {
     console.log('scope destroy');

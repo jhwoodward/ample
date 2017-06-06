@@ -1,13 +1,12 @@
 var eventType = require('../../interpreter/constants').eventType;
 var utils = require('../../interpreter/utils');
 var Interpreter = require('../../interpreter/Interpreter');
-require('./WAAClock');
 
-function Sequencer(output) {
+function Sequencer(output, timer) {
 
   this.stopped = false;
   this.paused = false;
-  this.interval = 1;
+  this.interval = 10000;
   this.tick = 0;
   this.beat = 0;
   this.beatTicks = 0;
@@ -18,11 +17,14 @@ function Sequencer(output) {
   this.markers = [];
   this.noteState = {}; //index by track of noteons so that noteoffs can be raised when track is muted
   this.increment = 1;
+  this.timer = timer;
 }
 
 Sequencer.prototype = {
   unsubscribeAll: function () {
     this.listeners = [];
+    this.timer.stop();
+    /*
     if (this.context) {
       this.context.close();
       this.context = undefined;
@@ -31,6 +33,7 @@ Sequencer.prototype = {
       this.clock.stop();
       this.clock = undefined;
     }
+    */
   },
   subscribe: function (listener) {
     this.listeners.push(listener);
@@ -183,14 +186,10 @@ Sequencer.prototype = {
     this.increment = 1;
     this.stopped = false;
     this.paused = false;
-    this.fastForwarding = false;
 
-    if (this.startTick > 0) {
-      this.fastForward();
-    } else {
-      this.raiseEvent({ type: 'start' });
-      this.play();
-    }
+    this.raiseEvent({ type: 'start' });
+    this.play();
+
   },
   toggleMute: function (track) {
     var mutedIndex = this.muted.indexOf(track.key);
@@ -229,20 +228,9 @@ Sequencer.prototype = {
   },
   play: function () {
     this.stop();
-    if (this.context) {
-      this.context.close();
-    }
-
-    this.context = new AudioContext();
-    this.clock = new WAAClock(this.context);
-    this.clock.start();
     this.playing = true;
     this.stopped = false;
-
-    this.scheduled = this.clock.callbackAtTime(this.onTick, 0.01)
-      .repeat(0.01)
-      .tolerance({ late: 500 })
-
+    this.timer.start(this.onTick, this.interval);
   },
   reverse: function () {
     this.increment = -1;
@@ -280,18 +268,6 @@ Sequencer.prototype = {
       beat: this.beat
     });
   },
-  fastForward: function () {
-    this.ffendTick = this.endTick;
-    this.endTick = this.startTick - 1;
-    this.fastForwarding = true;
-    this.timer = window.setInterval(this.onTick, 1);
-  },
-  onFastForwardCompleted: function () {
-    //window.clearInterval(this.timer);
-    this.endTick = this.ffendTick;
-    this.fastForwarding = false;
-    this.play();
-  },
   allNotesOff: function () {
     for (var i = 0; i < 3; i++) {
       for (var c = 0; c < 16; c++) {
@@ -309,9 +285,8 @@ Sequencer.prototype = {
     this.raiseEvent({ type: 'stop' });
     this.playing = false;
     this.paused = false;
-    if (this.clock) {
-      this.clock.stop();
-    }
+    this.timer.stop();
+   
     this.markers.forEach(m => {
       m.active = false;
     });
@@ -346,7 +321,7 @@ Sequencer.prototype = {
     this.paused = !this.paused;
     this.playing = !this.paused;
     if (this.paused) {
-      this.clock.stop();
+      this.timer.stop();
       this.allNotesOff();
       this.raiseEvent({ type: 'pause' });
     } else {
@@ -428,29 +403,53 @@ Sequencer.prototype = {
 
       switch (e.type) {
         case eventType.tempo:
-          var newInterval = Math.round(1000 / (e.value * 0.8));
-          if (newInterval !== this.interval) {
-            this.interval = newInterval;
-            window.clearTimeout(this.timer);
-            this.timer = window.setTimeout(this.onTick, this.interval);
-            // window.clearInterval(this.timer);
-            //this.timer = windows.setInterval(this.onTick, this.interval);
-          }
+          // var newInterval = Math.round(1000 / (e.value * 0.8));
+          //  if (newInterval !== this.interval) {
+          //    this.interval = newInterval;
+          //   window.clearTimeout(this.timer);
+          //   this.timer = window.setTimeout(this.onTick, this.interval);
+          // window.clearInterval(this.timer);
+          //this.timer = windows.setInterval(this.onTick, this.interval);
+          //  }
           break;
         case eventType.controller:
           this.output.sendControlChange(e.controller, e.value, e.track.channel + 1);
+          /*
+          this.output.send(eventType.controller, {
+            value: e.value,
+            controller: e.controller,
+            channel: e.channel
+          });
+          */
           break;
         case eventType.pitchbend:
           var val = (e.value - 8192) / 8192;
           this.output.sendPitchBend(val, e.track.channel + 1); //value needs to be between -1 and 1 for webmidi
+
+        /*
+          this.output.send(eventType.pitchbend, {
+            value: e.value,
+            channel: e.channel
+          });
+        */
           break;
         case eventType.noteon:
           if (!this.fastForwarding || e.keyswitch) {
+/*
+             this.output.send(eventType.noteon, {
+              note: e.pitch.value,
+              velocity: e.velocity || 80,
+              channel: e.channel
+            });
+*/
+            
             this.output.playNote(e.pitch.value, e.track.channel + 1,
               {
                 rawVelocity: true,
                 velocity: e.velocity || 80
               });
+
+
             this.noteState[e.track] = this.noteState[e.track] || {};
             this.noteState[e.track][e.pitch.value] = 1;
 
@@ -458,7 +457,14 @@ Sequencer.prototype = {
             if (this.increment < 0) {
               (function (seq) {
                 setTimeout(function () {
-                  seq.output.stopNote(e.pitch.value, e.track.channel + 1);
+                   seq.output.stopNote(e.pitch.value, e.track.channel + 1);
+
+                  /*
+                  seq.output.send(eventType.noteoff, {
+                    note: e.pitch.value,
+                    channel: e.channel
+                  });
+                  */
                   delete seq.noteState[e.track][e.pitch.value];
                   seq.raiseEvent({
                     type: 'noteoff',
@@ -479,7 +485,15 @@ Sequencer.prototype = {
           if (this.increment < 0) return;
 
           if (!this.fastForwarding || e.keyswitch) {
-            this.output.stopNote(e.pitch.value, e.track.channel + 1);
+
+/*
+            this.output.send(eventType.noteoff, {
+              note: e.pitch.value,
+              channel: e.channel
+            });
+*/
+
+             this.output.stopNote(e.pitch.value, e.track.channel + 1);
             if (this.noteState[e.track]) {
               delete this.noteState[e.track][e.pitch.value];
             }

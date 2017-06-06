@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 var config = {
   watch: true,
-  entry: './src/web/app.js',
+  entry: './src/web/app.web.js',
   output: {
     path:'./dist/',
     filename: 'bundle.js',

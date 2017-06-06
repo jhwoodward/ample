@@ -216,7 +216,8 @@ module.exports = function (ngModule) {
       getInputs: getInputs,
       Output: Output,
       getOutputs: getOutputs,
-      selectedOutput: new Output('IAC Driver Bus 1') 
+      selectedOutput: new Output('IAC Driver Bus 1'),
+      enable: angular.noop
     }
 
   }]);

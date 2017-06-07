@@ -6,7 +6,7 @@ var config = {
   entry: './src/web/app.web.js',
   output: {
     path:'./dist/',
-    filename: 'bundle.js',
+    filename: 'bundle-web.js',
     path: path.resolve(__dirname, 'dist')
   },
     devServer: { 

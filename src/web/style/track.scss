@@ -1,67 +1,63 @@
 .track {
-
-  transition: all 0.7s ease-in-out;
+   /* transition: all 0.7s ease-in-out;*/
 
     &:not(.collapsed) {
-      min-width: 300px !important;
+        min-width: 300px !important;
     }
-    &.collapsed {
-      min-width: 200px !important;
-    }
+
+  
+
     border-right: 1px solid #423d35;
 
-    .track-content .highlight {
-      border-bottom: 3px solid white;
+    .track-content {
+        height: 400px;
+        background: #191919;
     }
 
-    &.master-track .track-content,
-    &.master-track .track-content .CodeMirror {
-        background: #000;
+    .track-content .highlight {
+        border-bottom: 3px solid white;
     }
 
     &.master-track .track-content .CodeMirror {
         box-shadow: inset 1px 2px 40px -5px rgba(0, 0, 0, 0.3);
         height: 100%;
-        font-size: 1.4em;
-    }
-
-    .md-toolbar-tools {
-        background: #4e4e4e;
+        font-size: 1em;
     }
 
     &.solo {
-      flex:2;
-      flex-grow: 2;
-      min-width:400px;
-      max-width:600px;
+        flex: 2;
+        flex-grow: 2;
+        min-width: 400px;
+        max-width: 600px;
     }
 
     &.mute {
-      flex-grow: 0.1 !important;
+        flex-grow: 0.1 !important;
     }
 
     &.collapsed {
+        min-width: 200px !important;
         flex-grow: 0.5;
         -webkit-box-flex: 0.5;
         -webkit-flex: 0.5;
         flex: 0.5;
+
+        .track-toolbar .md-toolbar-tools {
+          border-color:  #000;
+        }
 
         .track-content, .CodeMirror {
             opacity: 0.7;
         }
 
         .track-key {
-            background: #353535 !important;
-        }
-
-        .md-button {
-            margin: 0 !important;
+            background: #191919 !important;
         }
     }
 
     .CodeMirror {
         height: auto;
-        font-size: 1.3em;
+        font-size: 1em;
     }
 
     .track-toolbar {
@@ -69,6 +65,28 @@
         min-height: 40px;
         background-color: transparent !important;
         color: white;
+
+        .md-toolbar-tools {
+            padding: 0 10px;
+            background: #1b1b1b;
+            border-bottom-width: 3px;
+            border-bottom-style: solid;
+          
+
+            .md-button {
+                margin: 0;
+                color: grey;
+            }
+        }
+
+        .track-led {
+          display:none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            margin-top: 1px;
+            margin-right: 10px;
+        }
 
         .md-button.md-fab.md-micro {
             background-color: transparent;

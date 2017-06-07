@@ -3,11 +3,28 @@ var _ = require('lodash');
 
 module.exports = function (ngModule) {
 
-  ngModule.factory('userService',  ['$http', 'storeService', function ($http, storeService) {
+  ngModule.factory('userService', ['$http', function ($http) {
 
     var root = config.store;
+      
+    var guest = { key: 'guest', name: 'guest' };
 
-    var api = {
+    function UserService() {
+      var user = localStorage.getItem('user');
+      if (user) {
+        try {
+          this.user = JSON.parse(user);
+          this.token = localStorage.getItem('token');
+        } catch (e) {
+          localStorage.removeItem('user');
+          this.user = guest;
+        }
+      } else {
+        this.user = guest;
+      }
+    }
+
+    UserService.prototype = {
 
       signup: function (account) {
         return $http({
@@ -30,8 +47,8 @@ module.exports = function (ngModule) {
           data: account,
         }).then(onSuccess, onFail);
         function onSuccess(response) {
-          storeService.user = response.data.user;
-          storeService.token = response.data.token;
+          this.user = response.data.user;
+          this.token = response.data.token;
           localStorage.setItem('user', JSON.stringify(response.data.user));
           localStorage.setItem('token', response.data.token);
           return response.data.user;
@@ -66,15 +83,18 @@ module.exports = function (ngModule) {
           console.error('Failed to get user', err);
         }
       },
-      isLoggedIn: storeService.isLoggedIn.bind(storeService),
+      isLoggedIn: function () {
+        return this.user !== guest;
+      },
       logout: function () {
         localStorage.removeItem('user');
         localStorage.removeItem('token');
-        storeService.clearUser();
+        this.user = guest;
+        delete this.token;
       }
     };
 
-    return api;
+    return new UserService();
 
   }]);
 

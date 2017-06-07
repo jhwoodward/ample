@@ -11,19 +11,19 @@ module.exports = function (ngModule) {
         onSelected: '&'
       },
       bindToController: true,
-      controller: ['$scope', 'storeService', controller],
+      controller: ['$scope', 'songService', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope, storeService) {
+  function controller($scope, songService) {
     var vm = this;
 
     $scope.$watch('vm.listName', activate);
 
     function activate() {
       if (!vm.listName) return;
-      storeService.getAll(vm.listName).then(function (songs) {
+      songService.getAll(vm.listName).then(function (songs) {
         vm.songs = songs;
       });
     }

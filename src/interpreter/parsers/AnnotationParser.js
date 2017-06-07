@@ -35,11 +35,11 @@ var prototype = {
     });
   },
   waitForNote: true,
-  continue:true,
-  getEvents: function(state, prev, events) {
+ // continue:true,
+  getEvents: function(state, prev) {
     var out = this.parsed.parsed.reduce(function(acc, parser) {
       if (!parser.getEvents) return acc;
-      acc = acc.concat(parser.getEvents(state, prev, events));
+      acc = acc.concat(parser.getEvents(state, prev));
       return acc;
     },[]);
     out.forEach(e => {

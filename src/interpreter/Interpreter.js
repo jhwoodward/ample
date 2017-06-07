@@ -284,6 +284,7 @@ Interpreter.prototype.getEvents = function () {
 }
 
 Interpreter.prototype.setMacro = function (macro) {
+  macro.isOwn = true;
   utils.mergeMacros(this.macros, [macro]);
 }
 
@@ -303,6 +304,11 @@ Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
       macro.type === macroType.articulation
   }).forEach(macro => {
     macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart, isMaster);
+    macro.isMaster = isMaster;
+    if (macro.isOwn) {
+      macro.isOwn = !isMaster;
+    }
+    
   });
 
   this.animations = {};
@@ -342,6 +348,7 @@ Interpreter.prototype.interpret = function (part) {
   this.generateState(this.parse(part));
 
   var out = {
+    macros: this.macros,
     states: this.states,
     events: this.getEvents()
   };

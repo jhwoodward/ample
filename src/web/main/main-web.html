@@ -1,0 +1,108 @@
+<md-toolbar class="main-toolbar">
+  <div class="md-toolbar-tools main">
+    <md-button class="md-icon-button ion-navicon-round" ng-click="vm.toggleOptions()">
+    </md-button>
+    <h2 md-truncate class="brand" ng-click="vm.toggleOptions()" style="outline:none;cursor:pointer">
+      Midiscript
+    </h2>
+    <div flex>
+      <div class="md-toolbar-tools">
+        <div flex class="marker-info system-text song-text" style="text-align:center">
+
+          <md-button class="md-icon-button btn-rewind ion-skip-backward" ng-click="vm.sequencer.rewind()">
+          </md-button>
+            <md-button class="md-icon-button btn-rewind ion-skip-forward" ng-click="vm.sequencer.toend()">
+          </md-button>
+          <md-button class="md-icon-button ion-play btn-reverse" ng-click="vm.sequencer.reverse()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === -1 || vm.sequencer.paused}">
+          </md-button>
+          <span md-truncate class="song-text system-text" ng-click="vm.editSong()" style="outline:none;cursor:pointer;font-weight:700">{{vm.song.name || 'new song'}}</span>
+          <span ng-repeat="marker in vm.sequencer.markers">
+            <span style="cursor:pointer;outline:none;" ng-click="vm.goTo(marker)" ng-class="{'active': marker.active}" class="beat marker">{{marker.key}}</span>
+          <span ng-if="$index < vm.sequencer.markers.length-1"> - </span>
+
+          </span>
+          <span class="beat-info system-text">
+            <span class="beat">{{vm.sequencer.beat | padZeros:5}} </span>
+          <span class="beat-ticks">{{vm.sequencer.beatTicks | padZeros:2}}</span>
+          </span>
+          <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === 1 || vm.sequencer.paused}">
+          </md-button>
+          <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active': vm.sequencer.paused}">
+          </md-button>
+          <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
+          </md-button>
+
+        </div>
+
+
+
+
+      </div>
+    </div>
+
+  
+  
+
+
+  <md-button ng-if="$root.user.key !== 'guest'" 
+  class="md-icon-button ion-android-document" 
+  ng-click="vm.new($event)">
+    <md-tooltip md-direction="top">New</md-tooltip>
+    </md-button>
+
+     <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" 
+      class="md-icon-button ion-ios-browsers" ng-click="vm.clone($event)">
+        <md-tooltip md-direction="top">Clone</md-tooltip>
+    </md-button>
+
+    <md-button ng-if="$root.user.key !== 'guest'" 
+      class="md-icon-button ion-android-folder" ng-click="vm.toggleStore()">
+        <md-tooltip md-direction="top">Library</md-tooltip>
+    </md-button>
+   
+
+    <h2 md-truncate  ng-if="$root.user.key === 'guest'" class="brand" ng-click="vm.toggleStore()" style="outline:none;cursor:pointer">Tutorial
+    </h2>
+
+  </div>
+</md-toolbar>
+
+<section>
+  <div layout="column" class="track-container">
+    <div layout="row" class="track-row" flex style="min-width:{{(251 * vm.song.tracks.length) + 251}}px;">
+      <master-track ng-if="vm.song.useMaster" 
+          on-edit="vm.editTrack(vm.song.master)"
+          flex master="vm.song.master" 
+          sequencer="vm.sequencer">
+      </master-track>
+      <track flex ng-repeat="track in vm.song.tracks" 
+        track="track" 
+        track-index="$index" 
+        sequencer="vm.sequencer"
+        on-edit="vm.editTrack(track)">
+      </track>
+
+    </div>
+  </div>
+
+  <piano-keys active="vm.log==='keys'" sequencer="vm.sequencer"></piano-keys>
+
+  <piano-roll active="vm.log==='roll'" sequencer="vm.sequencer"></piano-roll>
+
+  <md-sidenav class="md-sidenav-left side-menu" md-component-id="options">
+    <options log="vm.log"></options>
+  </md-sidenav>
+
+  <md-sidenav class="md-sidenav-right side-menu" md-component-id="store">
+    <store song="vm.song" is-open="vm.storeOpen()"></store>
+  </md-sidenav>
+
+  <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="editSong">
+    <edit-song song="vm.song" sequencer="vm.sequencer" is-open="vm.editSongOpen()"></edit-song>
+  </md-sidenav>
+
+   <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="editTrack">
+    <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()"></edit-track>
+  </md-sidenav>
+
+</section>

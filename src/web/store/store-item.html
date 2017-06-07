@@ -1,0 +1,45 @@
+<form name="vm.storeItemForm">
+  <md-content class="md-padding" layout="column">
+
+    <md-input-container ng-if="vm.storeItem.requireKey">
+      <label>Key</label>
+      <input type="text" required name="key" md-autofocus="vm.storeItem.requireKey" ng-model="vm.storeItem.key" 
+      ng-model-options='{ debounce: 1000 }' ng-pattern="/^[a-zA-Z0-9]*$/" 
+            ng-change='vm.checkUniqueKey()' 
+      />
+      <div ng-messages="vm.storeItemForm.key.$error" role="alert" multiple>
+        <div ng-message="required">You must supply a key if you want to save</div>
+        <div ng-message="unique">There's already an item with this key</div>
+        <div ng-message="reserved">Key not allowed</div>
+        <div ng-message="pattern">Key can only have letters and numbers</div>
+  
+      </div>
+    </md-input-container>
+
+    <md-input-container ng-if="vm.storeItem.requireName">
+      <label>Name</label>
+      <input type="text" required name="name" md-autofocus="vm.storeItem.requireName" ng-model="vm.storeItem.name" />
+      <div ng-messages="vm.storeItemForm.name.$error" role="alert" multiple>
+        <div ng-message="required">You must supply a name if you want to save</div>
+      </div>
+    </md-input-container>
+
+    <md-input-container>
+      <label>Tags</label>
+      <md-chips ng-model="vm.storeItem.tags" md-removable="true" placeholder="Enter tags..." delete-button-label="Remove Tag" delete-hint="Press delete to remove tag"
+        secondary-placeholder="+Tag">
+
+        <button md-chip-remove class="md-primary btn-remove-tag">
+              <span class="ion-close"></span>
+            </button>
+      </md-chips>
+    </md-input-container>
+
+    <md-input-container class="md-block">
+      <label>Description</label>
+      <textarea ng-model="vm.storeItem.description" md-maxlength="150" rows="5" md-select-on-focus></textarea>
+
+    </md-input-container>
+    <span ng-if="vm.storeItem.created">Created: {{vm.storeItem.created}}</span>
+  </md-content>
+</form>

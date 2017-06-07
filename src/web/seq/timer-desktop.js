@@ -6,6 +6,11 @@ module.exports = function (ngModule) {
       this.timer = new NanoTimer();
     }
 
+    Timer.prototype.dispose = function () {
+      this.timer.clearInterval();
+      this.timer = undefined;
+    }
+
     Timer.prototype.start = function (callback, interval) {
       this.timer.setInterval(callback, '', interval + 'u');
     }

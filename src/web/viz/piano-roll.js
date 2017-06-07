@@ -345,7 +345,7 @@ module.exports = function (ngModule) {
       $timeout(function () {
         note.active = false;
         vm.sequencer.trigger(note.meta.off);
-      }, note.meta.on.duration * vm.sequencer.interval * 10);
+      }, note.meta.on.duration * vm.sequencer.interval / 1000);
     }
   }
 

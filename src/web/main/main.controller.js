@@ -4,13 +4,13 @@ var Interpreter = require('../../interpreter/Interpreter');
 var Sequencer = require('../seq/Sequencer.js');
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'storeService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', '$mdDialog','midiService', 'timer', controller]);
+  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'songService', 'userService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', '$mdDialog', 'midiService', 'timer', controller]);
 }
 
-function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer) {
+function controller($scope, $rootScope, $timeout, songService, userService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer) {
   var vm = this;
 
-  if (storeService.user.key === 'guest') {
+  if (userService.user.key === 'guest') {
     showTutorialDialog();
   }
 
@@ -25,15 +25,17 @@ function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdP
     };
   }
 
+
+
   if (!vm.song.created) {
     $timeout(function () {
-      $mdSidenav('tracks').open();
+      $mdSidenav('editSong').open();
     });
   }
 
-  $rootScope.user = storeService.user;
+  $rootScope.user = userService.user;
   $scope.$on('login', function () {
-    $rootScope.user = storeService.user;
+    $rootScope.user = userService.user;
   });
 
   vm.log = 'roll';
@@ -52,16 +54,25 @@ function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdP
   vm.toggleStore = function () {
     $mdSidenav('store').toggle();
   }
-  vm.toggleTracks = function () {
-    $mdSidenav('tracks').toggle();
+  vm.editSong = function () {
+    $mdSidenav('editSong').toggle();
   }
+  vm.editTrack = function (track) {
+    vm.selectedTrack = track;
+    $mdSidenav('editTrack').toggle();
+  }
+
   vm.toggleOptions = function () {
     $mdSidenav('options').toggle();
   }
 
-  vm.tracksOpen = function () {
-    return $mdSidenav('tracks').isOpen();
+  vm.editSongOpen = function () {
+    return $mdSidenav('editSong').isOpen();
   }
+  vm.editTrackOpen = function () {
+    return $mdSidenav('editTrack').isOpen();
+  }
+
   vm.storeOpen = function () {
     return $mdSidenav('store').isOpen();
   }
@@ -83,7 +94,7 @@ function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdP
   }
 
   vm.clone = function () {
-    return storeService.clone(vm.song).then(function (song) {
+    return songService.clone(vm.song).then(function (song) {
       $state.go('root.main', { key: song.key, owner: song.owner });
     })
   };
@@ -93,7 +104,7 @@ function controller($scope, $rootScope, $timeout, storeService, $mdSidenav, $mdP
     //vm.close();
     /*
    if (!currentSong || !currentSong.created) {
-     vm.song = storeService.new();
+     vm.song = songService.new();
      // vm.tracks = songToArray(vm.song);
      vm.sequencer.load(vm.song.tracks);
    } else {

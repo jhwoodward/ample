@@ -1,5 +1,6 @@
-body, md-toolbar, md-toolbar input, #song-name, .track-row {
-    background-color: #000;
+body, md-toolbar, md-toolbar input,.md-toolbar-tools, #song-name, .track-row {
+    background-color: #171616;
+    font-size: 16px !important;
 }
 
 .loading {
@@ -22,9 +23,6 @@ body, md-toolbar, md-toolbar input, #song-name, .track-row {
     color: inherit;
 }
 
-h4 {
-    font-size: 16px;
-}
 
 .song-text {
     line-height: 19px;
@@ -39,7 +37,6 @@ h4 {
 
     .beat {
         width: 80px;
-      
     }
 
     .beat-ticks {
@@ -80,16 +77,17 @@ h4 {
 }
 
 .system-text {
-    text-transform: uppercase;
-    font-size: 14px !important;
+
     letter-spacing: 0.01em;
+    color: #b3b3b3;
+
     &.bold {
-      font-weight:500;
+        font-weight: 500;
     }
 }
 
 h1.system-text {
-    font-size: 14px !important;
+
     font-weight: 500;
 }
 
@@ -113,7 +111,7 @@ md-checkbox.md-checked .md-icon:after {
 }
 
 .main-toolbar {
-    background-color: #353535 !important;
+    background-color: #1d1d1d !important;
     color: #a2a2a2 !important;
 
     .md-toolbar-tools .md-button.active {
@@ -146,7 +144,7 @@ md-checkbox.md-checked .md-icon:after {
     height: calc(100vh - 500px);
     overflow: auto;
     white-space: nowrap;
-    background: #171717;
+    background: #171616;
     color: #999;
     border-top: none !important;
     margin-top: 0;
@@ -159,11 +157,6 @@ md-checkbox.md-checked .md-icon:after {
 .panel-grey {
     background-color: #cec6bb;
     color: #fff;
-}
-
-.track-content {
-    height: 400px;
-    background-color: #000;
 }
 
 .track-container {
@@ -186,42 +179,61 @@ md-checkbox.md-checked .md-icon:after {
 }
 
 .track-led.active {
-    background-color: white !important;
+    /*   background-color: white !important;*/
 }
 
 .track1 .track-toolbar .track-led.active {
+    /* background-color: white !important;*/
+    /*
+
+
     box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #d83e00, 0 0 35px #d83e00;
+    */
 }
 
 .track2 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #8e8b00, 0 0 35px #8e8b00;
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #8e8b00, 0 0 35px #8e8b00;
+      */
 }
 
 .track3 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0079b5, 0 0 35px #0079b5;
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #0079b5, 0 0 35px #0079b5;
+      */
 }
 
 .track4 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73;
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #2e8c73, 0 0 35px #2e8c73;
+      */
 }
 
 .track5 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239);
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(127, 100, 239), 0 0 35px rgb(127, 100, 239);
+      */
 }
 
 .track6 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(255, 64, 129), 0 0 35px rgb(255, 64, 129);
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(255, 64, 129), 0 0 35px rgb(255, 64, 129);
+      */
 }
 
 .track7 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255);
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(0, 149, 255), 0 0 35px rgb(0, 149, 255);
+      */
 }
 
 .track8 .track-toolbar .track-led.active {
-    box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2);
+    /*
+      box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2);
+      */
 }
 
-.track1 .track-toolbar .track-key,
+.track1 .track-led,
 .track1 .sub-highlight,
 .channel-menu-content.track1, .channel-menu-content.track1 .channel-menu-item,
 .note.track1,
@@ -231,74 +243,90 @@ md-checkbox.md-checked .md-icon:after {
     background-color: #d83e00;
 }
 
+.track1 .track-toolbar .md-toolbar-tools {
+    border-color: #d83e00;
+}
+
 .md-button.md-fab.solo.md-micro.active {
     background: #3e3d3d !important;
 }
 
-.track2 .track-toolbar .track-key, 
+.track2 .track-led,
 .channel-menu-content.track2, .channel-menu-content.track2 .channel-menu-item,
 .track2 .sub-highlight,
-.note.track2, 
-.key.active.track2, 
+.note.track2,
+.key.active.track2,
 .track2 .md-button.md-fab.mute.md-micro.active {
     background-color: #8e8b00;
 }
 
-.track3 .track-toolbar .track-key, 
+.track2 .track-toolbar .md-toolbar-tools {
+    border-color: #8e8b00;
+}
+
+.track3 .track-led,
 .channel-menu-content.track3, .channel-menu-content.track3 .channel-menu-item,
 .track3 .sub-highlight,
-.note.track3, 
-.key.active.track3, 
+.note.track3,
+.key.active.track3,
 .track3 .md-button.md-fab.mute.md-micro.active {
     background-color: #0079b5;
 }
 
-.track4 .track-toolbar .track-key, 
+.track3 .track-toolbar .md-toolbar-tools {
+    border-color: #0079b5;
+}
+
+.track4 .track-led,
 .channel-menu-content.track4, .channel-menu-content.track4 .channel-menu-item,
 .track4 .sub-highlight,
-.note.track4, 
-.key.active.track4, 
+.note.track4,
+.key.active.track4,
 .track4 .md-button.md-fab.mute.md-micro.active {
     background-color: #2e8c73;
 }
 
-.track5 .track-toolbar .track-key, 
+.track4 .track-toolbar .md-toolbar-tools {
+    border-color: #2e8c73;
+}
+
+.track5 .track-led,
 .channel-menu-content.track5, .channel-menu-content.track5 .channel-menu-item,
 .track5 .sub-highlight,
-.note.track5, 
+.note.track5,
 .key.active.track5,
- .track5 .md-button.md-fab.mute.md-micro.active {
+.track5 .md-button.md-fab.mute.md-micro.active {
     background-color: rgb(127, 100, 239);
 }
 
-.track6 .track-toolbar .track-key, 
+.track6 .track-led,
 .channel-menu-content.track6, .channel-menu-content.track6 .channel-menu-item,
 .track6 .sub-highlight,
-.note.track6, .key.active.track6, 
+.note.track6, .key.active.track6,
 .track6 .md-button.md-fab.mute.md-micro.active {
     background-color: rgb(255, 64, 129);
 }
 
-.track7 .track-toolbar .track-key, 
+.track7 .track-led,
 .channel-menu-content.track7, .channel-menu-content.track7 .channel-menu-item,
 .track7 .sub-highlight,
-.note.track7, 
-.key.active.track7, 
+.note.track7,
+.key.active.track7,
 .track7 .md-button.md-fab.mute.md-micro.active {
     background-color: rgb(0, 149, 255);
 }
 
-.track8 .track-toolbar .track-key,
+.track8 .track-led,
 .channel-menu-content.track8, .channel-menu-content.track8 .channel-menu-item,
 .track8 .sub-highlight,
- .note.track8, 
- .key.active.track8, 
- .track8 .md-button.md-fab.mute.md-micro.active {
+.note.track8,
+.key.active.track8,
+.track8 .md-button.md-fab.mute.md-micro.active {
     background-color: rgb(72, 185, 2);
 }
 
 .master-track .sub-highlight {
-  background-color: #4e4e4e;
+    background-color: #4e4e4e;
 }
 
 .channel-menu > .md-fab {
@@ -313,7 +341,7 @@ md-checkbox.md-checked .md-icon:after {
     padding: 0;
     padding-top: 5px;
     padding-bottom: 5px;
-    margin-left:8px
+    margin-left: 8px;
 }
 
 .channel-menu-item {
@@ -327,19 +355,10 @@ md-checkbox.md-checked .md-icon:after {
     text-transform: uppercase;
     padding: 0 2px 0px 13px;
     font-size: 14px;
-  
-}
-.md-open-menu-container.md-whiteframe-z2 {
-  box-shadow: none;
 }
 
-.track-led {
-    border-radius: 50%;
-    width: 10px;
-    height: 10px;
-    background-color: #000;
-    margin-top: 1px;
-    margin-right: 10px;
+.md-open-menu-container.md-whiteframe-z2 {
+    box-shadow: none;
 }
 
 .modal-header {
@@ -402,17 +421,25 @@ md-list[dnd-list] {
     }
 }
 
-.highlight ,  .beat.marker.active{
+.beat.marker.active {
     text-shadow: 0 0 5px #fff, 0 0 15px #fff, 0 0 20px white, 0 0 35px white;
     color: white !important;
 }
+
+/*
+.highlight {
+   color: white !important;
+}*/
+
 .scale-highlight {
     background-color: #f7e976;
     color: black !important;
 }
+
 .sustain-highlight {
     border-bottom: 3px solid grey;
 }
+
 .sub-highlight {
     color: white !important;
 }

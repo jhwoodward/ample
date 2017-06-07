@@ -23,17 +23,8 @@ function Sequencer(output, timer) {
 Sequencer.prototype = {
   unsubscribeAll: function () {
     this.listeners = [];
-    this.timer.stop();
-    /*
-    if (this.context) {
-      this.context.close();
-      this.context = undefined;
-    }
-    if (this.clock) {
-      this.clock.stop();
-      this.clock = undefined;
-    }
-    */
+    this.timer.dispose();
+   
   },
   subscribe: function (listener) {
     this.listeners.push(listener);
@@ -52,7 +43,9 @@ Sequencer.prototype = {
     track.macros = utils.combineMacros(track);
   },
   interpret: function (track) {
-    this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key })
+    this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key });
+
+    
     var interpreter = new Interpreter(track.macros, this.interpretedMaster || this.master.part);
     var interpreted = interpreter.interpret(track.part);
     interpreted.events.forEach(e => {
@@ -108,6 +101,7 @@ Sequencer.prototype = {
         track = updatedTrack;
         this.tracks[i] = updatedTrack;
         this.interpreted[i] = this.interpret(updatedTrack);
+        this.tracks[i].interpreted = this.interpreted[i];
       }
       if (this.interpreted[i] && this.interpreted[i].events) {
         events = events.concat(this.interpreted[i].events);
@@ -151,6 +145,8 @@ Sequencer.prototype = {
     var events = this.interpretedMaster.events;
     this.tracks.forEach((track, i) => {
       this.interpreted[i] = this.interpret(track);
+      track.interpreted = this.interpreted[i];
+     
       events = events.concat(this.interpreted[i].events);
     });
     this.validate(events);

@@ -10,7 +10,8 @@ module.exports = function (ngModule) {
       scope: {
         sequencer: '=',
         track: '=',
-        trackIndex: '='
+        trackIndex: '=',
+        onEdit: '&'
       },
       bindToController: true,
       controller: ['$scope', '$timeout', controller],

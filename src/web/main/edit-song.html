@@ -1,0 +1,70 @@
+<div>
+
+  <md-tabs md-dynamic-height md-selected="vm.selectedTabIndex">
+
+    <md-tab id="tab2">
+      <md-tab-label>Tracks</md-tab-label>
+      <md-tab-body>
+        <form name="vm.trackForm">
+          <div class="md-padding" style="margin-top:10px">
+
+            <md-checkbox style="margin-left:2px" ng-model="vm.song.useMaster" aria-label="Use Master">
+              <span style="padding-left:8px;margin-top: -3px;" class="system-text">Use master track</span>
+            </md-checkbox>
+
+            <md-list dnd-list="vm.song.tracks" class="track-list">
+              <md-list-item class="track{{$index+1}}" ng-repeat="track in vm.song.tracks" dnd-draggable="track" dnd-effect-allowed="move"
+                dnd-moved="vm.moved($index)">
+                <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
+                <md-input-container flex>
+                  <label>Name</label>
+                  <input type="text" name="name{{$index}}" ng-model="track.key" required />
+                  <div ng-messages="vm.trackForm['name' + $index].$error" role="alert" multiple>
+                    <div ng-message="required">You must supply a name for the track</div>
+                  </div>
+                </md-input-container>
+
+                <md-button ng-click="vm.deleteTrack($index)" class="md-fab md-button md-micro"><span class="ion-minus-round"></span>
+                  <md-tooltip md-direction="top">Delete track</md-tooltip>
+                </md-button>
+              </md-list-item>
+
+              <div style="outline:none; cursor:pointer" ng-if="vm.song.tracks.length < 8" ng-click="vm.addTrack()">
+                <button class="md-fab md-button md-micro">
+                <span class="ion-plus-round"></span>
+             
+         </button>
+                <span class="system-text">Add track</span>
+              </div>
+
+          </div>
+        </form>
+      </md-tab-body>
+    </md-tab>
+    <md-tab id="tab1">
+      <md-tab-label>Info</md-tab-label>
+      <md-tab-body>
+     
+        <store-item store-item="vm.song" valid="vm.valid"></store-item>
+      </md-tab-body>
+    </md-tab>
+  </md-tabs>
+  <div class="tracks-panel-buttons" layout="row">
+    <md-button ng-click="vm.save()" ng-disabled="!vm.valid" ng-if="vm.song.owner === $root.user.key || !vm.song.created">
+      Save
+    </md-button>
+
+
+    <md-button ng-click="vm.clone()" ng-disabled="!vm.valid" ng-if="vm.song.owner !== $root.user.key && vm.song.created">
+      Clone
+    </md-button>
+
+    <md-button ng-click="vm.del()" ng-if="vm.song.created && vm.song.owner === $root.user.key">
+      Delete
+    </md-button>
+    <span flex></span>
+    <md-button ng-click="vm.cancel() ">
+      Cancel
+    </md-button>
+  </div>
+</div>

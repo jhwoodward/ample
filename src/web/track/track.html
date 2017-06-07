@@ -13,7 +13,7 @@
       ng-hide="(vm.track.isMuted && vm.sequencer.solo !== vm.track.key) || (vm.sequencer.solo && vm.sequencer.solo !== vm.track.key)"
       ng-class="{'active': vm.active && (!vm.sequencer.solo || vm.sequencer.solo === vm.track.key)}"></span>
      
-      <span  class="system-text bold">
+      <span  class="system-text bold" ng-click="vm.onEdit({track: vm.track})">
         {{vm.track.key}}
       </span>
       <span  flex class="flex"></span>

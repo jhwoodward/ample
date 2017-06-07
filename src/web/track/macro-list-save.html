@@ -1,0 +1,42 @@
+<md-dialog aria-label="Tutorial">
+
+  <md-toolbar>
+    <div class="md-toolbar-tools modal-header">
+      <h2>Save Macro List</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" ng-click="vm.cancel()">
+        <md-icon class="ion-close" aria-label="Close dialog"></md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+
+  <md-dialog-content style="width: 700px;">
+
+    <md-content class="md-padding" layout="column">
+      <div layout="row">
+        <store-item flex store-item="vm.macroList" valid="vm.valid"></store-item>
+        <div flex>
+          <md-input-container class="md-block">
+            <label>Macros</label>
+            <macro-list macros="vm.macroList.macros"></macro-list>
+          </md-input-container>
+        </div>
+      </div>
+    </md-content>
+
+  </md-dialog-content>
+
+  <md-dialog-actions layout="row">
+
+    <span flex></span>
+
+    <md-button md-primary ng-click="vm.save()">
+      Save
+    </md-button>
+
+    <md-button ng-click="vm.cancel()">
+      Cancel
+    </md-button>
+  </md-dialog-actions>
+  </form>
+</md-dialog>

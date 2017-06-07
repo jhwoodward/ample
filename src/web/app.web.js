@@ -18,7 +18,7 @@ require('./style/all.scss');
 
 let main = angular.module('mainModule', []);
 require('./main/main.controller')(main);
-require('./main/edit')(main);
+require('./main/edit-song')(main);
 require('./main/options')(main);
 
 let viz = angular.module('vizModule', []);
@@ -29,6 +29,10 @@ require('./viz/info-log')(viz);
 let track = angular.module('trackModule', []);
 require('./track/track')(track);
 require('./track/master-track')(track);
+require('./track/edit-track')(track);
+require('./track/macro-list')(track);
+require('./track/macro-list.service')(track);
+require('./track/macro-list-save.controller')(track);
 
 let seq = angular.module('seqModule', []);
 require('./seq/midi-web')(seq);
@@ -40,9 +44,11 @@ require('./user/signup.controller')(user);
 require('./user/login.controller')(user);
 
 let store = angular.module('storeModule', []);
-require('./store/store.service')(store);
+require('./store/store.factory')(store);
 require('./store/store')(store);
+require('./store/store-item')(store);
 require('./store/song-list')(store);
+require('./store/song.service')(store);
 
 let tutorial = angular.module('tutorialModule', []);
 require('./tutorial/notation.controller')(tutorial);
@@ -59,60 +65,15 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThe
 
     $mdInkRippleProvider.disableInkRipple();
 
-    /*
-        // Extend the red theme with a different color and make the contrast color black instead of white.
-        // For example: raised button text will be black instead of white.
-        var neonRedMap = $mdThemingProvider.extendPalette('red', {
-          '500': '#ff0000',
-          'contrastDefaultColor': 'dark'
-        });
-    
-        // Register the new color palette map with the name <code>neonRed</code>
-        $mdThemingProvider.definePalette('neonRed', neonRedMap);
-    
-        // Use that theme for the primary intentions
-        $mdThemingProvider.theme('default')
-          .primaryPalette('neonRed');
-    */
-    /*
-    $mdThemingProvider.definePalette('amazingPaletteName', {
-        '50': 'ffebee',
-        '100': 'ffcdd2',
-        '200': 'ef9a9a',
-        '300': 'e57373',
-        '400': 'ef5350',
-        '500': 'f44336',
-        '600': 'e53935',
-        '700': 'd32f2f',
-        '800': 'c62828',
-        '900': 'b71c1c',
-        'A100': 'ff8a80',
-        'A200': 'ff5252',
-        'A400': 'ff1744',
-        'A700': 'd50000',
-        'contrastDefaultColor': 'light',    // whether, by default, text (contrast)
-                                            // on this palette should be dark or light
-    
-        'contrastDarkColors': ['50', '100', //hues which contrast should be 'dark' by default
-         '200', '300', '400', 'A100'],
-        'contrastLightColors': undefined    // could also specify this if default was 'dark'
-      });
-    
-      $mdThemingProvider.theme('default')
-        .primaryPalette('amazingPaletteName')
-    */
-
     var blueGrey2 = $mdThemingProvider.extendPalette('blue-grey', {
       'contrastDefaultColor': 'light'
     });
 
-    // Register the new color palette map with the name <code>neonRed</code>
     $mdThemingProvider.definePalette('blue-grey2', blueGrey2);
 
     $mdThemingProvider.theme('default')
       .primaryPalette('blue-grey')
       .accentPalette('blue-grey2');
-
 
     $locationProvider.html5Mode(true);
 
@@ -131,10 +92,9 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThe
         views: {
           'app@': {
             template: '',
-            controller: ['$state', function ($state) {
-              var lastLoad = localStorage.getItem('lastLoad');
+            controller: ['$state', 'songService', function ($state, songService) {
+              var lastLoad = songService.getLastLoad();
               if (lastLoad) {
-                lastLoad = JSON.parse(lastLoad);
                 $state.go('root.main', { key: lastLoad.key, owner: lastLoad.owner });
               } else {
                 $state.go('root.new');
@@ -148,14 +108,14 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThe
         url: '/new',
         views: {
           'app@': {
-            template: require('./main/main.html'),
+            template: require('./main/main-web.html'),
             controller: 'mainController',
             controllerAs: 'vm',
           }
         },
         resolve: {
-          song: function (storeService, $stateParams) {
-            return storeService.new();
+          song: function (songService, $stateParams) {
+            return songService.new();
           }
         }
       })
@@ -163,21 +123,19 @@ app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThe
         url: '/:owner/:key',
         views: {
           'app@': {
-            template: require('./main/main.html'),
+            template: require('./main/main-web.html'),
             controller: 'mainController',
             controllerAs: 'vm',
           }
         },
         resolve: {
-          song: function (storeService, $stateParams) {
-            return storeService.getOne($stateParams.key, $stateParams.owner);
+          song: function (songService, $stateParams) {
+            return songService.getOne($stateParams.key, $stateParams.owner);
           }
         }
       });
 
     $urlRouterProvider.otherwise('/');
   }]);
-
-
 
 module.exports = app;

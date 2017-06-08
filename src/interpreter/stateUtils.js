@@ -14,6 +14,7 @@ var api = {
       var parsed = {
         type: 'annotation',
         key: 'default',
+        source: 'default',
         value: defaultPhrase,
         parsed: parse(parsers, defaultPhrase)
       };

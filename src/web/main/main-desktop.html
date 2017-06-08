@@ -13,7 +13,7 @@
 
           <md-button class="md-icon-button btn-rewind ion-skip-backward" ng-click="vm.sequencer.rewind()">
           </md-button>
-            <md-button class="md-icon-button btn-rewind ion-skip-forward" ng-click="vm.sequencer.toend()">
+          <md-button class="md-icon-button btn-rewind ion-skip-forward" ng-click="vm.sequencer.toend()">
           </md-button>
           <md-button class="md-icon-button ion-play btn-reverse" ng-click="vm.sequencer.reverse()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === -1 || vm.sequencer.paused}">
           </md-button>
@@ -42,28 +42,24 @@
       </div>
     </div>
 
-  
-  
 
 
-  <md-button ng-if="$root.user.key !== 'guest'" 
-  class="md-icon-button ion-android-document" 
-  ng-click="vm.new($event)">
-    <md-tooltip md-direction="top">New</md-tooltip>
+
+
+    <md-button ng-if="$root.user.key !== 'guest'" class="md-icon-button ion-android-document" ng-click="vm.new($event)">
+      <md-tooltip md-direction="top">New</md-tooltip>
     </md-button>
 
-     <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" 
-      class="md-icon-button ion-ios-browsers" ng-click="vm.clone($event)">
-        <md-tooltip md-direction="top">Clone</md-tooltip>
+    <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" class="md-icon-button ion-ios-browsers" ng-click="vm.clone($event)">
+      <md-tooltip md-direction="top">Clone</md-tooltip>
     </md-button>
 
-    <md-button ng-if="$root.user.key !== 'guest'" 
-      class="md-icon-button ion-android-folder" ng-click="vm.toggleStore()">
-        <md-tooltip md-direction="top">Library</md-tooltip>
+    <md-button ng-if="$root.user.key !== 'guest'" class="md-icon-button ion-android-folder" ng-click="vm.toggleStore()">
+      <md-tooltip md-direction="top">Library</md-tooltip>
     </md-button>
-   
 
-    <h2 md-truncate  ng-if="$root.user.key === 'guest'" class="brand" ng-click="vm.toggleStore()" style="outline:none;cursor:pointer">Tutorial
+
+    <h2 md-truncate ng-if="$root.user.key === 'guest'" class="brand" ng-click="vm.toggleStore()" style="outline:none;cursor:pointer">Tutorial
     </h2>
 
   </div>
@@ -97,7 +93,7 @@
     <edit-song song="vm.song" sequencer="vm.sequencer" is-open="vm.tracksOpen()"></edit-song>
   </md-sidenav>
 
-     <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="editTrack">
+  <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="editTrack">
     <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()"></edit-track>
   </md-sidenav>
 

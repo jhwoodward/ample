@@ -73,6 +73,14 @@ function controller($scope, $rootScope, $timeout, songService, userService, $mdS
     return $mdSidenav('editTrack').isOpen();
   }
 
+  $scope.$watch('vm.editTrackOpen()', function (open) {
+    if (open === false && vm.selectedTrack) {
+       vm.sequencer.update(vm.selectedTrack);
+    }
+  });
+
+
+
   vm.storeOpen = function () {
     return $mdSidenav('store').isOpen();
   }

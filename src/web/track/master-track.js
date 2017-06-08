@@ -9,7 +9,8 @@ module.exports = function (ngModule) {
       template: require('./master-track.html'),
       scope: {
         sequencer: '=',
-        master: '='
+        master: '=',
+        onEdit: '&'
       },
       bindToController: true,
       controller: ['$scope', '$timeout', controller],

@@ -6,10 +6,11 @@ module.exports = function (ngModule) {
   ngModule.service('storeFactory', ['$http', 'userService', function ($http, userService) {
 
     var root = config.store;
-  
-    function Store(type, props) {
+
+    function Store(type, props, onLoad) {
       this.props = props;
       this.type = type;
+      this.onLoad = onLoad;
     }
 
     Store.prototype = {
@@ -97,7 +98,7 @@ module.exports = function (ngModule) {
           console.log('Failed to get list');
         }
       },
-      getLastLoad: function() {
+      getLastLoad: function () {
         var lastLoad = localStorage.getItem(this.type + ':lastLoad');
         if (lastLoad) {
           return JSON.parse(lastLoad);
@@ -117,39 +118,50 @@ module.exports = function (ngModule) {
           var item = response.data;
           item.tags = item.tags || [];
           _.extend(item, this.props);
+          if (this.onLoad) {
+            return this.onLoad.bind(item)();
+          }
           return item;
         }
         function onFail(err) {
           console.error('Failed to get one', err);
         }
       },
-      checkKeyExists: function(key, owner) {
+      checkKeyExists: function (key, owner) {
 
         return this.getOne(key, owner).then(exists);
         function exists(item) {
           return item;
         }
-       
-      
+
+
       }
     };
-    
+
     return {
-      create: function(type, getNew, getPayload, props) {
-        Store.prototype.new = function() {
-          var item = getNew();
-          item.tags = [];
-          var store = this;
-          item.checkKeyExists = function() {
-            return store.checkKeyExists(this.key, userService.user.key);
-          }
+      create: function (type, getNew, getPayload, props, onLoad) {
 
-          _.extend(item, props);
-          return item;
+        var prototype = {
+          new: function () {
+            var item = getNew();
+            item.tags = [];
+            var store = this;
+            item.checkKeyExists = function () {
+              return store.checkKeyExists(this.key, userService.user.key);
+            }
+            Object.assign(item, props);
+            return item;
+          },
+          getPayload: getPayload
+        };
+
+        function NewStore(type, props, onLoad) {
+          Store.call(this, type, props, onLoad);
         }
-        Store.prototype.getPayload = getPayload;
+        NewStore.prototype = _.extend({}, Store.prototype, prototype);
+        NewStore.prototype.constructor = NewStore;
 
-        return new Store(type, props);
+        return new NewStore(type, props, onLoad);
       }
     };
 

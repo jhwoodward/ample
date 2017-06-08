@@ -86,7 +86,7 @@ var api = {
       acc[item.part] = item;
       return acc;
     },{});
-    var instruments = {};
+
     function mapInstrumentToChannelAndPart(instrument, i) {
       return {
         name: `${instrument.name} (${performer[i].name})`,

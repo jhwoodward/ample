@@ -18,13 +18,12 @@ require('./style/all.scss');
 
 let main = angular.module('mainModule', []);
 require('./main/main.controller')(main);
-require('./main/edit-song')(main);
 require('./main/options')(main);
 
-let viz = angular.module('vizModule', []);
-require('./viz/piano-keys')(viz);
-require('./viz/piano-roll')(viz);
-require('./viz/info-log')(viz);
+let song = angular.module('songModule', []);
+require('./song/edit-song')(song);
+require('./song/song-list')(song);
+require('./song/song.service')(song);
 
 let track = angular.module('trackModule', []);
 require('./track/track')(track);
@@ -38,6 +37,11 @@ let seq = angular.module('seqModule', []);
 require('./seq/midi-web')(seq);
 require('./seq/timer-web')(seq);
 
+let viz = angular.module('vizModule', []);
+require('./viz/piano-keys')(viz);
+require('./viz/piano-roll')(viz);
+require('./viz/info-log')(viz);
+
 let user = angular.module('userModule', []);
 require('./user/user.service')(user);
 require('./user/signup.controller')(user);
@@ -47,8 +51,6 @@ let store = angular.module('storeModule', []);
 require('./store/store.factory')(store);
 require('./store/store')(store);
 require('./store/store-item')(store);
-require('./store/song-list')(store);
-require('./store/song.service')(store);
 
 let tutorial = angular.module('tutorialModule', []);
 require('./tutorial/notation.controller')(tutorial);
@@ -58,7 +60,7 @@ require('./shared/padZeros.filter')(shared);
 require('./shared/unload')(shared);
 require('./shared/draggable')(shared);
 
-let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'dndLists', 'ui.router', 'ui.codemirror','vizModule', 'trackModule', 'seqModule', 'sharedModule', 'storeModule', 'tutorialModule', 'userModule', 'mainModule']);
+let app = angular.module('app', ['ngAnimate', 'ngMessages', 'ngSanitize', 'ngMaterial', 'dndLists', 'ui.router', 'ui.codemirror','vizModule', 'trackModule', 'seqModule', 'sharedModule', 'storeModule', 'tutorialModule', 'userModule', 'songModule', 'mainModule']);
 
 app.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$mdThemingProvider', '$mdInkRippleProvider',
   function ($stateProvider, $urlRouterProvider, $locationProvider, $mdThemingProvider, $mdInkRippleProvider) {

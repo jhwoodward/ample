@@ -1,26 +1,27 @@
 <div>
   <div ng-if="vm.annotations.length">
     <h3>Annotations</h3>
-    <div ng-repeat="macro in vm.annotations">
-      {{ macro.key }}
+    <div ng-repeat="macro in vm.annotations" layout="row">
+         <div flex>{{ macro.key }} </div><div> 
+           {{ macro.isOwn ? 'self' : macro.isMaster ? 'master': macro.source }}</div>
     </div>
   </div>
   <div ng-if="vm.articulations.length">
     <h3>Articulations</h3>
-    <div ng-repeat="macro in vm.articulations">
-      {{ macro.key }}
+    <div ng-repeat="macro in vm.articulations" layout="row" >
+         <div flex>{{ macro.key }} </div><div>   {{ macro.isOwn ? 'self' : macro.isMaster ? 'master': macro.source }}</div>
     </div>
   </div>
   <div ng-if="vm.substitutions.length">
     <h3>Substitutions</h3>
-    <div ng-repeat="macro in vm.substitutions">
-      {{ macro.key }}
+    <div ng-repeat="macro in vm.substitutions" layout="row">
+      <div flex>{{ macro.key }} </div><div>   {{ macro.isOwn ? 'self' : macro.isMaster ? 'master': macro.source }}</div>
     </div>
   </div>
     <div ng-if="vm.animations.length">
     <h3>Animations</h3>
-    <div ng-repeat="macro in vm.animations">
-      {{ macro.key }}
+    <div ng-repeat="macro in vm.animations" layout="row">
+        <div flex>{{ macro.key }} </div><div>   {{ macro.isOwn ? 'self' : macro.isMaster ? 'master': macro.source }}</div>
     </div>
   </div>
 </div>

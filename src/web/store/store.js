@@ -11,12 +11,12 @@ module.exports = function (ngModule) {
         song: '='
       },
       bindToController: true,
-      controller: ['$scope', '$timeout', 'songService', '$mdSidenav', '$rootScope', '$state', '$log', controller],
+      controller: ['$scope', '$timeout', 'songService', 'userService', '$mdSidenav', '$rootScope', '$state', '$log', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope, $timeout, songService, $mdSidenav, $rootScope, $state, $log) {
+  function controller($scope, $timeout, songService, userService, $mdSidenav, $rootScope, $state, $log) {
     var vm = this;
 
 
@@ -29,8 +29,8 @@ module.exports = function (ngModule) {
     $scope.$on('login', activate);
 
     function activate() {
-      if (songService.isLoggedIn()) {
-        songService.getAll(songService.user.key).then(function (songs) {
+      if (userService.isLoggedIn()) {
+        songService.getAll(userService.user.key).then(function (songs) {
           vm.songs = songs;
         });
       } 

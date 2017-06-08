@@ -36,12 +36,13 @@ Sequencer.prototype = {
     });
     
   },
+  /*
   preptrack: function (track) {
     if (track.annotations && track.annotations.name) {
       delete track.annotations.name;
     }
     track.macros = utils.combineMacros(track);
-  },
+  },*/
   interpret: function (track) {
     this.raiseEvent({ type: 'info', info: 'Interpreting ' + track.key });
 
@@ -94,7 +95,7 @@ Sequencer.prototype = {
   },
   update: function (updatedTrack) {
     if (!this.tracks) return;
-    this.preptrack(updatedTrack);
+   // this.preptrack(updatedTrack);
     var events = [];
     this.tracks.forEach((track, i) => {
       if (track.key === updatedTrack.key) {
@@ -162,7 +163,7 @@ Sequencer.prototype = {
   load: function (tracks, master) {
     this.interpreted = [];
     this.tracks = tracks;
-    this.tracks.forEach(this.preptrack.bind(this));
+  //  this.tracks.forEach(this.preptrack.bind(this));
     return this.updateMaster(master);
 
   },

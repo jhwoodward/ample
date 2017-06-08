@@ -1,60 +1,35 @@
 <div>
-
-  <md-tabs md-dynamic-height md-selected="vm.selectedTabIndex">
+  <md-tabs md-selected="vm.selectedTabIndex">
 
     <md-tab id="tab2">
       <md-tab-label>Track</md-tab-label>
-      <md-tab-body>
-        <form name="vm.trackForm">
+      <md-tab-body layout="column">
+        <div class="tab-content-inner">
           <div class="md-padding" style="margin-top:10px">
-            <h2>Imported</h2>
-            <macro-list macros="vm.importedMacros"></macro-list>
-
-            <div ng-if="vm.masterMacros.length">
-              <h2>Master</h2>
-              <macro-list macros="vm.masterMacros"></macro-list>
-            </div>
-            <h2>Own </h2>
-            <macro-list macros="vm.ownMacros"></macro-list>
-
-            <md-button ng-click="vm.saveMacroList()">
-              Save Macro List
-            </md-button>
-
-
+            <macro-list macros="vm.track.interpreted.macros"></macro-list>
           </div>
-        </form>
+        </div>
+        <div class="tab-buttons" layout="row">
+          <md-button ng-click="vm.saveMacroList()">
+            Export
+          </md-button>
+        </div>
       </md-tab-body>
     </md-tab>
 
     <md-tab id="tab1">
-      <md-tab-label>Macros</md-tab-label>
+      <md-tab-label>Imports</md-tab-label>
       <md-tab-body>
-        <md-list-item class="md-2-line"  ng-repeat="macroList in vm.macroLists"
-          ng-click="vm.import(macroList)">
-          <div class="md-list-item-text">
-            <h3 class="system-text">{{ macroList.key}}</h3>
-            <p>{{ macroList.description }}</p>
-          </div>
-        </md-list-item>
+        <div >
+          <md-list-item class="md-2-line" ng-repeat="macroList in vm.macroLists">
+            <div class="md-list-item-text">
+              <h3 class="system-text">{{ macroList.key}}</h3>
+              <p>{{ macroList.description }}</p>
+              <md-checkbox class="md-secondary" ng-change="vm.setImports()" ng-model="macroList.selected"></md-checkbox>
+            </div>
+          </md-list-item>
+        </div>
       </md-tab-body>
-
     </md-tab>
-
   </md-tabs>
-  <div class="tracks-panel-buttons" layout="row">
-
-
-    <md-button ng-click="vm.clone()">
-      Clone
-    </md-button>
-
-    <md-button ng-click="vm.del()">
-      Delete
-    </md-button>
-    <span flex></span>
-    <md-button ng-click="vm.cancel() ">
-      Cancel
-    </md-button>
-  </div>
 </div>

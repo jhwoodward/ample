@@ -1,13 +1,47 @@
 .side-menu {
     background: #d8d8d8 !important;
 
+    &.edit-song .track-list md-input-container {
+        margin: 10px 0;
+    }
+
     md-tabs,
     md-content {
         background: #d8d8d8 !important;
     }
 
+    md-tabs {
+        height: 100vh;
+    }
+
+    md-tabs-content-wrapper {
+        top: 63px;
+    }
+
+    .tab-buttons {
+        border-top: 1px solid #eee;
+    }
+
+    .tab-buttons, .btn-remove-tag {
+        bottom: 0;
+        position: absolute;
+        width: 100%;
+    }
+
+    md-tab-content {
+        background: #d8d8d8 !important;
+        height: calc(100vh - 70px);
+        overflow-y: auto;
+    }
+
+    .tab-content-inner {
+        height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+
     md-content {
         border-right: 1px solid #c5c5c5;
+        overflow-y: auto;
     }
 
     .md-tab {

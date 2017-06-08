@@ -4,7 +4,7 @@
     <md-tab id="tab2"  ng-if="$root.user.key !== 'guest'" >
       <md-tab-label>{{$root.user.key}}</md-tab-label>
       <md-tab-body>
-        <md-content>
+        <md-content class="scroll">
            <song-list 
             
               list-name='{{$root.user.key}}' 
@@ -17,10 +17,12 @@
     <md-tab id="tab2"  ng-if="$root.user.key !== 'tutorial'">
       <md-tab-label>Tutorial</md-tab-label>
       <md-tab-body>
+         <md-content class="scroll">
         <song-list 
           list-name='tutorial' 
           on-selected="vm.load(song)">
         </song-list>
+           </md-content>
       </md-tab-body>
     </md-tab>
 

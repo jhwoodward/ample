@@ -284,7 +284,7 @@ Interpreter.prototype.getEvents = function () {
 }
 
 Interpreter.prototype.setMacro = function (macro) {
-  macro.isOwn = true;
+  macro.source = 'self';
   utils.mergeMacros(this.macros, [macro]);
 }
 
@@ -304,11 +304,9 @@ Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
       macro.type === macroType.articulation
   }).forEach(macro => {
     macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart, isMaster);
-    macro.isMaster = isMaster;
-    if (macro.isOwn) {
-      macro.isOwn = !isMaster;
+    if (isMaster) {
+      macro.source = 'master';
     }
-    
   });
 
   this.animations = {};
@@ -331,10 +329,17 @@ Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
 
 Interpreter.prototype.interpret = function (part) {
 
+  this.macros = this.macros.filter(m => m.source !== 'self');
+  
   this.parseMacros(part, parsers.main);
 
-  if (this.master) {
-    _.extend(this.macros, this.master.macros);
+  if (this.master && this.master.macros && this.master.macros.length) {
+    this.master.macros.forEach(m=> {
+      var overwritten = this.macros.filter(m2 => m2.key === m.key).length;
+      if (!overwritten) {
+        this.macros.push(m);
+      }
+    });
   }
 
   this.defaultPhraseParser = stateUtils.getDefaultPhraseParser(this.macros);

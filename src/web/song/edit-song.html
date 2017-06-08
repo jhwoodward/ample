@@ -5,6 +5,7 @@
     <md-tab id="tab2">
       <md-tab-label>Tracks</md-tab-label>
       <md-tab-body>
+         <div class="tab-content-inner">
         <form name="vm.trackForm">
           <div class="md-padding" style="margin-top:10px">
 
@@ -38,18 +39,20 @@
               </div>
 
           </div>
+          </div>
         </form>
       </md-tab-body>
     </md-tab>
     <md-tab id="tab1">
       <md-tab-label>Info</md-tab-label>
       <md-tab-body>
-     
-        <store-item store-item="vm.song" valid="vm.valid"></store-item>
+        <div class="tab-content-inner">
+          <store-item store-item="vm.song" valid="vm.valid"></store-item>
+        </div>
       </md-tab-body>
     </md-tab>
   </md-tabs>
-  <div class="tracks-panel-buttons" layout="row">
+  <div class="tab-buttons" layout="row">
     <md-button ng-click="vm.save()" ng-disabled="!vm.valid" ng-if="vm.song.owner === $root.user.key || !vm.song.created">
       Save
     </md-button>

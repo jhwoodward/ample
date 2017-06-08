@@ -49,14 +49,6 @@ body, md-toolbar, md-toolbar input,.md-toolbar-tools, #song-name, .track-row {
     border-bottom: 1px solid #423d35;
 }
 
-.tracks-panel-buttons {
-    border-top: 1px solid #eee;
-}
-
-.tracks-panel .track-list md-input-container {
-    margin: 10px 0;
-}
-
 .btn-rewind {
     font-size: 29px !important;
     margin-top: -4px !important;
@@ -70,14 +62,7 @@ body, md-toolbar, md-toolbar input,.md-toolbar-tools, #song-name, .track-row {
     color: white;
 }
 
-.tracks-panel-buttons, .btn-remove-tag {
-    bottom: 0;
-    position: absolute;
-    width: 100%;
-}
-
 .system-text {
-
     letter-spacing: 0.01em;
     color: #b3b3b3;
 
@@ -87,7 +72,6 @@ body, md-toolbar, md-toolbar input,.md-toolbar-tools, #song-name, .track-row {
 }
 
 h1.system-text {
-
     font-weight: 500;
 }
 

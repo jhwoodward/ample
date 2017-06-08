@@ -24,30 +24,36 @@ module.exports = function (ngModule) {
       if (open) {
         activate();
       }
-    })
+    });
 
     function activate() {
-
-      vm.ownMacros = vm.track.interpreted.macros.filter(m => m.isOwn);
-      vm.masterMacros = vm.track.interpreted.macros.filter(m => m.isMaster);
-      vm.importedMacros = vm.track.interpreted.macros.filter(m => !m.isMaster && !m.isOwn);
-
-
       macroListService.getAll(userService.user.key).then(function (items) {
+        items = items.map(macroList => {
+          var source = macroList.owner + '/' + macroList.key;
+          macroList.selected = vm.track.imports.indexOf(source) > -1;
+          return macroList;
+        });
         vm.macroLists = items;
       });
-   
-
     }
 
-    vm.import = function(macroList) {
-      vm.track.imports = vm.track.imports || [];
+    vm.setImports = function () {
+      vm.track.imports = [];
+      vm.track.macros = [];
+      vm.track.interpreted.macros = vm.track.interpreted.macros.filter(m => m.source === 'default' || m.source === 'self' || m.source === 'master');
 
-      vm.track.imports.push(macroList);
-
-      vm.track.macros = vm.track.macros.concat(macroList.macros);
-
-
+      vm.macroLists.filter(m => m.selected).forEach(macroList => {
+        var source = macroList.owner + '/' + macroList.key;
+        vm.track.imports.push(source);
+        macroListService.getOne(macroList.key, macroList.owner).then(function (loaded) {
+          loaded.macros = loaded.macros.map(m => {
+            m.source = source;
+            return m;
+          });
+          vm.track.macros = vm.track.macros.concat(loaded.macros);
+          vm.track.interpreted.macros = vm.track.interpreted.macros.concat(loaded.macros);
+        });
+      });
     }
 
     vm.saveMacroList = function () {
@@ -56,17 +62,13 @@ module.exports = function (ngModule) {
         controller: 'MacroListController',
         resolve: {
           macros: function () {
-            return vm.ownMacros;
+            return vm.track.interpreted.macros.filter(m => m.source === 'self');
           }
-        }
-        ,
+        },
         controllerAs: 'vm',
         parent: angular.element(document.body),
         clickOutsideToClose: false
       });
     }
-
-
   }
-
 }

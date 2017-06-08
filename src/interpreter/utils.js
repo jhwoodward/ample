@@ -82,7 +82,7 @@ var api = {
     add.forEach(a => {
       var updated = false;
       existing.filter(x => x.type === a.type).forEach(x => {
-        if (x.key === a.key) {
+        if (x.key === a.key && (x.source === a.source || !x.source)) {
 
           if (x.type === 'substitutionset') {
             x.values[a.index] = {
@@ -94,13 +94,13 @@ var api = {
             return;
           }
 
-          if (x.value) {
+          if (a.value) {
             x.value = a.value;
           }
-          if (x.values) {
+          if (a.values) {
             x.values = a.values;
           }
-          if (x.parsed) {
+          if (a.parsed) {
             x.parsed = a.parsed;
           }
           x.definitionStart = a.definitionStart;

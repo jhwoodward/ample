@@ -11,7 +11,7 @@
 
           <md-button class="md-icon-button btn-rewind ion-skip-backward" ng-click="vm.sequencer.rewind()">
           </md-button>
-            <md-button class="md-icon-button btn-rewind ion-skip-forward" ng-click="vm.sequencer.toend()">
+          <md-button class="md-icon-button btn-rewind ion-skip-forward" ng-click="vm.sequencer.toend()">
           </md-button>
           <md-button class="md-icon-button ion-play btn-reverse" ng-click="vm.sequencer.reverse()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === -1 || vm.sequencer.paused}">
           </md-button>
@@ -40,28 +40,24 @@
       </div>
     </div>
 
-  
-  
 
 
-  <md-button ng-if="$root.user.key !== 'guest'" 
-  class="md-icon-button ion-android-document" 
-  ng-click="vm.new($event)">
-    <md-tooltip md-direction="top">New</md-tooltip>
+
+
+    <md-button ng-if="$root.user.key !== 'guest'" class="md-icon-button ion-android-document" ng-click="vm.new($event)">
+      <md-tooltip md-direction="top">New</md-tooltip>
     </md-button>
 
-     <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" 
-      class="md-icon-button ion-ios-browsers" ng-click="vm.clone($event)">
-        <md-tooltip md-direction="top">Clone</md-tooltip>
+    <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" class="md-icon-button ion-ios-browsers" ng-click="vm.clone($event)">
+      <md-tooltip md-direction="top">Clone</md-tooltip>
     </md-button>
 
-    <md-button ng-if="$root.user.key !== 'guest'" 
-      class="md-icon-button ion-android-folder" ng-click="vm.toggleStore()">
-        <md-tooltip md-direction="top">Library</md-tooltip>
+    <md-button ng-if="$root.user.key !== 'guest'" class="md-icon-button ion-android-folder" ng-click="vm.toggleStore()">
+      <md-tooltip md-direction="top">Library</md-tooltip>
     </md-button>
-   
 
-    <h2 md-truncate  ng-if="$root.user.key === 'guest'" class="brand" ng-click="vm.toggleStore()" style="outline:none;cursor:pointer">Tutorial
+
+    <h2 md-truncate ng-if="$root.user.key === 'guest'" class="brand" ng-click="vm.toggleStore()" style="outline:none;cursor:pointer">Tutorial
     </h2>
 
   </div>
@@ -70,16 +66,9 @@
 <section>
   <div layout="column" class="track-container">
     <div layout="row" class="track-row" flex style="min-width:{{(251 * vm.song.tracks.length) + 251}}px;">
-      <master-track ng-if="vm.song.useMaster" 
-          on-edit="vm.editTrack(vm.song.master)"
-          flex master="vm.song.master" 
-          sequencer="vm.sequencer">
+      <master-track ng-if="vm.song.useMaster" on-edit="vm.editTrack(vm.song.master)" flex master="vm.song.master" sequencer="vm.sequencer">
       </master-track>
-      <track flex ng-repeat="track in vm.song.tracks" 
-        track="track" 
-        track-index="$index" 
-        sequencer="vm.sequencer"
-        on-edit="vm.editTrack(track)">
+      <track flex ng-repeat="track in vm.song.tracks" track="track" track-index="$index" sequencer="vm.sequencer" on-edit="vm.editTrack(track)">
       </track>
 
     </div>
@@ -89,20 +78,22 @@
 
   <piano-roll active="vm.log==='roll'" sequencer="vm.sequencer"></piano-roll>
 
-  <md-sidenav class="md-sidenav-left side-menu" md-component-id="options">
-    <options log="vm.log"></options>
-  </md-sidenav>
 
-  <md-sidenav class="md-sidenav-right side-menu" md-component-id="store">
-    <store song="vm.song" is-open="vm.storeOpen()"></store>
-  </md-sidenav>
-
-  <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="editSong">
-    <edit-song song="vm.song" sequencer="vm.sequencer" is-open="vm.editSongOpen()"></edit-song>
-  </md-sidenav>
-
-   <md-sidenav class="tracks-panel md-sidenav-right side-menu" md-component-id="editTrack">
-    <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()"></edit-track>
-  </md-sidenav>
 
 </section>
+
+<md-sidenav class="md-sidenav-left side-menu" md-component-id="options">
+  <options log="vm.log"></options>
+</md-sidenav>
+
+<md-sidenav class="md-sidenav-right side-menu" md-component-id="store">
+  <store song="vm.song" is-open="vm.storeOpen()"></store>
+</md-sidenav>
+
+<md-sidenav class="edit-song md-sidenav-right side-menu" md-component-id="editSong">
+  <edit-song song="vm.song" sequencer="vm.sequencer" is-open="vm.editSongOpen()"></edit-song>
+</md-sidenav>
+
+<md-sidenav class="edit-track md-sidenav-right side-menu" md-component-id="editTrack">
+  <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()"></edit-track>
+</md-sidenav>

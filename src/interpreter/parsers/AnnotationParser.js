@@ -5,8 +5,9 @@ var eventType = require('../constants').eventType;
 
 function AnnotationParser(macros) {
   this.type = 'Annotation';
-  this.test = /^{\w+}/;
-
+  //this.test = /^{\w+}/;
+  this.dynamic = true;
+  this.test = /^{\w+}(?!( ?)=)/;
   if (macros) {
     this.annotations = macros.reduce(function (acc, item) {
       if (item.type === macroType.annotation) {
@@ -14,6 +15,7 @@ function AnnotationParser(macros) {
       }
       return acc;
     }, {});
+    
   } else {
     this.annotations = {};
   }
@@ -48,6 +50,7 @@ var prototype = {
     return out;
   },
   merge: function(articulations){
+    
     var out = new AnnotationParser();
     out.parsed = {
       key: this.parsed.key,
@@ -62,6 +65,7 @@ var prototype = {
     out.info = articulations.map(a => a.key).join(', ');
     out.isArticulation = true;
     return out;
+    
   },
   append: function(parsers, key) {
     var replace = [];

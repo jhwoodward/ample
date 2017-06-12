@@ -67,6 +67,7 @@ module.exports = function (ngModule) {
           note.top = (note.pitch * scaleFactor) - offset;
           note.height = scaleFactor > 20 ? 20 : scaleFactor;
           note.width = note.duration;
+          note.opacity = (note.velocity / 127) + 0.3;
           return note;
         });
       }
@@ -263,10 +264,31 @@ module.exports = function (ngModule) {
           if (vm.sequencer.solo && vm.sequencer.solo !== track.key) return;
           if (!vm.sequencer.solo && track.isMuted) return;
 
-          var noteons = interpreted.events.filter(e => e.type === eventType.noteon);
-          var noteoffs = interpreted.events.filter(e => e.type === eventType.noteoff);
+          var events = interpreted.events.filter(e => e.type === eventType.noteon && !e.keyswitch).map(e => {
+
+            if (e.pitch.value > highestPitch) {
+              highestPitch = e.pitch.value;
+            }
+            if (e.pitch.value < lowestPitch) {
+              lowestPitch = e.pitch.value;
+            }
+
+            return {
+              trackIndex: e.trackIndex,
+              pitch: 127 - e.pitch.value,
+              on: e.tick - e.offset,
+              off: e.tick + e.duration - e.offOffset,
+              duration: e.duration,// off.duration || (off.tick - on.tick),
+              meta: { on: e },
+              ornament: e.ornament,
+              velocity: e.velocity
+            }
+          });
+          data = data.concat(events);
+          //  var noteoffs = interpreted.events.filter(e => e.type === eventType.noteoff);
 
           //TODO: no need to calc duration anymore here
+          /*
           noteons.forEach(on => {
 
             for (var i = 0; i < noteoffs.length; i++) {
@@ -293,6 +315,8 @@ module.exports = function (ngModule) {
               }
             }
           });
+
+          */
         });
 
 
@@ -344,8 +368,8 @@ module.exports = function (ngModule) {
       note.active = true;
       $timeout(function () {
         note.active = false;
-        vm.sequencer.trigger(note.meta.off);
-      }, note.meta.on.duration * vm.sequencer.interval / 1000);
+        vm.sequencer.trigger({type: 'noteoff', pitch: note.meta.on.pitch, track: note.meta.on.track});
+      }, note.duration * vm.sequencer.interval / 1000);
     }
   }
 

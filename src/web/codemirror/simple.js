@@ -112,61 +112,23 @@ function tokenFunction(states, config) {
     //TODO: SHOULD BE MOVED SOMEWHERE WHERE IT CAN BE PROCESSED ONLY WHEN TEXT CHANGES
     if (cm) {
       var val = cm.doc.getValue();
-      var all = val.match(/\w+((\#[\d])?)( ?)=/g);
-      var subRules = states.start.filter(s => s.data.sub);
-      var subsetRules = states.start.filter(s => s.data.subset);
-
-      if (all) {
-        var subs = all.filter(s => s.indexOf('#') === -1);
-        var subsets = all.filter(s => s.indexOf('#') > -1);
-
-        if (subsets.length) {
-          subsets.sort((a, b) => {
-            if (a.length > b.length) return -1;
-            return 1;
-          });
-          subsets = subsets.reduce(function (acc, item) {
-
-            acc.push(item.replace('=', '').replace('#', '\\#').trim());
-
-            var key = item.split('#')[0];
-            acc.push(key + '\\#random');
-            acc.push(key + '\\#next');
-            return acc;
-          }, []);
-          subsets = '^(' + subsets.join('|') + ')';
-          subsetRules.forEach(r => {
-            r.regex = new RegExp(subsets, 'g');
-          });
-        } else {
-          subsetRules.forEach(r => {
-            r.regex = /$^/;
-          });
-        }
-
-        if (subs.length) {
-          subs.sort((a, b) => {
-            if (a.length > b.length) return -1;
-            return 1;
-          });
-          subs = '^(' + subs.map(k => k.replace('=', '').trim()).join('|') + ')';
-          subRules.forEach(r => {
-            r.regex = new RegExp(subs, 'g');
-          });
-        } else {
-          subRules.forEach(r => {
-            r.regex = /$^/;
-          });
-        }
+      var macros = cm.doc.macros || [];
+      var substitutions = macros.filter(m => m.type === 'substitution');
+      var annotations = macros.filter(m => m.type === 'annotation');
+      var substitutionRule = states.start.filter(s => s.token === 'substitution')[0];
+      var annotationRule = states.start.filter(s => s.token === 'annotation')[0];
+      if (substitutions && substitutions.length) {
+        substitutions = '^(' + substitutions.map(macro => macro.key + '( ?)(\=?)').join('|') + ')';
+        substitutionRule.regex = new RegExp(substitutions, 'g');
       } else {
-        subsetRules.forEach(r => {
-          r.regex = /$^/;
-        });
-        subRules.forEach(r => {
-          r.regex = /$^/;
-        });
+        substitutionRule.regex = /$^/;
       }
-
+      if (annotations && annotations.length) {
+        annotations = '^(' + annotations.map(macro => '{' + macro.key + '}' + '( ?)(\=?)').join('|') + ')';
+        annotationRule.regex = new RegExp(annotations, 'g');
+      } else {
+        annotationRule.regex = /$^/;
+      }
     }
 
     var curState = states[state.state];

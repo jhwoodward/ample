@@ -1,44 +1,34 @@
+var macroType = require('../../interpreter/constants').macroType;
+var Interpreter = require('../../interpreter/Interpreter');
+var parsers = require('../../interpreter/parsers');
+var parse = require('../../interpreter/parse');
 var eventType = require('../../interpreter/constants').eventType;
 var _ = require('lodash');
+
 module.exports = function (ngModule) {
 
-  ngModule.directive('track', [function () {
+  ngModule.directive('editMacroList', [function () {
     return {
       restrict: 'E',
       replace: true,
-      template: require('./track.html'),
+      template: require('./edit-macro-list.html'),
       scope: {
         sequencer: '=',
-        track: '=',
+        macroList: '=',
         panelIndex: '=',
-        onEdit: '&',
-        onEditMacroList: '&'
+        onClose: '&',
+        onUpdate: '&'
       },
       bindToController: true,
-      controller: ['$scope', '$timeout', 'macroListService', controller],
+      controller: ['$scope', '$timeout', 'userService', controller],
       controllerAs: 'vm'
     }
   }]);
 
-  function controller($scope, $timeout, macroListService) {
+  function controller($scope, $timeout, userService) {
     var vm = this;
-    vm.channels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16];
-    vm.showChannelDropdown = function ($mdMenu, ev) {
-      $mdMenu.open(ev);
-    };
 
-    $scope.$watch('vm.track.isMuted', function (isMuted) {
-      if (isMuted) {
-        clearAllMarkers();
-        if (subMarker) {
-          subMarker.clear();
-        }
-        if (sustainMarker) {
-          sustainMarker.clear();
-        }
-        vm.setActive(false);
-      }
-    });
+    $scope.$watch('vm.macroList', activate);
 
     $scope.$watch('vm.sequencer', function (seq) {
       if (seq) {
@@ -46,8 +36,56 @@ module.exports = function (ngModule) {
       }
     });
 
-    //  http://codemirror.net/doc/manual.html#api_marker
-    var markers = {};
+    function activate(macroList) {
+      if (!macroList) return;
+      macroList.part = macroList.macros.reduce((acc, macro) => {
+
+        switch (macro.type) {
+          case macroType.annotation:
+            acc += '{' + macro.key + '} = {' + macro.value + '}';
+            break;
+          case macroType.substitution:
+            acc += macro.key + ' = (' + macro.value + ')';
+            break;
+        }
+
+        acc += '\n\n';
+
+        return acc;
+
+
+      }, '');
+    }
+
+    $scope.$watchCollection('vm.macroList.macros', function (macros) {
+      if (macros === undefined) return;
+      doc.macros = macros;
+
+      vm.part = vm.macroList.part;
+    });
+
+
+    $scope.$watch('vm.part', _.debounce(function (val, old) {
+      if (val && old && val !== old) {
+        $timeout(function () {
+
+          vm.macroList.part = vm.part;
+          var source = (vm.macroList.owner || userService.user.key) + '/' + vm.macroList.key;
+          var interpreter = new Interpreter();
+          interpreter.generateState(parse(parsers.setter, vm.macroList.part, [], 0, vm.panelIndex));
+          //vm.macroList.macros = interpreter.parseMacros(vm.macroList.part, parsers.main);
+          vm.macroList.macros = interpreter.macros.filter(m => m.value !== undefined).map(m => {
+            m.source = source;
+            m.panelIndex = vm.panelIndex;
+            return m;
+          });
+          vm.onUpdate({ macroList: vm.macroList });
+
+        });
+      }
+    }, 1000));
+
+   var markers = {};
     var subMarker, subMarker2
     var sustainMarker;
 
@@ -65,7 +103,7 @@ module.exports = function (ngModule) {
       if (event.type === 'stop') {
         clearAllMarkers();
 
-        vm.setActive(false);
+      
         return;
       }
 
@@ -149,7 +187,7 @@ module.exports = function (ngModule) {
 
     }
 
-    vm.setActive = function (active) {
+   vm.setActive = function (active) {
       $timeout(function () {
         $scope.$apply(function () {
           vm.active = active;
@@ -157,9 +195,15 @@ module.exports = function (ngModule) {
       });
     }
 
-    vm.selectChannel = function (channel) {
-      vm.track.channel = channel - 1;
-    }
+    var editor, doc;
+    vm.codemirrorLoaded = function (ed) {
+      editor = ed;
+      doc = editor.getDoc();
+    };
+
+
+
+
     vm.options = {
       lineWrapping: true,
       lineNumbers: false,
@@ -172,38 +216,7 @@ module.exports = function (ngModule) {
       theme: 'blackboard'
     };
 
-    var editor, doc;
-    vm.codemirrorLoaded = function (ed) {
-      editor = ed;
-      doc = editor.getDoc();
-    };
 
-    $scope.$watchCollection('vm.track.interpreted.macros', function (macros) {
-      if (macros === undefined) return;
-      doc.macros = macros;
-
-      vm.part = vm.track.part;
-    });
-    /*
-        macroListService.getAll().then(macroLists => {
-          vm.macroLists = macroLists;
-          doc.macros = macroLists.reduce((acc,item) => {
-            acc = acc.concat(item.macros.map(m => m.key));
-            return acc;
-          },[]);
-        })
-        */
-
-
-    $scope.$watch('vm.part', _.debounce(function (val, old) {
-      if (val && old && val !== old) {
-        // $timeout(function () {
-        vm.track.part = vm.part;
-        vm.track.panelIndex = vm.panelIndex;
-        vm.sequencer.update(vm.track);
-        // });
-      }
-    }, 1000));
 
   }
 

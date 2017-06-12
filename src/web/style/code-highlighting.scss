@@ -36,8 +36,18 @@
     color: #de68d3;
 }
 
+.cm-keyswitch,
+.cm-controller,
+.cm-on,
+.cm-off,
+.cm-pitchbend,
+.cm-velocity {
+  color: #eca9e6;
+}
+
+
 .cm-brace {
-    color: #de68d3;
+    color: #f13fdf
 }
 
 .cm-note, 
@@ -62,9 +72,8 @@
 .cm-scaleconstraint,
 .cm-arpeggioornament,
 .cm-trillornament,
-.cm-turnornament,
-.cm-on,
-.cm-off {
+.cm-turnornament
+ {
     color: #af9e7d;
 }
 

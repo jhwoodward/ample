@@ -4,10 +4,10 @@ var Interpreter = require('../../interpreter/Interpreter');
 var Sequencer = require('../seq/Sequencer.js');
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'songService', 'userService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', '$mdDialog', 'midiService', 'timer', controller]);
+  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'songService', 'macroListService', 'userService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', '$mdDialog', 'midiService', 'timer', controller]);
 }
 
-function controller($scope, $rootScope, $timeout, songService, userService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer) {
+function controller($scope, $rootScope, $timeout, songService, macroListService, userService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer) {
   var vm = this;
 
   if (userService.user.key === 'guest') {
@@ -75,11 +75,40 @@ function controller($scope, $rootScope, $timeout, songService, userService, $mdS
 
   $scope.$watch('vm.editTrackOpen()', function (open) {
     if (open === false && vm.selectedTrack) {
-       vm.sequencer.update(vm.selectedTrack);
+      vm.sequencer.update(vm.selectedTrack);
     }
   });
 
+  vm.editMacroList = function (track, index, imp) {
+    var owner = imp.split('/')[0];
+    var key = imp.split('/')[1];
+    var alreadyOpen = vm.song.tracks.filter(t => t.owner === owner && t.key === key).length;
+    if (alreadyOpen) return;
+    macroListService.getOne(key, owner).then(macroList => {
+      macroList.trackIndex = track.trackIndex;
+      vm.song.tracks.splice(index + 1, 0, macroList);
+    });
 
+  }
+
+  vm.removeMacroListTrack = function(macroList, index) {
+    vm.song.tracks.splice(index,1);
+  }
+
+  vm.updateMacroListTrack = function(macroList){
+
+    var source = macroList.owner + '/' + macroList.key;
+
+    var tracksWithMacroList = vm.song.tracks.filter(t => t.imports && t.imports.indexOf(source) > -1);
+    
+    tracksWithMacroList.forEach(track => {
+      track.macros = track.macros.filter(m => m.source !== source);
+      track.macros = track.macros.concat(macroList.macros);
+      vm.sequencer.update(track);
+    });
+
+   
+  }
 
   vm.storeOpen = function () {
     return $mdSidenav('store').isOpen();

@@ -15,13 +15,27 @@ module.exports = function (ngModule) {
         }
       }
       payload.tracks = song.tracks.map(t => {
-        return {
+
+        var out = {
           key: t.key,
+          trackIndex: t.trackIndex,
+          panelIndex: t.panelIndex,
           channel: t.channel,
           part: t.part,
-          imports: t.imports,
-          macros: t.macros //save imported macros as backup
+          imports: t.imports
         };
+
+        //save macros locally as backup
+        if (t.macros) {
+          var macros = _.clone(t.macros);
+          delete macros.parsed;
+          out.macros = macros;
+        }
+
+        if (t.owner) {
+          out.owner = t.owner;
+        }
+        return out;
       });
       return payload;
     }
@@ -36,18 +50,21 @@ module.exports = function (ngModule) {
         tracks: [
           {
             key: 'track1',
+            trackIndex: 1,
             channel: 0,
             part: '',
             imports: []
           },
           {
             key: 'track2',
+            trackIndex: 2,
             channel: 0,
             part: '',
             imports: []
           },
           {
             key: 'track3',
+            trackIndex: 3,
             channel: 0,
             part: '',
             imports: []
@@ -57,7 +74,18 @@ module.exports = function (ngModule) {
     }
 
     function onLoad() {
+
+      var useMaster = this.useMaster ? 1 : 0;
+
+      this.tracks.forEach((track, i) => {
+        track.trackIndex = track.trackIndex || (i + 1);
+        track.panelIndex = track.panelIndex || (i + useMaster);
+      });
+
+      return this;
       var deferred = $q.defer();
+
+
 
       var imports = this.tracks.reduce((acc, track) => {
         track.imports = track.imports || [];

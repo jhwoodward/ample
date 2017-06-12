@@ -75,9 +75,10 @@ module.exports = function (ngModule) {
         }
       },
       getAll: function (owner) {
+        owner = owner || userService.user.key;
         return $http({
           method: 'GET',
-          url: root + '/all/' + this.type + '/' + owner
+          url: root + '/all/' + this.type + '/' + (owner)
         }).then(onSuccess, onFail);
         function onSuccess(response) {
           return response.data;

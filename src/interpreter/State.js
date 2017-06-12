@@ -22,6 +22,8 @@ function State(defaultPhraseParser) {
     },
     on: {},
     off: {},
+    onOffset: 0,
+    offOffset: -5,
     controller: {},
     pitchbend: undefined,
     velocity: 85,

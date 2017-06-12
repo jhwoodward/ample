@@ -11,8 +11,7 @@ var prototype = {
     return utils.parseValue(s);
   },
   mutateState: function (state) {
-    state.off = state.off || {};
-    state.off.offset = this.parsed.value;
+    state.offOffset = this.parsed.value;
   }
 }
 

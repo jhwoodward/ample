@@ -10,7 +10,6 @@ var eventType = require('../constants').eventType;
 
 function appendEvents(state, events, config, interpreter) {
 
-  var initialNoteOnTick = state.time.tick + (state.on.offset || 0);
   var noteon = events.filter(e => e.type === eventType.noteon)[0];
   noteon.duration = config.duration;
   //reset note off
@@ -51,18 +50,22 @@ function appendEvents(state, events, config, interpreter) {
     modifiers.forEach(m => {
       m.fn(dummyState);
     });
+
+    var velocity = state.velocity - (count * 15);
+    if (velocity < 30) velocity = 60;
     out.push({
       tick: onTick,
-      offset: dummyState.on.offset,
+      offset: dummyState.onOffset,
+      offOffset:  dummyState.offOffset,
       type: eventType.noteon,
       pitch: dummyState.pitch,
-      velocity: state.velocity - (count * 20),
+      velocity,
       duration: config.duration,
       ornament: true
     });
     out.push({
       tick: onTick + config.duration,
-      offset: dummyState.off.offset,
+      offset: dummyState.offOffset,
       type: eventType.noteoff,
       pitch: dummyState.pitch,
       ornament: true

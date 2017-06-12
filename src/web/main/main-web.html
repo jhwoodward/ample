@@ -66,10 +66,30 @@
 <section>
   <div layout="column" class="track-container">
     <div layout="row" class="track-row" flex style="min-width:{{(251 * vm.song.tracks.length) + 251}}px;">
-      <master-track ng-if="vm.song.useMaster" on-edit="vm.editTrack(vm.song.master)" flex master="vm.song.master" sequencer="vm.sequencer">
+      <master-track ng-if="vm.song.useMaster" 
+      on-edit="vm.editTrack(vm.song.master)" 
+      panel-index="0"
+      flex master="vm.song.master" 
+      sequencer="vm.sequencer">
       </master-track>
-      <track flex ng-repeat="track in vm.song.tracks" track="track" track-index="$index" sequencer="vm.sequencer" on-edit="vm.editTrack(track)">
-      </track>
+      <div flex ng-repeat="track in vm.song.tracks" 
+      class="track-container"
+      ng-class="{'collapsed': (track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(track)}"
+      >
+        <track
+          panel-index="$index+ (vm.song.useMaster ? 1:0)"
+          ng-if="track.channel !== undefined" flex track="track" sequencer="vm.sequencer" on-edit="vm.editTrack(track)"
+          on-edit-macro-list="vm.editMacroList(track, $index, imp)">
+        </track>
+        <edit-macro-list 
+          panel-index="$index+ (vm.song.useMaster ? 1:0)"
+          ng-if="track.channel === undefined" flex macro-list="track" 
+          on-close="vm.removeMacroListTrack(track, $index)"
+          on-update="vm.updateMacroListTrack(macroList)"
+          sequencer="vm.sequencer" >
+        </edit-macro-list>
+      </div>
+
 
     </div>
   </div>
@@ -95,5 +115,5 @@
 </md-sidenav>
 
 <md-sidenav class="edit-track md-sidenav-right side-menu" md-component-id="editTrack">
-  <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()"></edit-track>
+  <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()" ></edit-track>
 </md-sidenav>

@@ -8,17 +8,19 @@ function AnnotationSetterParser(macros) {
   this.type = 'AnnotationSetter';
   this.setter = true;
   this.master = true;
-
-    this.test = /{\w+}=/;///for code highlighting only
+  this.dynamic =true;
+  //this.test = /^\w+( ?)=( ?)\{[\s\S]*\}/;///for code highlighting only
+  
 }
 
 var prototype = { 
   match: function match(s) {
-    var startTest = /^\{\w+\}=\{/.exec(s);
+    var startTest = /^{\w+}( ?)=( ?)\{/.exec(s);
     if (!startTest) return false;
 
-    var key = /^\{\w+\}=/.exec(s)[0].replace('{','').replace('}','').replace('=','');
+    var key = /^{\w+}( ?)=/.exec(s)[0].replace('}','').replace('{','').replace('=','').trim();;
     var bracketed = parserUtils.getBracketed(s, startTest[0].length, '{','}');
+    if (!bracketed) return;
     var value = bracketed.trim();
     this.string = startTest[0] + bracketed + '}';
     this.parsed = { type: 'annotation', key, value };

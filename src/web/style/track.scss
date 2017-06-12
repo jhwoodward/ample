@@ -1,28 +1,101 @@
+.track-row {
+    border-bottom: 1px solid #423d35;
+}
+
+.track-container {
+   &:not(.collapsed) {
+      min-width: 300px !important;
+   }
+  
+}
 .track {
-   /* transition: all 0.7s ease-in-out;*/
+  
+    border-right: 1px solid #423d35;
 
     &:not(.collapsed) {
         min-width: 300px !important;
     }
 
-  
-
-    border-right: 1px solid #423d35;
-
     .track-content {
         height: 400px;
         background: #191919;
+
+        md-chips-wrap {
+            border: none !important;
+        }
+
+        md-chips.md-chips.md-focused {
+            box-shadow: none;
+        }
+
+        .md-chips {
+            padding: 0;
+            font-size: 12px;
+
+            .md-chip-input-container {
+                margin: 0;
+            }
+
+            .md-chip-input-container, .md-chip-input-container md-autocomplete {
+                line-height: 20px;
+
+                input {
+                    color: #eee;
+                    font-family: menlo;
+                    font-size: 12px;
+                    height: 20px;
+                    line-height: 20px;
+                }
+            }
+
+            md-chip {
+                background: transparent;
+                color: #eee;
+                height: 20px;
+                line-height: 20px;
+                font-family: menlo;
+                font-size: 12px;
+                padding: 0 28px 0 0;
+                margin: 0;
+                color: #9fc7c7;
+
+                .md-chip-remove-container {
+                    top: 0;
+                    opacity: 0.5;
+                }
+            }
+        }
+    }
+
+    .track-imports {
+        color: #94b5e0;
+        padding: 5px 0 5px 10px;
+        font-family: menlo;
+        font-size: 0.8em;
+    }
+
+    .track-imports {
+        border-bottom: 1px dashed #525252;
     }
 
     .track-content .highlight {
         border-bottom: 3px solid white;
     }
 
-    &.master-track .track-content .CodeMirror {
+    &.master-track {
+
+      .md-toolbar-tools {
+         background-color: #2f2f2f;
+          border-bottom: #828282;
+      }
+      .track-content .CodeMirror {
         box-shadow: inset 1px 2px 40px -5px rgba(0, 0, 0, 0.3);
         height: 100%;
-        font-size: 1em;
+      }
+
     }
+
+   
 
     &.solo {
         flex: 2;
@@ -43,7 +116,7 @@
         flex: 0.5;
 
         .track-toolbar .md-toolbar-tools {
-          border-color:  #000;
+            border-color: #000;
         }
 
         .track-content, .CodeMirror {
@@ -57,7 +130,7 @@
 
     .CodeMirror {
         height: auto;
-        font-size: 1em;
+        font-size: 14px;
     }
 
     .track-toolbar {
@@ -68,10 +141,8 @@
 
         .md-toolbar-tools {
             padding: 0 10px;
-            background: #1b1b1b;
             border-bottom-width: 3px;
             border-bottom-style: solid;
-          
 
             .md-button {
                 margin: 0;
@@ -80,7 +151,7 @@
         }
 
         .track-led {
-          display:none;
+            display: none;
             width: 13px;
             height: 13px;
             border-radius: 50%;

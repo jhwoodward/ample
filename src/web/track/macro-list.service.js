@@ -7,10 +7,11 @@ module.exports = function (ngModule) {
 
     function getPayload(macroList) {
       var payload = {
+        part:'',
         macros: []
       };
       for (var key in macroList) {
-        if (key !== 'macros' && macroList.hasOwnProperty(key)) {
+        if (key !== 'macros' && key !== 'part' && macroList.hasOwnProperty(key)) {
           payload[key] = macroList[key];
         }
       }
@@ -27,16 +28,24 @@ module.exports = function (ngModule) {
     function getNew() {
       return {
         name: '',
+        part: '',
         description: '',
         macros: []
       };
     }
 
+    function onLoad() {
+      this.part = this.part || '';
+      return this;
+    }
+
+    
+
     var props = {
       requireKey: true
     };
 
-    return storeFactory.create('macroList', getNew, getPayload, props);
+    return storeFactory.create('macroList', getNew, getPayload, props, onLoad);
 
   }]);
 

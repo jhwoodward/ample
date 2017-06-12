@@ -35,21 +35,29 @@ module.exports = function (ngModule) {
       vm.nameHasFocus = !vm.song.created;
       orig = _.cloneDeep(vm.song);
       origInterpeted = _.cloneDeep(vm.sequencer.interpreted);
-      vm.song.tracks.forEach((t, i) => t.originalIndex = i);
+      //vm.song.tracks.forEach((t, i) => t.originalIndex = i);
     }
 
     vm.deleteTrack = function (index) {
       vm.song.tracks.splice(index, 1);
+
+      vm.song.tracks.forEach((track, i) => {
+        track.trackIndex = i + 1;
+      });
     }
 
     vm.moved = function (index) {
       vm.song.tracks.splice(index, 1);
+      vm.song.tracks.forEach((track, i) => {
+        track.trackIndex = i + 1;
+      });
       vm.sequencer.reorder(vm.song.tracks);
     }
 
     vm.addTrack = function () {
       var newTrack = {
         key: 'track' + (vm.song.tracks.length + 1),
+        trackIndex: vm.song.tracks.length + 1,
         part: '',
         channel: 0
       };

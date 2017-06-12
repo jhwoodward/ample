@@ -19,7 +19,7 @@ function findMatch(parsers, part, macros) {
 /*
 Returns an array of parsers who's regex's match the part string
 */
-const parse = (parsers, part, macros, cursor, isMaster) => {
+const parse = (parsers, part, macros, cursor, panelIndex) => {
   var out = [], parser;
   var cursor = cursor || 0;
   while (part.length && out.length < 9999999) {
@@ -29,7 +29,7 @@ const parse = (parsers, part, macros, cursor, isMaster) => {
       parser.origin = {
         start: cursor,
         end: cursor + parser.string.length,
-        isMaster: isMaster
+        panelIndex: panelIndex
       };
       out.push(parser);
       part = part.substring(parser.string.length, part.length);

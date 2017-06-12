@@ -48,7 +48,7 @@ Sequencer.prototype = {
 
     
     var interpreter = new Interpreter(track.macros, this.interpretedMaster || this.master.part);
-    var interpreted = interpreter.interpret(track.part);
+    var interpreted = interpreter.interpret(track.part, track.panelIndex);
     interpreted.events.forEach(e => {
       e.track = track;
     });
@@ -64,7 +64,7 @@ Sequencer.prototype = {
       if (!this.interpreted[index]) return;
       interpreted[i] = this.interpreted[index];
       interpreted[i].events.forEach(e => {
-        e.trackIndex = i;
+        e.trackIndex = track.trackIndex;
       });
       track.originalIndex = i;
     });
@@ -83,10 +83,10 @@ Sequencer.prototype = {
     }
     interpreted.events.forEach(e => {
       e.track = master;
-      e.isMaster = true;
+      e.panelIndex = master.panelIndex;
     });
     this.interpretedMaster = interpreted;
-
+    this.master.interpreted = interpreted;
     if (this.tracks) {
       return this.interpretAll();
     }
@@ -114,7 +114,11 @@ Sequencer.prototype = {
     this.reorder();
     this.raiseEvent({ type: 'ready', tracks: this.tracks, interpreted: this.interpreted })
     return this;
-  },
+  },/*
+  updateMacroList: function(macroList) {
+      var interpreter = new Interpreter()
+      interpreter.parseMacros(macroList.part, parsers.main);
+  },*/
   validate: function (events) {
     var errors = events.filter(e => {
       return e.tick === undefined || isNaN(e.tick);

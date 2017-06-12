@@ -6,7 +6,7 @@ var eventType = require('../constants').eventType;
 function SubstitutionSetParser(macros) {
   this.type = 'SubstitutionSet';
   this.test = /^\w+(\#[\d]+|\#random|\#next)?(?!( ?)=)/;
-  this.subset = true;
+  this.dynamic = true;
   this.substitutionSets = {};
   if (macros) {
     this.substitutionSets = macros.reduce(function (acc, item) {

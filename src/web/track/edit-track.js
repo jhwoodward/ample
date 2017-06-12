@@ -56,6 +56,8 @@ module.exports = function (ngModule) {
       });
     }
 
+    
+
     vm.saveMacroList = function () {
       $mdDialog.show({
         template: require('./macro-list-save.html'),

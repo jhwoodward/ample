@@ -8,8 +8,9 @@ function SubstitutionSetterParser() {
   this.setter = true;
   this.master = true;
 
-  this.test = /^\w+( ?)=( ?)/;///for code highlighting only
-  this.testEnd = /\)/;
+  this.dynamic = true;
+  //this.test = /^\w+( ?)=( ?)/;///for code highlighting only
+  //this.testEnd = /\)/;
 }
 
 var prototype = {

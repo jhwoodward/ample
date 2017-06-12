@@ -20,10 +20,10 @@ style="position:relative" ng-class="{ 'playing': vm.sequencer.playing }">
     style="left:{{marker.tick}}px;">{{marker.key}}</div>
 
     <div ng-repeat="note in vm.visible track by $index" 
-      ng-class="{'active': note.active, 'ornament': note.ornament}"
+      ng-class="{'active': note.active}"
       ng-mouseover="vm.hoverNote(note)"
-      class="note track{{note.track}}" 
-      style="left:{{note.on}}px;width:{{note.width}}px;top:{{note.top}}px;height:{{note.height}}px">
+      class="note track{{note.trackIndex}}" 
+      style="left:{{note.on}}px;width:{{note.width}}px;top:{{note.top}}px;height:{{note.height}}px;opacity:{{note.opacity}}">
     </div>
 
     </div>

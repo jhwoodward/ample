@@ -9,6 +9,7 @@ module.exports = function (ngModule) {
       template: require('./master-track.html'),
       scope: {
         sequencer: '=',
+        panelIndex: '=',
         master: '=',
         onEdit: '&'
       },
@@ -67,7 +68,10 @@ module.exports = function (ngModule) {
       });
 
       event.events.forEach(e => {
-        if (!e.isMaster && !(e.origin && e.origin.isMaster)  && !(e.onOrigin && e.onOrigin.isMaster)) return;
+        if (e.onOrigin && e.onOrigin.panelIndex !== vm.panelIndex) return;
+        if (e.origin && e.origin.panelIndex !== vm.panelIndex) return;
+
+       // if (!e.isMaster && !(e.origin && e.origin.isMaster)  && !(e.onOrigin && e.onOrigin.isMaster)) return;
 
         if (e.origin) {
           var start = editor.posFromIndex(e.origin.start);
@@ -119,11 +123,13 @@ module.exports = function (ngModule) {
             break;
         }
       });
-
-
-
     }
+    $scope.$watchCollection('vm.master.interpreted.macros', function (macros) {
+      if (macros === undefined) return;
+      doc.macros = macros;
 
+      vm.part = vm.master.part;
+    });
 
     vm.options = {
       lineWrapping: true,
@@ -136,9 +142,10 @@ module.exports = function (ngModule) {
       theme: 'blackboard'
     };
 
-    var editor;
+    var editor, doc;
     vm.codemirrorLoaded = function (ed) {
       editor = ed;
+      doc = editor.getDoc();
       /*
       var charWidth = editor.defaultCharWidth(), basePadding = 4;
       editor.on("renderLine", function (cm, line, elt) {
@@ -151,9 +158,11 @@ module.exports = function (ngModule) {
 */
     };
 
-    $scope.$watch('vm.master.part', _.debounce(function (val, old) {
+    $scope.$watch('vm.part', _.debounce(function (val, old) {
       if (val && old && val !== old) {
         $timeout(function () {
+          vm.master.part = vm.part;
+          vm.master.panelIndex = vm.panelIndex;
           vm.sequencer.updateMaster(vm.master);
         });
       }

@@ -30,6 +30,7 @@ require('./track/track')(track);
 require('./track/master-track')(track);
 require('./track/edit-track')(track);
 require('./track/macro-list')(track);
+require('./track/edit-macro-list')(track);
 require('./track/macro-list.service')(track);
 require('./track/macro-list-save.controller')(track);
 
@@ -57,6 +58,7 @@ require('./tutorial/notation.controller')(tutorial);
 
 let shared = angular.module('sharedModule', []);
 require('./shared/padZeros.filter')(shared);
+require('./shared/import.filter')(shared);
 require('./shared/unload')(shared);
 require('./shared/draggable')(shared);
 

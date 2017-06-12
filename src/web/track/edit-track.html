@@ -23,7 +23,7 @@
         <div >
           <md-list-item class="md-2-line" ng-repeat="macroList in vm.macroLists">
             <div class="md-list-item-text">
-              <h3 class="system-text">{{ macroList.key}}</h3>
+              <h3 >{{ macroList.key}}</h3>
               <p>{{ macroList.description }}</p>
               <md-checkbox class="md-secondary" ng-change="vm.setImports()" ng-model="macroList.selected"></md-checkbox>
             </div>

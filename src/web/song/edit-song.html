@@ -14,9 +14,9 @@
             </md-checkbox>
 
             <md-list dnd-list="vm.song.tracks" class="track-list">
-              <md-list-item class="track{{$index+1}}" ng-repeat="track in vm.song.tracks" dnd-draggable="track" dnd-effect-allowed="move"
+              <md-list-item class="track{{track.trackIndex}}" ng-repeat="track in vm.song.tracks" dnd-draggable="track" dnd-effect-allowed="move"
                 dnd-moved="vm.moved($index)">
-                <span class="md-fab md-button md-micro note track{{$index+1}}">{{$index+1}}</span>
+                <span class="md-fab md-button md-micro note track{{track.trackIndex}}"></span>
                 <md-input-container flex>
                   <label>Name</label>
                   <input type="text" name="name{{$index}}" ng-model="track.key" required />

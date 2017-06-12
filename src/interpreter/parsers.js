@@ -41,9 +41,10 @@ var main = [
 var setter = [
   //require('./parsers/ShuffleSetterParser'),
   //require('./parsers/ReverseSetterParser'),
+   require('./parsers/AnnotationSetterParser'),
   require('./parsers/SubstitutionSetterParser'),
-  require('./parsers/SubstitutionSetSetterParser'),
-  require('./parsers/AnnotationSetterParser')
+  require('./parsers/SubstitutionSetSetterParser')
+ 
 ];
 
 var master = [

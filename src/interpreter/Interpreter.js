@@ -9,6 +9,7 @@ var parsers = require('./parsers');
 
 function Interpreter(macros, master) {
   this.macros = macros || [];
+  this.states = [new State()];
 
   this.master = { states: [], events: [], markers: {}, markerArray: [] };
   if (master) {
@@ -24,6 +25,7 @@ function Interpreter(macros, master) {
 
 Interpreter.prototype.interpretMaster = function (part) {
 
+  this.panelIndex = 0;
   this.parseMacros(part, parsers.master, true);
 
   var state = new State();
@@ -76,7 +78,7 @@ Interpreter.prototype.interpretMaster = function (part) {
 }
 
 Interpreter.prototype.parse = function (part, cursor) {
-  return parse(parsers.main, part, this.macros, cursor);
+  return parse(parsers.main, part, this.macros, cursor, this.panelIndex);
 }
 
 Interpreter.prototype.appendState = function (states) {
@@ -285,7 +287,8 @@ Interpreter.prototype.getEvents = function () {
 
 Interpreter.prototype.setMacro = function (macro) {
   macro.source = 'self';
-  utils.mergeMacros(this.macros, [macro]);
+  macro.panelIndex = this.panelIndex;
+  utils.mergeMacros(this.macros, [macro]); 6
 }
 
 Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
@@ -296,17 +299,19 @@ Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
   var state = new State();
   this.states = [state];
   this.next = undefined;
-  this.generateState(parse(parsers.setter, part));
+  this.generateState(parse(parsers.setter, part, [], 0, this.panelIndex));
 
   this.macros.filter(macro => {
     return macro.type === macroType.annotation ||
       macro.type === macroType.substitution ||
       macro.type === macroType.articulation
   }).forEach(macro => {
-    macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart, isMaster);
+
     if (isMaster) {
+      macro.panelIndex = 0;
       macro.source = 'master';
     }
+    macro.parsed = parse(macroParsers, macro.value, this.macros, macro.definitionStart, macro.panelIndex);
   });
 
   this.animations = {};
@@ -325,16 +330,26 @@ Interpreter.prototype.parseMacros = function (part, macroParsers, isMaster) {
       return a.percent > b.percent ? 1 : -1;
     });
   });
+
+  return this.macros;
 }
 
-Interpreter.prototype.interpret = function (part) {
+Interpreter.prototype.interpret = function (part, panelIndex) {
 
   this.macros = this.macros.filter(m => m.source !== 'self');
-  
-  this.parseMacros(part, parsers.main);
 
+  this.panelIndex = panelIndex;
+
+  this.parseMacros(part, parsers.main, false);
+
+  /*
+    this.macros = macros.sort((a,b) => {
+      if (a.key.length > b.key.length) return 1;
+      return -1;
+    });
+  */
   if (this.master && this.master.macros && this.master.macros.length) {
-    this.master.macros.forEach(m=> {
+    this.master.macros.forEach(m => {
       var overwritten = this.macros.filter(m2 => m2.key === m.key).length;
       if (!overwritten) {
         this.macros.push(m);

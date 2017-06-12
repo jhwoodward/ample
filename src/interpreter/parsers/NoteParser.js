@@ -58,24 +58,6 @@ var prototype = {
     state.pitch.down = this.parsed.pitch.down;
     state.pitch.up = this.parsed.pitch.up;
     state.pitch.string = pitchUtils.midiPitchToString(state.pitch.value);
-    /*
-        var onOffset = state.on.offset || 0;
-        //prevent negative offsets at the beginning of a phrase - should only apply to phrase changes - not note phrases
-    
-        if (onOffset < 0 && (!prev.on.tick || prev.on.offset >= 0)) {
-          //   onOffset = 0;
-        }
-        var isRepeatedNote = prev.pitch.value === state.pitch.value;
-        if (isRepeatedNote) {
-          onOffset = 0;
-        }
-    
-        //TODO: noteoff needs a bit of tidying up / refactoring
-        var onTick = state.time.tick + onOffset;
-        // if (prev.on.tick && !prev.on.duration) {
-        //   prev.on.duration = prev.on.parser.duration = onTick - prev.on.tick + (state.off.offset || 0)
-        // }
-        */
     this.duration = state.time.step;
     state.on = this;
 
@@ -88,7 +70,7 @@ var prototype = {
     }
    
     out.forEach(e => {
-      e.tick = state.time.tick + (state.on.offset || 0) + (e.offset || 0);
+      e.tick = state.time.tick + (state.onOffset || 0) + (e.offset || 0);
     });
 
     //prev note off
@@ -119,7 +101,7 @@ var prototype = {
     */
     var isRepeatedNote = prev.pitch.value === state.pitch.value;
 
-    var offOffset = state.off.offset || 0;
+    var offOffset = state.offOffset || 0;
     //TODO: prevent positive offsets at the end of a phrase
     if (isRepeatedNote) {
       offOffset = -5;
@@ -133,8 +115,9 @@ var prototype = {
 
     //noteon
     out.push({
-      tick: state.time.tick + (state.on.offset || 0),
-      offset: state.on.offset,
+      tick: state.time.tick + (state.onOffset || 0),
+      offset: state.onOffset,
+      offOffset,
       type: eventType.noteon,
       pitch: state.pitch,
       velocity: state.velocity,

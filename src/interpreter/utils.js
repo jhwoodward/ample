@@ -104,6 +104,7 @@ var api = {
             x.parsed = a.parsed;
           }
           x.definitionStart = a.definitionStart;
+          x.panelIndex = a.panelIndex;
           updated = true;
         }
       });
@@ -113,6 +114,7 @@ var api = {
           a.values[a.index] = {
             part: a.value,
             definitionStart: a.definitionStart,
+            panelIndex: a.panelIndex,
             origin: a.origin
           };
         }

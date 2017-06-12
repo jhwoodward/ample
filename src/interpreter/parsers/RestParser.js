@@ -11,23 +11,12 @@ var prototype = {
     return true;
   },
   mutateState: function (state, interpreter) {
-    //var prev = interpreter.getTopState();
-
-   // var offset = state.off.offset;
-   // if (offset > 0) offset = 0;
-  //  var offTick = state.time.tick + offset;
-
-    // state.off.tick = offTick;
 
     this.duration = state.time.step;
     state.on =  this;
     
-
    // state.phrase.mutateState(state);
-    /*
-    if (prev.on.tick && !prev.on.duration) {
-      prev.on.duration = prev.on.parser.duration =  offTick - prev.on.tick;
-    }*/
+   
 
   },
   getEvents: function (state, prev, events) {
@@ -39,7 +28,7 @@ var prototype = {
     //  });
 
     if (state.on.tick) {
-      var offset = state.off.offset;
+      var offset = state.offOffset;
       if (offset > 0) offset = 0;
       var offTick = state.time.tick + offset;
       out.push({

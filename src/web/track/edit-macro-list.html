@@ -1,0 +1,35 @@
+<div class="track track{{vm.macroList.trackIndex}}">
+  <md-toolbar class="track-toolbar">
+    <div class="md-toolbar-tools macro-list">
+      <span class="bold system-text">
+        {{vm.macroList.key}}
+      </span>
+      <span flex class="flex"></span>
+
+       <md-button 
+        aria-label="save" 
+        class="md-fab md-micro" 
+        ng-click="vm.save()">
+        <md-tooltip md-direction="top">Save</md-tooltip>
+        <span class="ion-android-upload"></span>
+      </md-button>
+
+        <md-button 
+        aria-label="close" 
+        class="md-fab md-micro" 
+        ng-click="vm.onClose()">
+        <md-tooltip md-direction="top">Close</md-tooltip>
+        <span class="ion-close-round"></span>
+      </md-button>
+    
+    </div>
+  </md-toolbar>
+  <md-content class="track-content" flex>
+    <textarea 
+    ui-codemirror="{ onLoad : vm.codemirrorLoaded }" 
+    ui-codemirror-opts="{{vm.options}}" 
+    ng-model="vm.part">
+    </textarea>
+  </md-content>
+
+</div>

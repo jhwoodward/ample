@@ -1,35 +1,20 @@
-<div class="track track{{vm.trackIndex+1}}"
-  ng-class="{
+<div class="track track{{vm.track.trackIndex}}" ng-class="{
     'mute': vm.track.isMuted,
     'solo': vm.sequencer.solo === vm.track.key,
     'collapsed': (vm.track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(vm.track)
-  }"
->
+  }">
   <md-toolbar class="track-toolbar">
-    <div class="md-toolbar-tools track-key" >
-     
-      <span 
-      class="track-led" 
-      ng-hide="(vm.track.isMuted && vm.sequencer.solo !== vm.track.key) || (vm.sequencer.solo && vm.sequencer.solo !== vm.track.key)"
-      ng-class="{'active': vm.active && (!vm.sequencer.solo || vm.sequencer.solo === vm.track.key)}"></span>
-     
-      <span  class="system-text bold" ng-click="vm.onEdit({track: vm.track})">
+    <div class="md-toolbar-tools track-key">
+
+      <span class="system-text bold" ng-click="vm.onEdit({track: vm.track})">
         {{vm.track.key}}
       </span>
-      <span  flex class="flex"></span>
-      <md-button 
-        aria-label="Mute" 
-        class="md-fab md-micro mute" 
-        ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}" 
-        ng-click="vm.sequencer.toggleMute(vm.track)">
+      <span flex class="flex"></span>
+      <md-button aria-label="Mute" class="md-fab md-micro mute" ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}" ng-click="vm.sequencer.toggleMute(vm.track)">
         <md-tooltip md-direction="top">Mute</md-tooltip>
         M
       </md-button>
-      <md-button 
-        aria-label="Solo" 
-        class="md-fab md-micro solo" 
-        ng-class="{'active': vm.track.key === vm.sequencer.solo}"
-        ng-click="vm.sequencer.toggleSolo(vm.track)">
+      <md-button aria-label="Solo" class="md-fab md-micro solo" ng-class="{'active': vm.track.key === vm.sequencer.solo}" ng-click="vm.sequencer.toggleSolo(vm.track)">
         <md-tooltip md-direction="top">Solo</md-tooltip>
         S
       </md-button>
@@ -49,7 +34,29 @@
     </div>
   </md-toolbar>
   <md-content class="track-content" flex>
-    <textarea ui-codemirror="{ onLoad : vm.codemirrorLoaded }" ui-codemirror-opts="{{vm.options}}" ng-model="vm.track.part">
+    <div ng-if="vm.track.imports.length" class="track-imports" >
+      
+      <span ng-repeat="imp in vm.track.imports" ng-click="vm.onEditMacroList({imp:imp})">{{imp | import}}<span ng-if="$index < vm.track.imports.length-1">,&nbsp;</span></span>
+    
+    <!--
+      <md-chips 
+      ng-model="vm.track.imports" md-removable="true" placeholder="Macros..." 
+      delete-button-label="Remove Tag" 
+      delete-hint="Press delete to remove macros"
+      secondary-placeholder="+Macros">
+<md-autocomplete md-no-cache="true"  md-items="item in vm.macroLists" md-search-text="searchText" md-item-text="item.key">
+
+<md-chip-template><span ng-click="vm.onEditMacroList({imp:$chip})">{{$chip}}</span></md-chip-template>
+
+        <span md-chip-remove class="ion-close"></span>
+
+      </md-chips>
+      -->
+    </div>
+
+
+
+    <textarea ui-codemirror="{ onLoad : vm.codemirrorLoaded }" ui-codemirror-opts="{{vm.options}}" ng-model="vm.part">
     </textarea>
   </md-content>
 

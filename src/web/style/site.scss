@@ -44,10 +44,7 @@ body, md-toolbar, md-toolbar input,.md-toolbar-tools, #song-name, .track-row {
     }
 }
 
-.track-row {
-    border-top: 1px solid #423d35;
-    border-bottom: 1px solid #423d35;
-}
+
 
 .btn-rewind {
     font-size: 29px !important;
@@ -218,17 +215,21 @@ md-checkbox.md-checked .md-icon:after {
 }
 
 .track1 .track-led,
+.note.track1,
+.key.active.track1
+{
+    background-color: $track1-primary;
+}
+
 .track1 .sub-highlight,
 .channel-menu-content.track1, .channel-menu-content.track1 .channel-menu-item,
-.note.track1,
-.key.active.track1,
-.track1 .md-button.md-fab.mute.md-micro.active,
-.track1 .md-button.md-fab.solo.md-micro.active {
-    background-color: #d83e00;
+.track1 .md-button.md-fab.mute.md-micro.active {
+  background-color: $track1-secondary;
 }
 
 .track1 .track-toolbar .md-toolbar-tools {
-    border-color: #d83e00;
+    border-color: $track1-primary;
+     background-color: $track1-secondary
 }
 
 .md-button.md-fab.solo.md-micro.active {
@@ -236,51 +237,66 @@ md-checkbox.md-checked .md-icon:after {
 }
 
 .track2 .track-led,
-.channel-menu-content.track2, .channel-menu-content.track2 .channel-menu-item,
-.track2 .sub-highlight,
 .note.track2,
-.key.active.track2,
-.track2 .md-button.md-fab.mute.md-micro.active {
-    background-color: #8e8b00;
+.key.active.track2
+{
+    background-color: $track2-primary
+}
+.channel-menu-content.track2, .channel-menu-content.track2 .channel-menu-item,
+.track2 .sub-highlight,.track2 .md-button.md-fab.mute.md-micro.active {
+    background-color: $track2-secondary
 }
 
 .track2 .track-toolbar .md-toolbar-tools {
-    border-color: #8e8b00;
+    border-color: $track2-primary;
+    background-color: $track2-secondary;
 }
 
 .track3 .track-led,
-.channel-menu-content.track3, .channel-menu-content.track3 .channel-menu-item,
-.track3 .sub-highlight,
 .note.track3,
-.key.active.track3,
-.track3 .md-button.md-fab.mute.md-micro.active {
-    background-color: #0079b5;
+.key.active.track3{
+    background-color: $track3-primary;
+}
+.channel-menu-content.track3, .channel-menu-content.track3 .channel-menu-item,
+.track3 .sub-highlight,.track3 .md-button.md-fab.mute.md-micro.active {
+  background-color: $track3-secondary;
 }
 
+
 .track3 .track-toolbar .md-toolbar-tools {
-    border-color: #0079b5;
+    border-color: $track3-primary;
+     background-color: $track3-secondary;
 }
 
 .track4 .track-led,
+.note.track4,
+.key.active.track4{
+    background-color: $track4-primary;
+}
 .channel-menu-content.track4, .channel-menu-content.track4 .channel-menu-item,
 .track4 .sub-highlight,
-.note.track4,
-.key.active.track4,
 .track4 .md-button.md-fab.mute.md-micro.active {
-    background-color: #2e8c73;
+  background-color: $track4-secondary;
 }
 
 .track4 .track-toolbar .md-toolbar-tools {
-    border-color: #2e8c73;
+    border-color: $track4-primary;
+    background-color: $track4-secondary;
+}
+
+.track5 .track-toolbar .md-toolbar-tools {
+    border-color: $track5-primary;
+    background-color: $track5-secondary;
 }
 
 .track5 .track-led,
-.channel-menu-content.track5, .channel-menu-content.track5 .channel-menu-item,
-.track5 .sub-highlight,
 .note.track5,
-.key.active.track5,
-.track5 .md-button.md-fab.mute.md-micro.active {
-    background-color: rgb(127, 100, 239);
+.key.active.track5
+{
+    background-color: $track5-primary
+}
+.track5 .sub-highlight,.channel-menu-content.track5, .channel-menu-content.track5 .channel-menu-item,.track5 .md-button.md-fab.mute.md-micro.active  {
+  background-color: $track5-secondary;
 }
 
 .track6 .track-led,
@@ -426,6 +442,8 @@ md-list[dnd-list] {
 
 .sub-highlight {
     color: white !important;
+    border-bottom: 1px solid white;
+    padding-bottom:2px;
 }
 
 .panel-body .btn-group {

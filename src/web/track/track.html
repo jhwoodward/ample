@@ -3,34 +3,14 @@
     'solo': vm.sequencer.solo === vm.track.key,
     'collapsed': (vm.track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(vm.track)
   }">
-  <md-toolbar class="track-toolbar">
+  <md-toolbar class="track-toolbar" ng-click="vm.onEdit({track: vm.track})">
     <div class="md-toolbar-tools track-key">
 
-      <span class="system-text bold" ng-click="vm.onEdit({track: vm.track})">
+      <span style="font-weight:bold" >
         {{vm.track.key}}
       </span>
       <span flex class="flex"></span>
-      <md-button aria-label="Mute" class="md-fab md-micro mute" ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}" ng-click="vm.sequencer.toggleMute(vm.track)">
-        <md-tooltip md-direction="top">Mute</md-tooltip>
-        M
-      </md-button>
-      <md-button aria-label="Solo" class="md-fab md-micro solo" ng-class="{'active': vm.track.key === vm.sequencer.solo}" ng-click="vm.sequencer.toggleSolo(vm.track)">
-        <md-tooltip md-direction="top">Solo</md-tooltip>
-        S
-      </md-button>
-
-      <md-menu class="channel-menu" md-position-mode="target-right bottom">
-        <md-button aria-label="Select channel" class="md-fab md-micro channel channel{{vm.track.channel+1}}" ng-click="vm.showChannelDropdown($mdMenu, $event)">
-          <md-tooltip md-direction="top">Channel</md-tooltip>
-          {{vm.track.channel+1}}
-        </md-button>
-        <md-menu-content class="channel-menu-content track{{vm.trackIndex+1}}">
-          <md-menu-item ng-repeat="channel in vm.channels" style="border-radius:0" class="channel-menu-item badge channel{{$index+1}}"
-            ng-click="vm.selectChannel(channel)">
-            {{ channel }}
-          </md-menu-item>
-        </md-menu-content>
-      </md-menu>
+  
     </div>
   </md-toolbar>
   <md-content class="track-content" flex>

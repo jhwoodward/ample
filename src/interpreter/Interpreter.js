@@ -8,6 +8,7 @@ var _ = require('lodash');
 var parsers = require('./parsers');
 
 function Interpreter(macros, master) {
+  
   this.macros = macros || [];
   this.states = [new State()];
 
@@ -87,15 +88,11 @@ Interpreter.prototype.appendState = function (states) {
   this.next = this.getNextState();
 
   //needs to be a parser with duration 
-
   var statesWithDuration = states.filter(s => s.parser.duration);
   if (statesWithDuration.length) {
     var lastParser = statesWithDuration[statesWithDuration.length - 1].parser;
     this.next.time.tick += lastParser.duration;
   }
-
-
-
 }
 
 Interpreter.prototype.generateState = function (parsers) {

@@ -127,24 +127,26 @@ module.exports = function (ngModule) {
             //render();
           }
         });
-
+      
+      vm.scrollLeft = 0;
       function scroll() {
+
         if (vm.active) {
           if (currentEvent && currentEvent.tick > vm.containerWidth) {
             el[0].scrollLeft = Math.round(currentEvent.tick - vm.containerWidth);
-          } else if (currentEvent && currentEvent.tick > el[0].scrollLeft - 10) {
+          } /*else if (currentEvent && currentEvent.tick > el[0].scrollLeft - 10) {
             // el[0].scrollLeft = 0;
-          }
+          }*/
 
-          vm.scrollLeft = el[0].scrollLeft;
-
+      
+           vm.scrollLeft = el[0].scrollLeft;
 
         }
 
         window.requestAnimationFrame(scroll);
       }
 
-      window.requestAnimationFrame(scroll);
+     window.requestAnimationFrame(scroll);
 
       scope.$watch('vm.sequencer', function (seq) {
         if (seq) {
@@ -263,6 +265,7 @@ module.exports = function (ngModule) {
 
           if (vm.sequencer.solo && vm.sequencer.solo !== track.key) return;
           if (!vm.sequencer.solo && track.isMuted) return;
+          if (track.isHidden) return;
 
           var events = interpreted.events.filter(e => e.type === eventType.noteon && !e.keyswitch).map(e => {
 

@@ -8,6 +8,24 @@
     <md-tab id="tab1">
       <md-tab-label>Account</md-tab-label>
       <md-tab-body>
+        <md-button ng-if="$root.user.key !== 'guest'"  ng-click="vm.new($event)">
+          <span class="ion-android-document"></span>New song...
+         
+        </md-button>
+
+        <md-button ng-if="$root.user.key !== 'guest' && vm.song.created" ng-click="vm.clone($event)">
+          <span class="ion-ios-browsers">Clone song
+        </md-button>
+
+        <md-button ng-if="$root.user.key !== 'guest'" ng-click="vm.toggleStore()">
+          <span class="ion-android-folder" ></span>Library
+        </md-button>
+
+
+        <md-button ng-if="$root.user.key === 'guest'"  ng-click="vm.toggleStore()" style="outline:none;cursor:pointer">
+          Tutorial
+        </md-button>
+
         <md-button ng-click="vm.signup($event)" ng-if="!vm.isLoggedIn">
           Sign up
         </md-button>

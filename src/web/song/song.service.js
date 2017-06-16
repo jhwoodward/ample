@@ -14,6 +14,11 @@ module.exports = function (ngModule) {
           payload[key] = song[key];
         }
       }
+      if (payload.master && payload.master.interpreted) {
+        delete payload.master.interpreted;
+      }
+
+
       payload.tracks = song.tracks.map(t => {
 
         var out = {

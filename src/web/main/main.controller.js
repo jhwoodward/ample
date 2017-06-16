@@ -154,9 +154,7 @@ function controller($scope, $rootScope, $timeout, songService, macroListService,
     vm.sequencer.start();
   }
 
-  vm.goTo = function (marker) {
-    vm.sequencer.goToMarker(marker);
-  }
+ 
 
   function showTutorialDialog() {
     $mdDialog.show({

@@ -1,0 +1,10 @@
+<div class="marker-list">
+<span ng-repeat="marker in vm.sequencer.markers">
+  <span style="cursor:pointer;outline:none;" 
+  ng-click=" vm.sequencer.goToMarker(marker)" 
+  ng-class="{'active': marker.active}" 
+  class="beat marker">{{marker.key}}</span>
+  <span ng-if="$index < vm.sequencer.markers.length-1"> - </span>
+
+</span>
+</div>

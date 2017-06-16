@@ -1,7 +1,8 @@
 <div class="log " 
 ng-show="vm.active"
 style="position:relative" ng-class="{ 'playing': vm.sequencer.playing }">
-  <div id='piano-roll' class="piano-roll" style="position:relative">
+  <div id='piano-roll' class="piano-roll" style="position:relative;">
+    <!--transform: translate3d({{-vm.scrollLeft}}px,0,0)-->
     <div 
     ng-repeat="beat in vm.visibleBeats"
     ng-class="{'active': beat.active}"

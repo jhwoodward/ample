@@ -213,6 +213,29 @@ md-checkbox.md-checked .md-icon:after {
       box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgb(72, 185, 2), 0 0 35px rgb(72, 185, 2);
       */
 }
+.overview {
+  width:100%;
+  background:#232323;
+}
+.overview .item.master {
+  background-color: #2f2f2f;
+  border-color: #828282;
+}
+.overview .item, .marker-list, .beat-info {
+  color: #888;
+  font-size:14px;
+  
+  font-family:menlo;
+      padding: 2px 6px 2px 6px;
+    margin: 5px;
+    border-radius: 2px;
+  
+}
+/*
+.overview .item {
+border-bottom:1px solid;
+}
+ */
 
 .track1 .track-led,
 .note.track1,
@@ -227,7 +250,8 @@ md-checkbox.md-checked .md-icon:after {
   background-color: $track1-secondary;
 }
 
-.track1 .track-toolbar .md-toolbar-tools {
+.track1 .track-toolbar .md-toolbar-tools, .overview .track1 {
+  
     border-color: $track1-primary;
      background-color: $track1-secondary
 }
@@ -247,7 +271,8 @@ md-checkbox.md-checked .md-icon:after {
     background-color: $track2-secondary
 }
 
-.track2 .track-toolbar .md-toolbar-tools {
+.track2 .track-toolbar .md-toolbar-tools, .overview .track2 {
+  
     border-color: $track2-primary;
     background-color: $track2-secondary;
 }
@@ -263,7 +288,8 @@ md-checkbox.md-checked .md-icon:after {
 }
 
 
-.track3 .track-toolbar .md-toolbar-tools {
+.track3 .track-toolbar .md-toolbar-tools, .overview .track3 {
+  
     border-color: $track3-primary;
      background-color: $track3-secondary;
 }
@@ -279,12 +305,13 @@ md-checkbox.md-checked .md-icon:after {
   background-color: $track4-secondary;
 }
 
-.track4 .track-toolbar .md-toolbar-tools {
+.track4 .track-toolbar .md-toolbar-tools, .overview .track4 {
+  
     border-color: $track4-primary;
     background-color: $track4-secondary;
 }
 
-.track5 .track-toolbar .md-toolbar-tools {
+.track5 .track-toolbar .md-toolbar-tools,.overview .track5 {
     border-color: $track5-primary;
     background-color: $track5-secondary;
 }

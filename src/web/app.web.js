@@ -29,6 +29,7 @@ let track = angular.module('trackModule', []);
 require('./track/track')(track);
 require('./track/master-track')(track);
 require('./track/edit-track')(track);
+require('./track/track-summary')(track);
 require('./track/macro-list')(track);
 require('./track/edit-macro-list')(track);
 require('./track/macro-list.service')(track);
@@ -37,6 +38,7 @@ require('./track/macro-list-save.controller')(track);
 let seq = angular.module('seqModule', []);
 require('./seq/midi-web')(seq);
 require('./seq/timer-web')(seq);
+require('./seq/marker-list')(seq);
 
 let viz = angular.module('vizModule', []);
 require('./viz/piano-keys')(viz);

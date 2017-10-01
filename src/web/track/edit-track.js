@@ -28,6 +28,7 @@ module.exports = function (ngModule) {
 
     function activate() {
       macroListService.getAll(userService.user.key).then(function (items) {
+        if (!items) { return; }
         items = items.map(macroList => {
           var source = macroList.owner + '/' + macroList.key;
           macroList.selected = vm.track.imports.indexOf(source) > -1;

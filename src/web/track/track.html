@@ -1,24 +1,30 @@
 <div class="track track{{vm.track.trackIndex}}" ng-class="{
     'mute': vm.track.isMuted,
     'solo': vm.sequencer.solo === vm.track.key,
-    'collapsed': (vm.track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(vm.track)
+    'collapsed overview': vm.collapsed
   }">
-  <md-toolbar class="track-toolbar" ng-click="vm.onEdit({track: vm.track})">
-    <div class="md-toolbar-tools track-key">
+  <md-toolbar class="track-toolbar"  >
+    <div class="md-toolbar-tools track-key" >
 
-      <span style="font-weight:bold" >
-        {{vm.track.key}}
+        <track-summary style="width: 100%"   sequencer="vm.sequencer" collapsed="vm.collapsed"  track="vm.track" class="item track{{vm.track.trackIndex}}">
+        </track-summary>
+<!--
+      <span style="font-weight:bold">
+   {{vm.track.key}} 
       </span>
+
       <span flex class="flex"></span>
-  
+    -->
     </div>
   </md-toolbar>
-  <md-content class="track-content" flex>
-    <div ng-if="vm.track.imports.length" class="track-imports" >
-      
+
+  <md-content class="track-content" ng-if="!vm.collapsed" flex>
+ 
+    <div ng-if="vm.track.imports.length" class="track-imports">
+
       <span ng-repeat="imp in vm.track.imports" ng-click="vm.onEditMacroList({imp:imp})">{{imp | import}}<span ng-if="$index < vm.track.imports.length-1">,&nbsp;</span></span>
-    
-    <!--
+
+      <!--
       <md-chips 
       ng-model="vm.track.imports" md-removable="true" placeholder="Macros..." 
       delete-button-label="Remove Tag" 
@@ -33,7 +39,6 @@
       </md-chips>
       -->
     </div>
-
 
 
     <textarea ui-codemirror="{ onLoad : vm.codemirrorLoaded }" ui-codemirror-opts="{{vm.options}}" ng-model="vm.part">

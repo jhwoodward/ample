@@ -19,6 +19,8 @@ require('./style/all.scss');
 let main = angular.module('mainModule', []);
 require('./main/main.controller')(main);
 require('./main/options')(main);
+require('./main/state.service')(main);
+
 
 let song = angular.module('songModule', []);
 require('./song/edit-song')(song);

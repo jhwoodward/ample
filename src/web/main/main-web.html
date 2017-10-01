@@ -1,52 +1,43 @@
 <md-toolbar class="main-toolbar">
   <div class="md-toolbar-tools main">
    
-    <h2 md-truncate class="brand" >
+    <h2 class="brand" >
       <span ng-click="vm.toggleOptions()" style="outline:none;cursor:pointer">Midiscript</span> 
     </h2>
-    <div flex>
       <div class="md-toolbar-tools">
-        <div flex class="marker-info system-text song-text" style="text-align:center">
+        <div class="marker-info system-text song-text fadein" style="text-align:center; display:flex;justify-content: center;align-items: center;width: 100%">
 
-          <md-button class="md-icon-button btn-rewind ion-skip-backward" ng-click="vm.sequencer.rewind()">
+          <md-button class="md-icon-button btn-rewind ion-ios-skipbackward" ng-click="vm.sequencer.rewind()">
           </md-button>
-          <md-button class="md-icon-button btn-rewind ion-skip-forward" ng-click="vm.sequencer.toend()">
+        
+          <md-button class="md-icon-button ion-ios-play btn-reverse" ng-click="vm.sequencer.reverse()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === -1 || vm.sequencer.paused}">
           </md-button>
-          <md-button class="md-icon-button ion-play btn-reverse" ng-click="vm.sequencer.reverse()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === -1 || vm.sequencer.paused}">
-          </md-button>
+          <marker-list sequencer="vm.sequencer"></marker-list>
+          <div class="beat-info">
+            <span class="beat">{{vm.sequencer.beat | padZeros:5}} </span>
+          <span class="beat-ticks">{{vm.sequencer.beatTicks | padZeros:2}}</span>
+          </div>
          
-          <md-button class="md-icon-button ion-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === 1 || vm.sequencer.paused}">
+          <md-button class="md-icon-button ion-ios-play btn-play" ng-click="vm.play()" ng-class="{'active':vm.sequencer.playing && vm.sequencer.increment === 1 || vm.sequencer.paused}">
           </md-button>
-          <md-button class="md-icon-button ion-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active': vm.sequencer.paused}">
+    
+          <md-button class="md-icon-button ion-ios-pause btn-pause" ng-click="vm.togglePause()" ng-class="{'active': vm.sequencer.paused}">
           </md-button>
-          <md-button class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
+          <md-button style="font-size: 29px !important;" class="md-icon-button ion-stop btn-stop" ng-click="vm.stop()">
           </md-button>
-
+          <md-button class="md-icon-button btn-rewind ion-ios-skipforward" ng-click="vm.sequencer.toend()">
+            </md-button>
         </div>
 
 
-
-
       </div>
-    </div>
 
-    <span md-truncate  ng-click="vm.editSong()" style="outline:none;cursor:pointer;">{{vm.song.name || 'new song'}}</span>
+
+    <span  ng-click="vm.editSong()" style="outline:none;cursor:pointer;">{{vm.song.name.toUpperCase() || 'NEW SONG'}}</span>
 
   </div>
 </md-toolbar>
-<section>
-   <div layout="row" flex  class="overview"  >
-     <track-summary  panel-index="0"  sequencer="vm.sequencer"   track="vm.song.master"  ng-if="vm.song.useMaster" class="item master" >Master</track-summary>
-      <track-summary on-edit="vm.editTrack(track)" panel-index="$index+ (vm.song.useMaster ? 1:0)"  sequencer="vm.sequencer"  track="track" ng-repeat="track in vm.song.tracks" class="item track{{track.trackIndex}}">
-      </track-summary>
-<span class="flex"></span>
-       <marker-list sequencer="vm.sequencer"></marker-list>
-          <span class="beat-info">
-            <span class="beat">{{vm.sequencer.beat | padZeros:5}} </span>
-          <span class="beat-ticks">{{vm.sequencer.beatTicks | padZeros:2}}</span>
-          </span>
-    </div>
-</section>
+
 <section>
   <div layout="column" class="track-container">
     <div layout="row" class="track-row" flex 
@@ -59,9 +50,11 @@
       </master-track>
       <div flex ng-repeat="track in vm.song.tracks" 
       class="track-container"
-      ng-if="!((track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(track)) && !track.isHidden"
+      ng-class="{'collapsed': vm.isCollapsed(track) }"
       >
+      <!--    ng-if="!((track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(track)) && !track.isHidden" -->
         <track
+          collapsed="vm.isCollapsed(track)"
           panel-index="$index+ (vm.song.useMaster ? 1:0)"
           ng-if="track.channel !== undefined" flex track="track" sequencer="vm.sequencer" on-edit="vm.editTrack(track)"
           on-edit-macro-list="vm.editMacroList(track, $index, imp)">
@@ -98,5 +91,5 @@
 </md-sidenav>
 
 <md-sidenav class="edit-track md-sidenav-right side-menu" md-component-id="editTrack">
-  <edit-track track="vm.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()" ></edit-track>
+  <edit-track track="vm.state.selectedTrack" sequencer="vm.sequencer" is-open="vm.editTrackOpen()" ></edit-track>
 </md-sidenav>

@@ -10,6 +10,7 @@ module.exports = function (ngModule) {
       scope: {
         sequencer: '=',
         track: '=',
+        collapsed: '=',
         panelIndex: '=',
         onEdit: '&',
         onEditMacroList: '&'
@@ -156,6 +157,7 @@ module.exports = function (ngModule) {
         });
       });
     }
+
 
     vm.selectChannel = function (channel) {
       vm.track.channel = channel - 1;

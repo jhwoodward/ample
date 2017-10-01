@@ -1,26 +1,20 @@
-<div class="track-summary track{{vm.track.trackIndex || 0}}">
-
-  <span ng-click="vm.onEdit({track: vm.track})">
-        {{vm.track.key || 'master'}}
-      </span>
-
- <span aria-label="Show/hide" class="md-micro" 
- ng-class="{'active': vm.track.isHidden}" ng-click="vm.track.isHidden = !vm.track.isHidden">
-    <md-tooltip md-direction="top">Visibility</md-tooltip>
-    <span ng-class="{'ion-eye': !vm.track.isHidden, 'ion-eye-disabled': vm.track.isHidden}"></span>
-  </span>
+<div class="track-summary track{{vm.track.trackIndex || 0}}" style="display:flex; width: 100%;">
 
 
-  <span aria-label="Mute" class="md-micro mute" ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}" ng-click="vm.sequencer.toggleMute(vm.track)">
+  <span ng-if="!vm.collapsed" aria-label="Mute" class="md-micro mute" ng-class="{'active': vm.track.isMuted && !vm.sequencer.solo}"
+    ng-click="vm.sequencer.toggleMute(vm.track)">
     <md-tooltip md-direction="top">Mute</md-tooltip>
-    <span ng-class="{'ion-android-volume-up': !vm.track.isMuted, 'ion-android-volume-off': vm.track.isMuted}"></span>
+    M
   </span>
-  <span aria-label="Solo" class="md-micro solo" ng-class="{'active': vm.track.key === vm.sequencer.solo}" ng-click="vm.sequencer.toggleSolo(vm.track)">
+
+  <span ng-if="!vm.collapsed" aria-label="Solo" class="md-micro solo" ng-class="{'active': vm.track.key === vm.sequencer.solo}"
+    ng-click="vm.sequencer.toggleSolo(vm.track)">
     <md-tooltip md-direction="top">Solo</md-tooltip>
     S
   </span>
 
-  <md-menu class="channel-menu" md-position-mode="target-right bottom">
+
+  <md-menu ng-if="!vm.collapsed" class="channel-menu" md-position-mode="target-right bottom">
     <span aria-label="Select channel" class="md-micro channel channel{{vm.track.channel+1}}" ng-click="vm.showChannelDropdown($mdMenu, $event)">
       <md-tooltip md-direction="top">Channel</md-tooltip>
       {{vm.track.channel+1}}
@@ -32,4 +26,22 @@
       </md-menu-item>
     </md-menu-content>
   </md-menu>
+
+  
+  <span ng-if="!vm.collapsed" aria-label="Edit" class="md-micro" ng-click="vm.edit()">
+      <md-tooltip md-direction="top">Edit</md-tooltip>
+      <span class="ion-android-more-horizontal"></span>
+</span>
+
+  <span flex style="display:block;flex-grow:1"></span>
+
+  <span aria-label="Show/hide"  class="collapser md-micro no-wrap" 
+  ng-class="{'active': vm.track.isHidden}"
+    ng-click="vm.track.isHidden = !vm.track.isHidden">
+     <md-tooltip md-direction="top">Visibility</md-tooltip>
+   
+     <span ng-class="{'ion-chevron-left': vm.track.isHidden, 'ion-chevron-right': !vm.track.isHidden}"></span>
+    <span style="margin-left:3px" ng-class="{'ion-chevron-left': !vm.track.isHidden, 'ion-chevron-right': vm.track.isHidden}"></span>
+  </span>
+
 </div>

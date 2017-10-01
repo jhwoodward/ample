@@ -1,4 +1,4 @@
-<div class="marker-list">
+<div class="marker-list" ng-if="vm.sequencer.markers.length">
 <span ng-repeat="marker in vm.sequencer.markers">
   <span style="cursor:pointer;outline:none;" 
   ng-click=" vm.sequencer.goToMarker(marker)" 

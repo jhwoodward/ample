@@ -8,10 +8,10 @@
 
     .beat {
         position: absolute;
-        color: #423d35;
+        color: #353535;
 
         &.marker {
-            border-color: #423d35;
+            border-color: #353535;
             bottom: 5px;
         }
 
@@ -27,7 +27,7 @@
         height: 100%;
 
         .needle {
-            border-left: 1px solid #423d35;
+            border-left: 1px solid #353535;
             margin-left: 20px;
             margin-right: 19px;
             height: 100%;

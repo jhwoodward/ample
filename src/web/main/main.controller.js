@@ -4,11 +4,16 @@ var Interpreter = require('../../interpreter/Interpreter');
 var Sequencer = require('../seq/Sequencer.js');
 
 module.exports = function (ngModule) {
-  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'songService', 'macroListService', 'userService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', '$mdDialog', 'midiService', 'timer', controller]);
+  ngModule.controller('mainController', ['$scope', '$rootScope', '$timeout', 'songService', 'macroListService', 
+  'userService', '$mdSidenav', '$mdPanel', '$mdMenu', '$mdToast', '$log', '$state', 'song', 
+  '$mdDialog', 'midiService', 'timer', 'stateService', controller]);
 }
 
-function controller($scope, $rootScope, $timeout, songService, macroListService, userService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer) {
+function controller($scope, $rootScope, $timeout, songService, macroListService, 
+  userService, $mdSidenav, $mdPanel, $mdMenu, $mdToast, $log, $state, song, $mdDialog, midiService, timer, state) {
   var vm = this;
+
+  vm.state = state;
 
   if (userService.user.key === 'guest') {
     showTutorialDialog();
@@ -24,6 +29,10 @@ function controller($scope, $rootScope, $timeout, songService, macroListService,
       part: ''
     };
   }
+
+  vm.isCollapsed = function(track) {
+    return  track.isHidden;//(track.isMuted && !vm.sequencer.solo) || vm.sequencer.isNotSolo(track) ||
+}
 
 
 

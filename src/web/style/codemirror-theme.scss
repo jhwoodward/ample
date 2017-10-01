@@ -1,9 +1,11 @@
 /* Port of TextMate's Blackboard theme */
 .cm-s-blackboard.CodeMirror {
-    background: #191919;
+    background: black;
     color: #F8F8F8;
     line-height: 1.3em;
     padding-left: 5px !important;
+
+    
 }
 
 .cm-s-blackboard div.CodeMirror-selected {

@@ -45,7 +45,7 @@ module.exports = function (ngModule) {
           method: 'POST',
           url: root + '/user/login',
           data: account,
-        }).then(onSuccess, onFail);
+        }).then(onSuccess.bind(this), onFail);
         function onSuccess(response) {
           this.user = response.data.user;
           this.token = response.data.token;

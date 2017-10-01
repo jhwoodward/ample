@@ -14,7 +14,9 @@ module.exports = function (ngModule) {
         webmidi.enable(function (err) {
           this.inputs = webmidi.inputs;
           this.outputs = webmidi.outputs
-          this.selectedOutput = webmidi.outputs[0];
+          console.log(this.outputs);
+          this.selectedOutput = webmidi.outputs[2];
+          console.log('selected output', this.selectedOutput);
           deferred.resolve();
         }.bind(this));
         return deferred.promise;

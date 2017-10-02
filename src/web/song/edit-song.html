@@ -51,6 +51,16 @@
         </div>
       </md-tab-body>
     </md-tab>
+
+    <md-tab id="tab1">
+        <md-tab-label>Load</md-tab-label>
+        <md-tab-body>
+          <div class="tab-content-inner">
+              <store song="vm.song" is-open="vm.isOpen"></store>
+          </div>
+        </md-tab-body>
+      </md-tab>
+
   </md-tabs>
   <div class="tab-buttons" layout="row">
     <md-button ng-click="vm.save()" ng-disabled="!vm.valid" ng-if="vm.song.owner === $root.user.key || !vm.song.created">
